@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Activity;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ActivityController extends Controller
 {
@@ -12,10 +13,10 @@ class ActivityController extends Controller
      */
     public function index()
     {
-        $activities = Activity::with('user')->latest()->paginate(10);
+        //$activities = Activity::with('user')->latest()->paginate(10);
 
-        return inertia('Activities', [
-            'activities' => $activities,
+        return Inertia::render('Activities/Index', [
+            'activities' => Activity::latest()->get(),
         ]);
     }
 
@@ -24,7 +25,7 @@ class ActivityController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('Activities/Create');
     }
 
     /**
@@ -32,7 +33,13 @@ class ActivityController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $attributes = $request->validate([
+            'title' => 'required|string|max:100',
+        ]);
+
+        $request->user()->activities()->create($attributes);
+
+        return redirect()->route('activities.index');
     }
 
     /**
