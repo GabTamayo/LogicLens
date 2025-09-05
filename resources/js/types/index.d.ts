@@ -10,6 +10,15 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface Activity {
+    id: number;
+    title: string;
+    user_id: number;
+    user: User;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface NavItem {
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;
