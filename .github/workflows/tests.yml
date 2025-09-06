@@ -35,20 +35,13 @@ jobs:
         run: npm ci
 
       - name: Install Dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 
       - name: Copy Environment File
         run: cp .env.example .env
 
       - name: Generate Application Key
         run: php artisan key:generate
-
-      - name: Clear Caches
-        run: |
-          php artisan config:clear
-          php artisan route:clear
-          php artisan cache:clear
-          php artisan view:clear
 
       - name: Build Assets
         run: npm run build
