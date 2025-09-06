@@ -22,7 +22,7 @@ function submit(close: () => void) {
 <template>
     <Modal max-width="md" position="top" v-slot="{ close }">
         <form class="space-y-6" @submit.prevent="submit(close)">
-            <FormField v-slot="{ field }" name="title">
+            <FormField name="title">
                 <FormItem>
                     <div class="mb-4">
                         <h1 class="font-bold text-lg">Add Activity</h1>
