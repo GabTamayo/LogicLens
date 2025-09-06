@@ -40,7 +40,7 @@ it('can be created using factory', function () {
     expect($activity->exists)->toBeTrue();
 });
 
-it('factory creates activity with user relationship', function () {
+test('factory creates activity with user relationship', function () {
     $user = User::factory()->create();
     $activity = Activity::factory()->create(['user_id' => $user->id]);
 
@@ -79,7 +79,7 @@ it('cannot be mass assigned user_id', function () {
     expect($activity->user_id)->toBeNull();
 });
 
-it('user can have multiple activities', function () {
+test('user can have multiple activities', function () {
     $user = User::factory()->create();
 
     $activity1 = Activity::factory()->create(['user_id' => $user->id]);
@@ -89,7 +89,7 @@ it('user can have multiple activities', function () {
     expect($user->activities->pluck('id'))->toContain($activity1->id, $activity2->id);
 });
 
-it('activity title is required', function () {
+test('activity title is required', function () {
     $user = User::factory()->create();
 
     expect(function () use ($user) {
