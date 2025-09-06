@@ -16,7 +16,9 @@ class ActivityController extends Controller
         //$activities = Activity::with('user')->latest()->paginate(10);
 
         return Inertia::render('Activities/Index', [
-            'activities' => Activity::latest()->get(),
+            'activities' => Activity::where('user_id', auth()->id())
+                ->latest()
+                ->get(),
         ]);
     }
 

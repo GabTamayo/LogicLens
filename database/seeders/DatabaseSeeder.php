@@ -22,6 +22,5 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('191423angpogiko'),
         ]);
 
-        Activity::factory(10)->create();
     }
 }

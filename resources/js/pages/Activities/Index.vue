@@ -7,11 +7,22 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Badge } from '@/components/ui/badge';
-import { Plus } from 'lucide-vue-next';
+import { Plus, Disc, LoaderCircle } from 'lucide-vue-next';
 import { Button } from "@/components/ui/button"
 import type { Activity } from '@/types';
+import { ref } from 'vue';
 
 dayjs.extend(relativeTime)
+
+const isLoading = ref(false);
+
+function handleClick() {
+    isLoading.value = true;
+}
+
+function resetLoading() {
+    isLoading.value = false;
+}
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -34,9 +45,10 @@ defineProps<Props>();
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <ModalLink href="/activities/create">
-                    <Button>
-                        <Plus /> Add Activity
+                <ModalLink href="/activities/create" @click="handleClick" @close="resetLoading" :class="{ 'pointer-events-none opacity-50': isLoading }">
+                    <Button class="cursor-pointer">
+                        <LoaderCircle v-if="isLoading" class="h-4 w-4 animate-spin" />
+                        <Plus v-else /> Add Activity
                     </Button>
                 </ModalLink>
             </div>
@@ -50,12 +62,19 @@ defineProps<Props>();
                                 <p class="font-medium">{{ activity.title }}</p>
                                 <div class="space-x-4 flex items-center">
                                     <div class="space-x-2">
-                                        <Badge variant="outline">1 Active</Badge>
-                                        <Badge variant="secondary">1 Closed</Badge>
-                                        <Badge>1 Expired</Badge>
+                                        <Badge variant="outline">
+                                            <Disc class="w-3 h-3 text-green-600" /> 1 Active
+                                        </Badge>
+                                        <Badge variant="outline">
+                                            <Disc class="w-3 h-3 text-red-600" />1 Closed
+                                        </Badge>
+                                        <Badge variant="outline">
+                                            <Disc class="w-3 h-3 text-gray-500" />1 Expired
+                                        </Badge>
                                     </div>
-                                    <span class="text-gray-600 text-xs">Activity {{ dayjs(activity.created_at).fromNow()
-                                    }}</span>
+                                    <span class="text-gray-600 text-xs">
+                                        Activity {{ dayjs(activity.created_at).fromNow() }}
+                                    </span>
                                 </div>
                             </div>
                         </TableCell>
