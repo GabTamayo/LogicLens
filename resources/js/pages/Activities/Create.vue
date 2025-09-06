@@ -2,7 +2,7 @@
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import { Button } from "@/components/ui/button";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
+import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoaderCircle } from 'lucide-vue-next';
 import InputError from '@/components/InputError.vue';

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityController extends Controller
 {
@@ -13,10 +14,8 @@ class ActivityController extends Controller
      */
     public function index()
     {
-        //$activities = Activity::with('user')->latest()->paginate(10);
-
         return Inertia::render('Activities/Index', [
-            'activities' => Activity::where('user_id', auth()->id())
+            'activities' => Activity::where('user_id', Auth::id())
                 ->latest()
                 ->get(),
         ]);
