@@ -50,4 +50,11 @@ jobs:
         run: php artisan migrate --env=testing --force
 
       - name: Tests
-        run: ./vendor/bin/pest --env=testing
+        run: ./vendor/bin/pest
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ':memory:'
+          CACHE_DRIVER: array
+          SESSION_DRIVER: array
+          QUEUE_CONNECTION: sync
