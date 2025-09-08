@@ -7,6 +7,6 @@ Route::middleware('auth')->group(function () {
     Route::get('activities', [ActivityController::class, 'index'])->name('activities.index');
     Route::get('activities/create', [ActivityController::class, 'create'])->name('activities.create');
     Route::post('activities', [ActivityController::class, 'store'])->name('activities.store');
+    Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
 });
 
-?>

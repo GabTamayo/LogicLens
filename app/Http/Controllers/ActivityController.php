@@ -48,7 +48,10 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        //
+        return Inertia::render('Activities/Show', [
+            'id' => $activity->id,
+            'title' => $activity->title,
+        ]);
     }
 
     /**

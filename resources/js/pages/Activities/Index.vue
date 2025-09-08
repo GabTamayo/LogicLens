@@ -2,7 +2,7 @@
 import { ModalLink } from '@inertiaui/modal-vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { Table, TableBody, TableCaption, TableCell, TableRow, } from '@/components/ui/table';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -79,7 +79,7 @@ defineProps<Props>();
                             </div>
                         </TableCell>
                         <TableCell class="text-right">
-                            <a href="#" class="text-gray-600 hover:underline text-sm">View Details</a>
+                            <Link :href="`/activities/${activity.id}`" class="text-gray-600 hover:underline text-sm">View Details</Link>
                         </TableCell>
                     </TableRow>
                 </TableBody>
