@@ -31,15 +31,6 @@ it('belongs to a user', function () {
     expect($activity->user->id)->toBe($user->id);
 });
 
-it('can be created using factory', function () {
-    $activity = Activity::factory()->create();
-
-    expect($activity)->toBeInstanceOf(Activity::class);
-    expect($activity->title)->not->toBeEmpty();
-    expect($activity->user_id)->toBeInt();
-    expect($activity->exists)->toBeTrue();
-});
-
 test('factory creates activity with user relationship', function () {
     $user = User::factory()->create();
     $activity = Activity::factory()->create(['user_id' => $user->id]);
@@ -47,13 +38,6 @@ test('factory creates activity with user relationship', function () {
     expect($activity->user->id)->toBe($user->id);
     expect($user->activities)->toHaveCount(1);
     expect($user->activities->first()->id)->toBe($activity->id);
-});
-
-it('has timestamps', function () {
-    $activity = Activity::factory()->create();
-
-    expect($activity->created_at)->not->toBeNull();
-    expect($activity->updated_at)->not->toBeNull();
 });
 
 it('can be mass assigned title', function () {

@@ -21,7 +21,7 @@ class Activity extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function activityLink(): HasMany
+    public function activityLinks(): HasMany
     {
         return $this->hasMany(ActivityLink::class);
     }

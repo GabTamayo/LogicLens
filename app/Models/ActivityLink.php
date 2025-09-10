@@ -11,6 +11,13 @@ class ActivityLink extends Model
     /** @use HasFactory<\Database\Factories\ActivityLinkFactory> */
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'token',
+        'status',
+        'expires_at',
+    ];
+
     public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);

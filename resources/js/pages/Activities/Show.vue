@@ -1,29 +1,48 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
 import { Copy } from 'lucide-vue-next';
-
-const page = usePage();
-const activity = page.props;
-
-const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Activities', href: '/activities' },
-    { title: activity.title, href: `/activities/${activity.id}` },
-];
+import { useForm } from '@inertiajs/vue3';
+import { Input } from '@/components/ui/input';
+import InputError from '@/components/InputError.vue';
 
 interface Props {
     id: number;
     title: string;
-    links: Array<object>;
+    links: Array<{
+        id: number;
+        name: string;
+        token: string;
+        status: string;
+        expires_at?: string | null;
+    }>;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Activities', href: '/activities' },
+    { title: props.title, href: `/activities/${props.id}` },
+];
+
+const form = useForm({
+    name: '',
+});
+
+const submit = () => {
+  form.post(`/activities/${props.id}/links`, {
+    onSuccess: () => {
+      form.reset('name') // clear input
+    }
+  })
+}
+
 </script>
 
 <template>
@@ -37,20 +56,19 @@ defineProps<Props>();
                 <p class="text-sm text-muted-foreground">
                     A submission token allows you to store student submissions for later detection.
                 </p>
-                <form class="space-y-6 flex items-center justify-center space-x-12 m-6">
-                    <Button>
-                        Generate
-                    </Button>
-                    <FormField v-slot="{ componentField }" name="username">
+                <form @submit.prevent="submit"
+                    class="space-y-6 flex items-center justify-center space-x-12 m-6">
+                    <Button type="submit" :disabled="form.processing">Generate</Button>
+                    <FormField name="name">
                         <FormItem v-auto-animate class="w-full">
                             <FormLabel>Token Name</FormLabel>
                             <FormControl>
-                                <Input type="text" v-bind="componentField" class="px-2 py-2 rounded-md border-2" />
+                                <Input type="text" v-model="form.name" />
                             </FormControl>
                             <FormDescription>
                                 Enter your desired submission token name.
                             </FormDescription>
-                            <FormMessage />
+                            <InputError :message="form.errors.name" />
                         </FormItem>
                     </FormField>
                 </form>
@@ -78,7 +96,9 @@ defineProps<Props>();
                                 <Badge variant="secondary">{{ link.status }}</Badge>
                             </TableCell>
                             <TableCell class="text-center w-0">{{ link.token }}</TableCell>
-                            <TableCell><Copy class="w-4 text-gray-400" /></TableCell>
+                            <TableCell>
+                                <Copy class="w-4 text-gray-400" />
+                            </TableCell>
                             <TableCell class="text-right">View Details</TableCell>
                         </TableRow>
                     </TableBody>

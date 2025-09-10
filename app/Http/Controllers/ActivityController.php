@@ -48,12 +48,12 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        $activity->load('activityLink');
+        $activity->load('activityLinks');
 
         return Inertia::render('Activities/Show', [
             'id' => $activity->id,
             'title' => $activity->title,
-            'links' => $activity->activityLink,
+            'links' => $activity->activityLinks,
         ]);
     }
 
