@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { useForm } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/InputError.vue';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog/';
+import { Loader2 } from 'lucide-vue-next';
+
 
 interface Props {
     id: number;
@@ -43,6 +45,11 @@ const submit = () => {
     })
 }
 
+const handleDelete = () => {
+    form.delete(`/activities/${props.id}`, {
+    })
+}
+
 </script>
 
 <template>
@@ -66,9 +73,11 @@ const submit = () => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <Button variant="destructive" @click="$inertia.delete(`/activities/${id}`)"
-                            class="cursor-pointer">Delete</Button>
+                        <AlertDialogCancel :disabled="form.processing">Cancel</AlertDialogCancel>
+                        <Button variant="destructive" @click="handleDelete" :disabled="form.processing" class="cursor-pointer">
+                            <Loader2 v-if="form.processing" class="h-4 w-4 animate-spin" />
+                            Delete
+                        </Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -80,10 +89,10 @@ const submit = () => {
                 <p class="text-sm text-muted-foreground">
                     A submission token allows you to store student submissions for later detection.
                 </p>
-                <form @submit.prevent="submit" class="space-y-6 flex items-center justify-center space-x-12 m-6">
+                <Form @submit="submit" class="space-y-6 flex items-center justify-center space-x-12 m-6">
                     <Button type="submit" :disabled="form.processing">Generate</Button>
                     <FormField name="name">
-                        <FormItem v-auto-animate class="w-full">
+                        <FormItem class="w-full">
                             <FormLabel>Token Name</FormLabel>
                             <FormControl>
                                 <Input type="text" v-model="form.name" />
@@ -94,7 +103,7 @@ const submit = () => {
                             <InputError :message="form.errors.name" />
                         </FormItem>
                     </FormField>
-                </form>
+                </Form>
             </div>
 
             <Separator />

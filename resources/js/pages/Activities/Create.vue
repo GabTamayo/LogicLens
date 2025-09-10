@@ -2,7 +2,7 @@
 import { Modal } from '@inertiaui/modal-vue';
 import { useForm } from '@inertiajs/vue3';
 import { Button } from "@/components/ui/button";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import InputError from '@/components/InputError.vue';
 
@@ -20,7 +20,7 @@ function submit(close: () => void) {
 
 <template>
     <Modal max-width="md" position="top" v-slot="{ close }">
-        <form class="space-y-6" @submit.prevent="submit(close)">
+        <Form class="space-y-6" @submit="submit(close)">
             <FormField name="title">
                 <FormItem>
                     <div class="mb-4">
@@ -40,6 +40,6 @@ function submit(close: () => void) {
             <Button type="submit" :disabled="form.processing" class="cursor-pointer">
                 Save
             </Button>
-        </form>
+        </Form>
     </Modal>
 </template>
