@@ -17,7 +17,7 @@ class ActivityLinkFactory extends Factory
     public function definition(): array
     {
         return [
-            'activity_id' => 1,
+            'activity_id' => 3,
             'token' => fake()->unique()->uuid(),
             'name' => fake()->word(),
             'status' => fake()->randomElement(['active', 'closed', 'expired']),

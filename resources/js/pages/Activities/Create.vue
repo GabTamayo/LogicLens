@@ -39,7 +39,6 @@ function submit(close: () => void) {
             </FormField>
 
             <Button type="submit" :disabled="form.processing" class="cursor-pointer">
-                <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                 Save
             </Button>
         </form>

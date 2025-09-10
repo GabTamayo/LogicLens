@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ActivityLink extends Model
 {
@@ -15,10 +14,5 @@ class ActivityLink extends Model
     public function activity(): BelongsTo
     {
         return $this->belongsTo(Activity::class);
-    }
-
-    public function activityLink(): HasMany
-    {
-        return $this->hasMany(ActivityLink::class);
     }
 }

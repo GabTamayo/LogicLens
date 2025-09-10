@@ -54,7 +54,7 @@ defineProps<Props>();
             </div>
 
             <Table>
-                <TableCaption>A list of your recent invoices.</TableCaption>
+                <TableCaption>A list of your recent activities.</TableCaption>
                 <TableBody>
                     <TableRow v-for="activity in activities" :key="activity.id" class="h-25">
                         <TableCell>
