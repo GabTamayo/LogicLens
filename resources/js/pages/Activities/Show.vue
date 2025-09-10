@@ -7,10 +7,10 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Copy } from 'lucide-vue-next';
 import { useForm } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import InputError from '@/components/InputError.vue';
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog/';
 
 interface Props {
     id: number;
@@ -36,11 +36,11 @@ const form = useForm({
 });
 
 const submit = () => {
-  form.post(`/activities/${props.id}/links`, {
-    onSuccess: () => {
-      form.reset('name') // clear input
-    }
-  })
+    form.post(`/activities/${props.id}/links`, {
+        onSuccess: () => {
+            form.reset('name');
+        }
+    })
 }
 
 </script>
@@ -50,14 +50,37 @@ const submit = () => {
     <Head title="Activity Name" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <template #header-actions>
+            <AlertDialog as-child>
+                <AlertDialogTrigger as-child>
+                    <Button variant="destructive" class="cursor-pointer">
+                        Delete Activity
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Deleting this activity will permanently remove the activity, all its submission tokens, and
+                            all associated data from our servers.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <Button variant="destructive" @click="$inertia.delete(`/activities/${id}`)"
+                            class="cursor-pointer">Delete</Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </template>
+
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
                 <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Generate Token Submission</h4>
                 <p class="text-sm text-muted-foreground">
                     A submission token allows you to store student submissions for later detection.
                 </p>
-                <form @submit.prevent="submit"
-                    class="space-y-6 flex items-center justify-center space-x-12 m-6">
+                <form @submit.prevent="submit" class="space-y-6 flex items-center justify-center space-x-12 m-6">
                     <Button type="submit" :disabled="form.processing">Generate</Button>
                     <FormField name="name">
                         <FormItem v-auto-animate class="w-full">
@@ -95,11 +118,10 @@ const submit = () => {
                             <TableCell>
                                 <Badge variant="secondary">{{ link.status }}</Badge>
                             </TableCell>
-                            <TableCell class="text-center w-0">{{ link.token }}</TableCell>
-                            <TableCell>
-                                <Copy class="w-4 text-gray-400" />
+                            <TableCell class="text-center w-0 font-mono">{{ link.token }}</TableCell>
+                            <TableCell class="text-right">
+                                <a href="#" class="text-gray-600 hover:underline text-sm">View Details</a>
                             </TableCell>
-                            <TableCell class="text-right">View Details</TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>

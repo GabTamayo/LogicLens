@@ -9,4 +9,5 @@ Route::middleware('auth')->group(function () {
     Route::post('activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
     Route::post('activities/{activity}/links', [\App\Http\Controllers\ActivityLinkController::class, 'store'])->name('activities.links.store');
+    Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
 });
