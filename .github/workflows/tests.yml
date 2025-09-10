@@ -76,6 +76,8 @@ jobs:
       # 🔟 Build frontend assets
       - name: Build Assets
         run: npm run build
+        env:
+          WAYFINDER_SKIP_GENERATE: 1
 
       # 11️⃣ Run tests
       - name: Run Tests
