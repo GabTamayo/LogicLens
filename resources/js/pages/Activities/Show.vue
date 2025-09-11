@@ -17,6 +17,7 @@ import { Loader2 } from 'lucide-vue-next';
 interface Props {
     id: number;
     title: string;
+    appUrl: string;
     links: Array<{
         id: number;
         name: string;
@@ -74,7 +75,8 @@ const handleDelete = () => {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel :disabled="form.processing">Cancel</AlertDialogCancel>
-                        <Button variant="destructive" @click="handleDelete" :disabled="form.processing" class="cursor-pointer">
+                        <Button variant="destructive" @click="handleDelete" :disabled="form.processing"
+                            class="cursor-pointer">
                             <Loader2 v-if="form.processing" class="h-4 w-4 animate-spin" />
                             Delete
                         </Button>
@@ -127,7 +129,7 @@ const handleDelete = () => {
                             <TableCell>
                                 <Badge variant="secondary">{{ link.status }}</Badge>
                             </TableCell>
-                            <TableCell class="text-center w-0 font-mono">{{ link.token }}</TableCell>
+                            <TableCell class="text-center w-0 font-mono">{{ props.appUrl }}/{{ link.token }}</TableCell>
                             <TableCell class="text-right">
                                 <a href="#" class="text-gray-600 hover:underline text-sm">View Details</a>
                             </TableCell>

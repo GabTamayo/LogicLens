@@ -54,6 +54,7 @@ class ActivityController extends Controller
             'id' => $activity->id,
             'title' => $activity->title,
             'links' => $activity->activityLinks,
+            'appUrl' => config('app.url'),
         ]);
     }
 

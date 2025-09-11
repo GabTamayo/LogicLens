@@ -60,7 +60,7 @@ jobs:
           CACHE_DRIVER: array
           SESSION_DRIVER: array
           QUEUE_CONNECTION: sync
-          WAYFINDER_SKIP_GENERATE: 1  # skip Wayfinder type generation in CI
+          WAYFINDER_SKIP_GENERATE: 1
 
       # 9️⃣ Run migrations for testing
       - name: Run Migrations
