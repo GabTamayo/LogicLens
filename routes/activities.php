@@ -10,7 +10,8 @@ Route::middleware('auth')->group(function () {
     Route::post('activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
     Route::post('activities/{activity}/links', [\App\Http\Controllers\ActivityLinkController::class, 'store'])->name('activities.links.store');
+    Route::patch('activities/{activity}/links/{link}', [\App\Http\Controllers\ActivityLinkController::class, 'update'])->name('activities.links.update');
     Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
 });
 
-Route::get('submit/{token}', [SubmissionController::class, 'create'])->name('submissions.create');
+Route::get('submit{token}', [SubmissionController::class, 'create'])->name('submissions.create');

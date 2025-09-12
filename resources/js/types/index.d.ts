@@ -43,3 +43,18 @@ export interface Activity {
     created_at: string;
     updated_at: string;
 }
+
+export interface ActivityDetail {
+    id: number
+    title: string
+    appUrl: string
+    links: ActivityLink[]
+}
+export interface ActivityLink {
+    id: number
+    name: string
+    token: string
+    is_open: boolean
+    expires_at?: string | null
+}
+

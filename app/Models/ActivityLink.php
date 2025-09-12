@@ -15,8 +15,12 @@ class ActivityLink extends Model
     protected $fillable = [
         'name',
         'token',
-        'status',
-        'expires_at',
+        'is_open',
+    ];
+
+    protected $casts = [
+        'is_open' => 'boolean',
+        'expires_at' => 'datetime',
     ];
 
     public function activity(): BelongsTo

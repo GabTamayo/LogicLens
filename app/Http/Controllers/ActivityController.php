@@ -48,7 +48,7 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        $activity->load('activityLinks');
+        $activity->load(['activityLinks' => fn($q) => $q->orderBy('created_at')]);
 
         return Inertia::render('Activities/Show', [
             'id' => $activity->id,

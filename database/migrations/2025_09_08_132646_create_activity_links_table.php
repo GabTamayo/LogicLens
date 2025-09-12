@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignIdFor(\App\Models\Activity::class)->constrained()->onDelete('cascade');
             $table->string('token')->unique();
             $table->string('name');
-            $table->string('status')->default('active');
+            $table->boolean('is_open',)->default(true);
             $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
