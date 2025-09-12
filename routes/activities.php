@@ -13,4 +13,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
 });
 
-Route::get('/{token}', [SubmissionController::class, 'create'])->name('submissions.create');
+Route::get('submit/{token}', [SubmissionController::class, 'create'])->name('submissions.create');
