@@ -27,6 +27,18 @@ const mainNavItems: NavItem[] = [
             },
         ],
     },
+    {
+        title: 'Activities',
+        href: '/activities',
+        icon: Rows3,
+        items: [
+            {
+                title: 'Archive',
+                href: '#',
+                icon: Archive,
+            },
+        ],
+    },
 ];
 
 const footerNavItems: NavItem[] = [
