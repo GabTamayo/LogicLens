@@ -6,7 +6,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';

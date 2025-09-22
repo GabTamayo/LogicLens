@@ -14,6 +14,7 @@ export interface NavItem {
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;
     icon?: LucideIcon;
+    items?: NavItem[];
     isActive?: boolean;
 }
 
@@ -58,3 +59,8 @@ export interface ActivityLink {
     expires_at?: string | null
 }
 
+export interface SubmissionPageProps {
+  bgImage: string
+  name: string
+  activityName: string
+}

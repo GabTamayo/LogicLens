@@ -29,6 +29,6 @@ class ActivityLinkController extends Controller
 
         $link->update($switch);
 
-        return back()->with('success', 'Status updated successfully!');
+        return redirect()->route('activities.show', $activity);
     }
 }

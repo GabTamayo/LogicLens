@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Rows3 } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, Rows3, Archive } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -19,6 +19,13 @@ const mainNavItems: NavItem[] = [
         title: 'Activities',
         href: '/activities',
         icon: Rows3,
+        items: [
+            {
+                title: 'Archive',
+                href: '#',
+                icon: Archive,
+            },
+        ],
     },
 ];
 
@@ -43,7 +50,7 @@ const footerNavItems: NavItem[] = [
                 <SidebarMenuItem>
                     <SidebarMenuButton size="lg" as-child>
                         <Link :href="dashboard()">
-                            <AppLogo />
+                        <AppLogo />
                         </Link>
                     </SidebarMenuButton>
                 </SidebarMenuItem>

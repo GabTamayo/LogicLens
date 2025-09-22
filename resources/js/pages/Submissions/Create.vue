@@ -4,14 +4,9 @@ import { GalleryVerticalEnd, File } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { SubmissionPageProps } from '@/types';
 
-interface Props {
-    bgImage: string
-    name: string
-    activityName: string
-}
-
-defineProps<Props>()
+defineProps<SubmissionPageProps>()
 </script>
 
 <template>
@@ -46,7 +41,7 @@ defineProps<Props>()
                             </div>
                             <div class="grid gap-2">
                                 <Label html-for="stud_no">Student Number</Label>
-                                <Input id="stud_no" type="text" />
+                                <Input id="stud_no" type="text" placeholder="2#-#####-###" />
                             </div>
                             <div class="grid gap-2">
                                 <Label for="picture">Code File</Label>
