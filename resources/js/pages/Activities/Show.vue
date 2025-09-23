@@ -6,12 +6,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';
-import { Circle } from 'lucide-vue-next';
-import DeleteActivity from '@/components/DeleteActivity.vue';
+import { Circle, Ellipsis } from 'lucide-vue-next';
+import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 
 const activity = defineProps<ActivityDetail>()
 
@@ -44,11 +44,15 @@ const updateStatus = (id: number, value: boolean) => {
 
 <template>
 
-    <Head title="Activity Name" />
+    <Head :title="`${activity.title}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <DeleteActivity :activityId="activity.id" />
+            <AlertDialogDelete
+            :endpoint="`/activities/${activity.id}`"
+            title="Are you absolutely sure?"
+            type="activity"
+            buttonText="Delete Activity" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -102,10 +106,13 @@ const updateStatus = (id: number, value: boolean) => {
                                 <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
                                     @update:modelValue="updateStatus(link.id, $event)" />
                             </TableCell>
-                            <TableCell class="text-center w-0 font-mono">{{ activity.appUrl }}/submit{{ link.token }}
+                            <TableCell
+                                class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
+                                    activity.appUrl }}/submit{{ link.token }}
                             </TableCell>
-                            <TableCell class="text-right">
-                                <a href="#" class="text-gray-600 hover:underline text-sm">View Details</a>
+                            <TableCell class="text-right w-0">
+                                <Link :href="`/activities/${activity.id}/links/${link.id}`"
+                                    class="text-gray-600 hover:underline text-sm">View Submissions</Link>
                             </TableCell>
                         </TableRow>
                     </TableBody>

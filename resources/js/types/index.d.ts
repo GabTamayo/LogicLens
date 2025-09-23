@@ -67,3 +67,17 @@ export interface SubmissionPageProps {
     activityName: string
     token: string
 }
+
+export type Submission = {
+    activityId: number,
+    activityTitle: string,
+    link: ActivityLink,
+    submissions: Array<{
+        id: number,
+        student_name: string,
+        student_email: string,
+        student_no: string,
+        file_path: string,
+        created_at: string,
+    }>
+}

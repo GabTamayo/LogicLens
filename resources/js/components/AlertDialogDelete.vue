@@ -15,26 +15,32 @@ import {
 import { Loader2 } from 'lucide-vue-next';
 
 const props = defineProps<{
-    activityId: number;
+    endpoint: string;
+    title: string;
+    type: string;
+    buttonText?: string;
 }>();
 
 const form = useForm({});
 
 const handleDelete = () => {
-    form.delete(`/activities/${props.activityId}`);
+    form.delete(props.endpoint);
 };
+
+
 </script>
 
 <template>
     <AlertDialog as-child>
         <AlertDialogTrigger as-child>
-            <Button variant="destructive" class="cursor-pointer">Delete Activity</Button>
+            <Button variant="destructive" class="cursor-pointer">{{ buttonText ?? 'Delete' }}</Button>
         </AlertDialogTrigger>
+
         <AlertDialogContent>
             <AlertDialogHeader>
                 <AlertDialogTitle class="text-destructive">Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Deleting this activity will permanently remove the activity, all its submission tokens, and
+                    Deleting this {{ type }} will permanently remove the {{ type }} and
                     all associated data from our servers.
                 </AlertDialogDescription>
             </AlertDialogHeader>
