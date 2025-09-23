@@ -11,7 +11,13 @@ class Submission extends Model
     /** @use HasFactory<\Database\Factories\SubmissionFactory> */
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'activity_link_id',
+        'student_name',
+        'student_email',
+        'student_no',
+        'file_path',
+    ];
 
     public function activityLink(): BelongsTo
     {

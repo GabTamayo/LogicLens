@@ -43,6 +43,8 @@ export interface Activity {
     user_id: number;
     created_at: string;
     updated_at: string;
+    open_links_count: number;
+    closed_links_count: number;
 }
 
 export interface ActivityDetail {
@@ -60,7 +62,8 @@ export interface ActivityLink {
 }
 
 export interface SubmissionPageProps {
-  bgImage: string
-  name: string
-  activityName: string
+    bgImage: string
+    name: string
+    activityName: string
+    token: string
 }

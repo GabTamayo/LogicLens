@@ -45,7 +45,8 @@ defineProps<Props>();
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <ModalLink href="/activities/create" @click="handleClick" @close="resetLoading" :class="{ 'pointer-events-none opacity-50': isLoading }">
+                <ModalLink href="/activities/create" @click="handleClick" @close="resetLoading"
+                    :class="{ 'pointer-events-none opacity-50': isLoading }">
                     <Button class="cursor-pointer">
                         <LoaderCircle v-if="isLoading" class="h-4 w-4 animate-spin" />
                         <Plus v-else /> Add Activity
@@ -54,7 +55,9 @@ defineProps<Props>();
             </div>
 
             <Table>
-                <TableCaption>A list of your recent activities.</TableCaption>
+                <TableCaption>
+                    {{ activities.length ? 'A list of your recent activities.' : 'There is no recent activities yet.' }}
+                </TableCaption>
                 <TableBody>
                     <TableRow v-for="activity in activities" :key="activity.id" class="h-25">
                         <TableCell>
@@ -63,23 +66,30 @@ defineProps<Props>();
                                 <div class="space-x-4 flex items-center">
                                     <div class="space-x-2">
                                         <Badge variant="outline">
-                                            <Disc class="w-3 h-3 text-green-600" /> 1 Active
+                                            <Disc class="w-3 h-3 text-green-600" /> {{ activity.open_links_count }}
+                                            Active
                                         </Badge>
                                         <Badge variant="outline">
-                                            <Disc class="w-3 h-3 text-red-600" />1 Closed
-                                        </Badge>
-                                        <Badge variant="outline">
-                                            <Disc class="w-3 h-3 text-gray-500" />1 Expired
+                                            <Disc class="w-3 h-3 text-red-600" /> {{ activity.closed_links_count }}
+                                            Closed
                                         </Badge>
                                     </div>
-                                    <span class="text-gray-600 text-xs">
+                                    <p v-if="activity.open_links_count + activity.closed_links_count > 0"
+                                        class="text-xs text-muted-foreground font-light">
+                                        {{ activity.open_links_count + activity.closed_links_count }} Total Activities
+                                    </p>
+                                    <p v-else class="text-xs text-muted-foreground italic">
+                                        No activities yet
+                                    </p>
+                                    <span class="ms-8 text-xs text-muted-foreground font-light">
                                         Activity {{ dayjs(activity.created_at).fromNow() }}
                                     </span>
                                 </div>
                             </div>
                         </TableCell>
                         <TableCell class="text-right">
-                            <Link :href="`/activities/${activity.id}`" class="text-gray-600 hover:underline text-sm">View Details</Link>
+                            <Link :href="`/activities/${activity.id}`" class="text-gray-600 hover:underline text-sm">
+                            View Details</Link>
                         </TableCell>
                     </TableRow>
                 </TableBody>

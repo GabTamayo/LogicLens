@@ -15,3 +15,4 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('submit{token}', [SubmissionController::class, 'create'])->name('submissions.create');
+Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store');
