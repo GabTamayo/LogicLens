@@ -25,4 +25,14 @@ class Activity extends Model
     {
         return $this->hasMany(ActivityLink::class);
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($activity) {
+            $activity->load('activityLinks');
+            foreach ($activity->activityLinks as $link) {
+                $link->delete();
+            }
+        });
+    }
 }

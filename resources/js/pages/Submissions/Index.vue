@@ -56,12 +56,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete
-            :endpoint="`/activities/${props.activityId}/links/${props.link.id}`"
-            title="Are you absolutely sure?"
-            type="token"
-            buttonText="Delete Token"
-            />
+            <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`"
+                title="Are you absolutely sure?" type="token" buttonText="Delete Token" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -82,17 +78,26 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="submission in props.submissions" :key="submission.id">
-                            <TableCell class="font-medium">{{ submission.student_name }}</TableCell>
-                            <TableCell>{{ submission.student_email }}</TableCell>
-                            <TableCell>{{ submission.student_no }}</TableCell>
-                            <TableCell>
-                                {{ new Date(submission.created_at).toLocaleString() }}
-                            </TableCell>
-                            <TableCell class="text-end">
-                                <Ellipsis />
-                            </TableCell>
-                        </TableRow>
+                        <template v-if="submissions.length > 0">
+                            <TableRow v-for="submission in props.submissions" :key="submission.id">
+                                <TableCell class="font-medium">{{ submission.student_name }}</TableCell>
+                                <TableCell>{{ submission.student_email }}</TableCell>
+                                <TableCell>{{ submission.student_no }}</TableCell>
+                                <TableCell>
+                                    {{ new Date(submission.created_at).toLocaleString() }}
+                                </TableCell>
+                                <TableCell class="text-end">
+                                    <Ellipsis />
+                                </TableCell>
+                            </TableRow>
+                        </template>
+                        <template v-else>
+                            <TableRow>
+                                <TableCell colspan="5" class="text-center text-muted-foreground py-6">
+                                    No submissions found.
+                                </TableCell>
+                            </TableRow>
+                        </template>
                     </TableBody>
                 </Table>
             </div>

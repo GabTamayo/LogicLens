@@ -114,7 +114,6 @@ const updateStatus = (id: number, value: boolean) => {
                                 </TableCell>
                             </TableRow>
                         </template>
-
                         <template v-else>
                             <TableCell colspan="4" class="text-center text-muted-foreground py-6">
                                 No submission tokens generated yet.

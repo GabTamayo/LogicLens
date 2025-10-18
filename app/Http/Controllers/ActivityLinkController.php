@@ -3,33 +3,24 @@
 namespace App\Http\Controllers;
 
 use App\Actions\GenerateActivityLink;
+use App\Http\Requests\ActivityLinkRequest;
+use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
 use App\Models\ActivityLink;
 use Illuminate\Http\Request;
 
 class ActivityLinkController extends Controller
 {
-    public function store(Request $request, Activity $activity, GenerateActivityLink $generateActivityLink)
+    public function store(ActivityLinkRequest $request, Activity $activity, GenerateActivityLink $generateActivityLink)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-        ]);
-
-        $generateActivityLink->execute($activity, $request->input('name'));
-
+        $generateActivityLink->execute($activity, $request->validated()['name']);
         return redirect()->route('activities.show', $activity);
     }
 
-    public function update(Request $request, Activity $activity, $link)
+    public function update(ActivityLinkUpdateRequest $request, Activity $activity, $linkId)
     {
-        $link = $activity->activityLinks()->findOrFail($link);
-
-        $switch = $request->validate([
-            'is_open' => 'required|boolean',
-        ]);
-
-        $link->update($switch);
-
+        $link = $activity->activityLinks()->findOrFail($linkId);
+        $link->update($request->validated());
         return redirect()->route('activities.show', $activity);
     }
 
