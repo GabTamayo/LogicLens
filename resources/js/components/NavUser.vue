@@ -4,10 +4,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/compon
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { usePage } from '@inertiajs/vue3';
 import { ChevronsUpDown } from 'lucide-vue-next';
+import { computed } from 'vue';
 import UserMenuContent from './UserMenuContent.vue';
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = computed(() => page.props.auth.user);
 const { isMobile, state } = useSidebar();
 </script>
 
@@ -16,17 +17,15 @@ const { isMobile, state } = useSidebar();
         <SidebarMenuItem>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <SidebarMenuButton size="lg" class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
+                    <SidebarMenuButton size="lg"
+                        class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
                         <UserInfo :user="user" :show-email="true" />
                         <ChevronsUpDown class="ml-auto size-4" />
                     </SidebarMenuButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                    :side="isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'"
-                    align="end"
-                    :side-offset="4"
-                >
+                <DropdownMenuContent class="w-(--reka-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                    :side="isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'" align="end"
+                    :side-offset="4">
                     <UserMenuContent :user="user" />
                 </DropdownMenuContent>
             </DropdownMenu>

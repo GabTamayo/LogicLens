@@ -16,9 +16,11 @@ class ActivityController extends Controller
     {
         return Inertia::render('Activities/Index', [
             'activities' => Activity::where('user_id', Auth::id())
+                ->select('id', 'user_id', 'title')
                 ->withCount([
                     'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
-                    'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)])
+                    'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
+                ])
                 ->latest()
                 ->get(),
         ]);

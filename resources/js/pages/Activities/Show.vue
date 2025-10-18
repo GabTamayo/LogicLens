@@ -48,11 +48,8 @@ const updateStatus = (id: number, value: boolean) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete
-            :endpoint="`/activities/${activity.id}`"
-            title="Are you absolutely sure?"
-            type="activity"
-            buttonText="Delete Activity" />
+            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" title="Are you absolutely sure?" type="activity"
+                buttonText="Delete Activity" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -94,27 +91,35 @@ const updateStatus = (id: number, value: boolean) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="link in activity.links" :key="link.id">
-                            <TableCell>{{ link.name }}</TableCell>
-                            <TableCell>
-                                <Badge class="w-18">
-                                    <Circle class="size-4" :class="link.is_open
-                                        ? 'fill-green-500 text-green-500'
-                                        : 'fill-red-500 text-red-500'" />
-                                    {{ link.is_open ? 'Open' : 'Closed' }}
-                                </Badge>
-                                <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
-                                    @update:modelValue="updateStatus(link.id, $event)" />
+                        <template v-if="activity.links.length > 0">
+                            <TableRow v-for="link in activity.links" :key="link.id">
+                                <TableCell>{{ link.name }}</TableCell>
+                                <TableCell>
+                                    <Badge class="w-18">
+                                        <Circle class="size-4" :class="link.is_open
+                                            ? 'fill-green-500 text-green-500'
+                                            : 'fill-red-500 text-red-500'" />
+                                        {{ link.is_open ? 'Open' : 'Closed' }}
+                                    </Badge>
+                                    <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
+                                        @update:modelValue="updateStatus(link.id, $event)" />
+                                </TableCell>
+                                <TableCell
+                                    class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
+                                        activity.appUrl }}/submit{{ link.token }}
+                                </TableCell>
+                                <TableCell class="text-right w-0">
+                                    <Link :href="`/activities/${activity.id}/links/${link.id}`"
+                                        class="text-gray-600 hover:underline text-sm">View Submissions</Link>
+                                </TableCell>
+                            </TableRow>
+                        </template>
+
+                        <template v-else>
+                            <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                No submission tokens generated yet.
                             </TableCell>
-                            <TableCell
-                                class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
-                                    activity.appUrl }}/submit{{ link.token }}
-                            </TableCell>
-                            <TableCell class="text-right w-0">
-                                <Link :href="`/activities/${activity.id}/links/${link.id}`"
-                                    class="text-gray-600 hover:underline text-sm">View Submissions</Link>
-                            </TableCell>
-                        </TableRow>
+                        </template>
                     </TableBody>
                 </Table>
             </div>

@@ -10,13 +10,15 @@ Route::middleware('auth')->group(function () {
     Route::get('activities/create', [ActivityController::class, 'create'])->name('activities.create');
     Route::post('activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::get('activities/{activity}', [ActivityController::class, 'show'])->name('activities.show');
+
+    //Activity Link Routes
     Route::post('activities/{activity}/links', [ActivityLinkController::class, 'store'])->name('activities.links.store');
     Route::patch('activities/{activity}/links/{link}', [ActivityLinkController::class, 'update'])->name('activities.links.update');
     Route::delete('activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
-
     Route::get('activities/{activity}/links/{link}', [ActivityLinkController::class, 'show'])->name('activities.links.show');
     Route::delete('activities/{activity}/links/{link}', [ActivityLinkController::class, 'destroy'])->name('submissions.destroy');
 });
 
+//Student Submission Routes
 Route::get('submit{token}', [SubmissionController::class, 'create'])->name('submissions.create');
 Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store');

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class ActivityLink extends Model
 {
@@ -31,5 +32,16 @@ class ActivityLink extends Model
     public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($activityLink) {
+            foreach ($activityLink->submissions as $submission) {
+                if ($submission->file_path && Storage::disk('public')->exists($submission->file_path)) {
+                    Storage::disk('public')->delete($submission->file_path);
+                }
+            }
+        });
     }
 }

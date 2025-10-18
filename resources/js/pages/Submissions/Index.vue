@@ -70,7 +70,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
             </div>
 
-            <div class="rounded-md border">
+            <div>
                 <Table>
                     <TableHeader>
                         <TableRow>

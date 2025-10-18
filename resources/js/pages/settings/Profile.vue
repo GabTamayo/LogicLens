@@ -2,7 +2,7 @@
 import ProfileController from '@/actions/App/Http/Controllers/Settings/ProfileController';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
-import { Form, Head, Link, usePage } from '@inertiajs/vue3';
+import { Form, Head, Link, usePage, router } from '@inertiajs/vue3';
 
 import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
@@ -30,6 +30,10 @@ const breadcrumbItems: BreadcrumbItem[] = [
 
 const page = usePage();
 const user = page.props.auth.user;
+
+function handleProfileUpdated() {
+    router.reload({ only: ['auth'] });
+}
 </script>
 
 <template>
@@ -39,20 +43,20 @@ const user = page.props.auth.user;
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
-                <HeadingSmall title="Profile information" description="Update your name and email address" />
+                <HeadingSmall title="Profile information" description="Update your name" />
 
                 <Form v-bind="ProfileController.update.form()" class="space-y-6"
-                    v-slot="{ errors, processing, recentlySuccessful }">
+                    v-slot="{ errors, processing, recentlySuccessful }" @success="handleProfileUpdated">
+                    <div class="grid gap-2">
+                        <Label>Email address</Label>
+                        <p class="mt-1 block w-full text-sm text-muted-foreground">{{ user.email }}</p>
+                    </div>
+
                     <div class="grid gap-2">
                         <Label for="name">Name</Label>
                         <Input id="name" class="mt-1 block w-full" name="name" :default-value="user.name" required
                             autocomplete="name" placeholder="Full name" />
                         <InputError class="mt-2" :message="errors.name" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <Label>Email address</Label>
-                        <p class="mt-1 block w-full text-sm text-muted-foreground">{{ user.email }}</p>
                     </div>
 
                     <div v-if="mustVerifyEmail && !user.email_verified_at">
