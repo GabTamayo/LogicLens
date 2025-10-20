@@ -2,6 +2,14 @@
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Head } from '@inertiajs/vue3'
 import { type BreadcrumbItem, Submission } from '@/types'
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 import type {
     ColumnDef,
     ColumnFiltersState,
@@ -56,17 +64,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`"
-                title="Are you absolutely sure?" type="token" buttonText="Delete Token" />
+            <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`" type="token"
+                buttonText="Delete Token" />
         </template>
 
-        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <div class="text-end me-4 mt-4">
-                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Submissions for {{ props.link.name }}</h4>
-                <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
+        <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Submissions for {{ props.link.name }}
+                    </h4>
+                    <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
+                </div>
+                <div class="mt-4 text-center">
+                    <Button class="cursor-pointer">Detect Submission</Button>
+                </div>
             </div>
 
-            <div>
+            <!-- Use Data Table format Here check https://www.shadcn-vue.com/docs/components/data-table.html for reference -->
+            <div class="flex-1 overflow-y-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -74,20 +89,16 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <TableHead>Email</TableHead>
                             <TableHead>Student No</TableHead>
                             <TableHead>Submitted At</TableHead>
-                            <TableHead class="text-end"></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <template v-if="submissions.length > 0">
-                            <TableRow v-for="submission in props.submissions" :key="submission.id">
+                        <template v-if="props.submissions.data.length > 0">
+                            <TableRow v-for="submission in props.submissions.data" :key="submission.id">
                                 <TableCell class="font-medium">{{ submission.student_name }}</TableCell>
                                 <TableCell>{{ submission.student_email }}</TableCell>
                                 <TableCell>{{ submission.student_no }}</TableCell>
                                 <TableCell>
                                     {{ new Date(submission.created_at).toLocaleString() }}
-                                </TableCell>
-                                <TableCell class="text-end">
-                                    <Ellipsis />
                                 </TableCell>
                             </TableRow>
                         </template>
@@ -101,7 +112,6 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </TableBody>
                 </Table>
             </div>
-
         </div>
     </AppLayout>
 </template>

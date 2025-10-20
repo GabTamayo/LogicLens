@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Activity;
 use App\Models\ActivityLink;
+use App\Models\Submission;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -17,11 +18,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Heihachi Mishima',
-            'email' => 'gabotamayo41@gmail.com',
-            'password' => bcrypt('191423angpogiko'),
-        ]);
+        /**
+         *User::factory()->create([
+         *    'name' => 'Heihachi Mishima',
+         *    'email' => 'gabotamayo41@gmail.com',
+         *    'password' => bcrypt('191423angpogiko'),
+         *]);
+         */
 
+        Submission::factory(50)->create();
     }
 }

@@ -26,17 +26,17 @@ class ActivityLinkController extends Controller
 
     public function show(Activity $activity, $linkId)
     {
-        $link = $activity->activityLinks()
-            ->with(['submissions' => function ($query) {
-                $query->latest();
-            }])
-            ->findOrFail($linkId);
+        $link = $activity->activityLinks()->findOrFail($linkId);
+
+        $submissions = $link->submissions()
+            ->paginate(15)
+            ->withQueryString();
 
         return inertia('Submissions/Index', [
             'activityId' => $activity->id,
             'activityTitle' => $activity->title,
             'link' => $link,
-            'submissions' => $link->submissions,
+            'submissions' => $submissions,
         ]);
     }
 

@@ -48,8 +48,7 @@ const updateStatus = (id: number, value: boolean) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" title="Are you absolutely sure?" type="activity"
-                buttonText="Delete Activity" />
+            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" type="activity" buttonText="Delete Activity" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">

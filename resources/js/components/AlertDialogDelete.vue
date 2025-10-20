@@ -16,7 +16,6 @@ import { Loader2 } from 'lucide-vue-next';
 
 const props = defineProps<{
     endpoint: string;
-    title: string;
     type: string;
     buttonText?: string;
 }>();
