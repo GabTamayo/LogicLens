@@ -80,7 +80,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </div>
             </div>
 
-            <!-- Use Data Table format Here check https://www.shadcn-vue.com/docs/components/data-table.html for reference -->
+            <!--Use Data Table format Here check this out https://www.shadcn-vue.com/docs/components/data-table.html for reference-->
             <div class="flex-1 overflow-y-auto">
                 <Table>
                     <TableHeader>
