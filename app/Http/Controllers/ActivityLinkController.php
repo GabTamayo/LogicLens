@@ -26,9 +26,11 @@ class ActivityLinkController extends Controller
 
     public function show(Activity $activity, $linkId)
     {
-        $link = $activity->activityLinks()->findOrFail($linkId);
+        $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
 
         $submissions = $link->submissions()
+            ->selectedAttributes()
+            ->orderBy('created_at', 'asc')
             ->paginate(15)
             ->withQueryString();
 

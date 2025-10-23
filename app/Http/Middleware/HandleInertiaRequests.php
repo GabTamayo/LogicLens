@@ -37,24 +37,32 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $quote = Inspiring::quoteWithImage();
+        $user = $request->user();
 
-        return [
+        $shared = [
             ...parent::share($request),
 
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'email_verified_at' => $user->email_verified_at,
+                ] : null,
             ],
-
-            ...(!$request->user() ? [
-                'name' => config('app.name'),
-                'quote' => [
-                    'message' => $quote['text'],
-                    'author' => $quote['author'],
-                    'image' => asset($quote['image']),
-                ],
-            ] : []),
 
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
+
+        if (!$user && ($request->is('login') || $request->is('register'))) {
+            $shared['name'] = config('app.name');
+            $shared['quote'] = [
+                'message' => $quote['text'],
+                'author' => $quote['author'],
+                'image' => asset($quote['image']),
+            ];
+        }
+
+        return $shared;
     }
 }

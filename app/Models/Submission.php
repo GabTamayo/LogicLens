@@ -23,4 +23,9 @@ class Submission extends Model
     {
         return $this->belongsTo(ActivityLink::class);
     }
+
+    public function scopeSelectedAttributes($query)
+    {
+        return $query->select('id', 'activity_link_id', 'student_name', 'student_email', 'student_no', 'file_path', 'created_at');
+    }
 }

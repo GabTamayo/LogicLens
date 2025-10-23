@@ -26,6 +26,11 @@ class Activity extends Model
         return $this->hasMany(ActivityLink::class);
     }
 
+    public function scopeSelectedAttributes($query)
+    {
+        return $query->select('id', 'user_id', 'title', 'created_at');
+    }
+
     protected static function booted()
     {
         static::deleting(function ($activity) {

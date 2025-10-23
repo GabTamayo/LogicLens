@@ -2,7 +2,7 @@
 import { ModalLink } from '@inertiaui/modal-vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import { Table, TableBody, TableCaption, TableCell, TableRow, } from '@/components/ui/table';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -10,32 +10,24 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Disc, LoaderCircle } from 'lucide-vue-next';
 import { Button } from "@/components/ui/button"
 import type { Activity } from '@/types';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 dayjs.extend(relativeTime)
-
 const isLoading = ref(false);
-
 function handleClick() {
     isLoading.value = true;
 }
-
 function resetLoading() {
     isLoading.value = false;
 }
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Activities',
         href: '/activities',
     },
 ];
-
-interface Props {
-    activities: Activity[];
-}
-
-defineProps<Props>();
+const page = usePage();
+const activities = computed(() => page.props.activities as Activity[]);
 </script>
 
 <template>
@@ -76,7 +68,8 @@ defineProps<Props>();
                                     </div>
                                     <p v-if="activity.open_links_count + activity.closed_links_count > 0"
                                         class="text-xs text-muted-foreground font-light">
-                                        {{ activity.open_links_count + activity.closed_links_count }} Total Activities
+                                        {{ activity.open_links_count + activity.closed_links_count }} Total Activity
+                                        Links
                                     </p>
                                     <p v-else class="text-xs text-muted-foreground italic">
                                         No activities yet
@@ -96,4 +89,5 @@ defineProps<Props>();
             </Table>
         </div>
     </AppLayout>
+    <Toaster />
 </template>
