@@ -10,8 +10,11 @@ import { Head, useForm, Link } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';
-import { Circle, Ellipsis } from 'lucide-vue-next';
+import { Circle } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
+import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'vue-sonner';
+import 'vue-sonner/style.css';
 
 const activity = defineProps<ActivityDetail>()
 
@@ -28,16 +31,28 @@ const submit = () => {
     form.post(`/activities/${activity.id}/links`, {
         onSuccess: () => {
             form.reset('name');
+            toast.success('Submission link generated', {
+                description: 'You can now use the link for student submissions.',
+            });
         }
     })
 }
 
-const updateStatus = (id: number, value: boolean) => {
-    useForm({
-        is_open: value,
-    }).patch(`/activities/${activity.id}/links/${id}`, {
-        preserveState: true,
-    })
+const statusForm = useForm({ is_open: false });
+const updateStatus = async (id: number, name: string, value: boolean) => {
+    statusForm.is_open = value
+    try {
+        await statusForm.patch(`/activities/${activity.id}/links/${id}`, {
+            preserveState: true,
+        })
+        toast.success('Link status updated', {
+            description: `The submission link ${name} is now ${value ? 'open' : 'closed'}.`,
+        })
+    } catch (error) {
+        toast.error('Failed to update link status', {
+            description: 'Please try again later.',
+        })
+    }
 }
 
 </script>
@@ -53,20 +68,20 @@ const updateStatus = (id: number, value: boolean) => {
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Generate Token Submission</h4>
+                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission</h4>
                 <p class="text-sm text-muted-foreground">
-                    A submission token allows you to store student submissions for later detection.
+                    A submission link allows you to store student submissions for later detection.
                 </p>
                 <Form @submit="submit" class="space-y-6 flex items-center justify-center space-x-12 m-6">
                     <Button type="submit" :disabled="form.processing">Generate</Button>
                     <FormField name="name">
                         <FormItem class="w-full">
-                            <FormLabel>Token Name</FormLabel>
+                            <FormLabel>Link Submission Name</FormLabel>
                             <FormControl>
                                 <Input type="text" v-model="form.name" />
                             </FormControl>
                             <FormDescription>
-                                Enter your desired submission token name.
+                                Enter your desired submission link submission name.
                             </FormDescription>
                             <InputError :message="form.errors.name" />
                         </FormItem>
@@ -77,16 +92,17 @@ const updateStatus = (id: number, value: boolean) => {
             <Separator />
 
             <div>
-                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Manage Token Submission</h4>
+                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Manage Link Submission</h4>
                 <p class="text-sm text-muted-foreground">
-                    You may need a cross detection or delete any of your existing submission tokens.
+                    You may need a cross detection or delete any of your existing submission links.
                 </p>
                 <Table class="mt-4">
                     <TableHeader>
                         <TableRow>
                             <TableHead class="w-[200px]">Name</TableHead>
                             <TableHead>Status</TableHead>
-                            <TableHead class="text-center">Token</TableHead>
+                            <TableHead class="text-center">Link</TableHead>
+                            <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -101,13 +117,13 @@ const updateStatus = (id: number, value: boolean) => {
                                         {{ link.is_open ? 'Open' : 'Closed' }}
                                     </Badge>
                                     <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
-                                        @update:modelValue="updateStatus(link.id, $event)" />
+                                        @update:modelValue="updateStatus(link.id, link.name, $event)" />
                                 </TableCell>
                                 <TableCell
                                     class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
                                         activity.appUrl }}/submit{{ link.token }}
                                 </TableCell>
-                                <TableCell class="text-right w-0">
+                                <TableCell class="text-right">
                                     <Link :href="`/activities/${activity.id}/links/${link.id}`"
                                         class="text-gray-600 hover:underline text-sm">View Submissions</Link>
                                 </TableCell>
@@ -115,7 +131,7 @@ const updateStatus = (id: number, value: boolean) => {
                         </template>
                         <template v-else>
                             <TableCell colspan="4" class="text-center text-muted-foreground py-6">
-                                No submission tokens generated yet.
+                                No submission links generated yet.
                             </TableCell>
                         </template>
                     </TableBody>
@@ -123,4 +139,5 @@ const updateStatus = (id: number, value: boolean) => {
             </div>
         </div>
     </AppLayout>
+    <Toaster />
 </template>

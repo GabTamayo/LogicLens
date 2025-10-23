@@ -28,7 +28,7 @@ class Activity extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'title');
+        return $query->select('id', 'user_id', 'title', 'created_at');
     }
 
     protected static function booted()

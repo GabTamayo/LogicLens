@@ -88,7 +88,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <TableHead>Student Name</TableHead>
                             <TableHead>Email</TableHead>
                             <TableHead>Student No</TableHead>
-                            <TableHead>Submitted At</TableHead>
+                            <TableHead class="text-right">Submitted At</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -97,7 +97,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <TableCell class="font-medium">{{ submission.student_name }}</TableCell>
                                 <TableCell>{{ submission.student_email }}</TableCell>
                                 <TableCell>{{ submission.student_no }}</TableCell>
-                                <TableCell>
+                                <TableCell class="text-right">
                                     {{ new Date(submission.created_at).toLocaleString() }}
                                 </TableCell>
                             </TableRow>
