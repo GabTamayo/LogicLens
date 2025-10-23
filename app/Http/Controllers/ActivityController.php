@@ -17,6 +17,7 @@ class ActivityController extends Controller
     {
         return Inertia::render('Activities/Index', [
             'activities' => Activity::where('user_id', Auth::id())
+                ->selectedAttributes()
                 ->withCount([
                     'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
                     'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
@@ -48,7 +49,9 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        $activity->load(['activityLinks' => fn($q) => $q->orderBy('created_at')]);
+        $activity->load([
+            'activityLinks' => fn($q) => $q->selectedAttributes()->orderBy('created_at')
+        ]);
 
         return Inertia::render('Activities/Show', [
             'id' => $activity->id,
