@@ -14,6 +14,10 @@ import type { SubmissionRow } from '@/components/submissions/columns'
 
 const { submission } = defineProps<{ submission: SubmissionRow }>()
 
+defineEmits<{
+    (e: 'expand'): void
+}>()
+
 function copy(id: string) {
     navigator.clipboard.writeText(id)
 }
@@ -22,7 +26,7 @@ function copy(id: string) {
 <template>
     <DropdownMenu>
         <DropdownMenuTrigger as-child>
-            <Button variant="ghost" class="w-8 h-8 p-0">
+            <Button variant="ghost" class="w-8 h-8 p-0 cursor-pointer">
                 <span class="sr-only">Open menu</span>
                 <MoreHorizontal class="w-4 h-4" />
             </Button>
@@ -31,6 +35,9 @@ function copy(id: string) {
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem>
                 View Details
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="$emit('expand')">
+                Expand
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem @click="copy(submission.student_no)">

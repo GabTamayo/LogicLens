@@ -1,14 +1,15 @@
 <script setup lang="ts" generic="TData, TValue">
-import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/vue-table'
-import { FlexRender, getCoreRowModel, getFilteredRowModel, getSortedRowModel, useVueTable, } from '@tanstack/vue-table'
-import { valueUpdater } from './ui/table/utils'
-import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+import type { ColumnDef, SortingState, VisibilityState, ExpandedState } from '@tanstack/vue-table'
 import { h, ref } from 'vue'
+import { Button } from '@/components/ui/button'
+import { Settings2 } from 'lucide-vue-next'
+import { FlexRender, getCoreRowModel, getSortedRowModel, getExpandedRowModel, useVueTable } from '@tanstack/vue-table'
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
+import { valueUpdater } from './ui/table/utils'
+import { Input } from '@/components/ui/input'
 import { computed } from 'vue'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious, } from '@/components/ui/pagination'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 
 export interface PaginationData {
     current_page: number
@@ -18,58 +19,81 @@ export interface PaginationData {
     to: number
     last_page: number
 }
-
 export interface FilterConfig {
     column: string
     placeholder?: string
 }
-
 const props = defineProps<{
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     pagination?: PaginationData
     filterConfig?: FilterConfig | FilterConfig[]
+    filterValues?: Record<string, string>
 }>()
 const sorting = ref<SortingState>([])
-const columnFilters = ref<ColumnFiltersState>([])
+const columnVisibility = ref<VisibilityState>({})
+const expanded = ref<ExpandedState>({})
+
 const emit = defineEmits<{
     'page-change': [page: number]
+    'filter-change': [column: string, value: string]
 }>()
 const reactiveData = computed(() => props.data ?? [])
 const reactiveColumns = computed(() => props.columns ?? [])
+
 const filterConfigs = computed(() => {
     if (!props.filterConfig) return []
     return Array.isArray(props.filterConfig) ? props.filterConfig : [props.filterConfig]
 })
-const table = useVueTable({
+
+const table = computed(() => useVueTable({
     data: reactiveData.value,
     columns: reactiveColumns.value,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
-    onColumnFiltersChange: updaterOrValue => valueUpdater(updaterOrValue, columnFilters),
-    getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
+    onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
     state: {
         get sorting() { return sorting.value },
-        get columnFilters() { return columnFilters.value },
+        get columnVisibility() { return columnVisibility.value },
+        get expanded() { return expanded.value },
     },
-})
+}))
+
 const handlePageChange = (page: number) => {
     emit('page-change', page)
+}
+const handleFilterInput = (column: string, value: string) => {
+    emit('filter-change', column, value)
 }
 </script>
 
 <template>
     <div class="space-y-4">
-        <div v-if="filterConfigs.length > 0" class="flex items-center gap-4 py-4">
-            <Input
-                v-for="(filter, index) in filterConfigs"
-                :key="index"
-                class="max-w-sm"
+        <div v-if="filterConfigs.length > 0" class="flex items-center gap-4 py-2">
+            <Input v-for="(filter, index) in filterConfigs" :key="index" class="max-w-sm"
                 :placeholder="filter.placeholder || `Filter ${filter.column}...`"
-                :model-value="table.getColumn(filter.column)?.getFilterValue() as string"
-                @update:model-value="table.getColumn(filter.column)?.setFilterValue($event)"
-            />
+                :model-value="filterValues?.[filter.column] || ''"
+                @update:model-value="handleFilterInput(filter.column, $event)" />
+            <DropdownMenu>
+                <DropdownMenuTrigger as-child>
+                    <Button variant="outline" class="ml-auto text-sm cursor-pointer">
+                        <Settings2 class="w-4 h-4 mr-2" />
+                        View
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuCheckboxItem
+                        v-for="column in table.getAllColumns().filter((column) => column.getCanHide())" :key="column.id"
+                        class="" :modelValue="column.getIsVisible()" @update:modelValue="(value) => {
+                            column.toggleVisibility(!!value)
+                        }">
+                        {{ column.columnDef.label || column.id }}
+                    </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
         <div class="border rounded-md">
             <Table>
@@ -83,12 +107,21 @@ const handlePageChange = (page: number) => {
                 </TableHeader>
                 <TableBody>
                     <template v-if="table.getRowModel().rows?.length">
-                        <TableRow v-for="row in table.getRowModel().rows" :key="row.id"
-                            :data-state="row.getIsSelected() ? 'selected' : undefined">
-                            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                                <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                            </TableCell>
-                        </TableRow>
+                        <template v-for="row in table.getRowModel().rows" :key="row.id">
+                            <TableRow :data-state="row.getIsSelected() ? 'selected' : undefined">
+                                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                </TableCell>
+                            </TableRow>
+                            <TableRow v-if="row.getIsExpanded()">
+                                <TableCell :colspan="row.getAllCells().length">
+                                    <code
+                                        class="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
+                                    {{ JSON.stringify(row.original) }}
+                                    </code>
+                                </TableCell>
+                            </TableRow>
+                        </template>
                     </template>
                     <template v-else>
                         <TableRow>

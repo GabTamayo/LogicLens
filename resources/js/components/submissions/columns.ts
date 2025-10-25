@@ -16,9 +16,11 @@ export interface SubmissionRow {
 export const columns: ColumnDef<SubmissionRow>[] = [
     {
         accessorKey: 'student_name',
+        label: 'Student Name',
         header: ({ column }) => {
             return h(Button, {
                 variant: 'ghost',
+                class: 'cursor-pointer',
                 onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
             }, () => ['Student Name', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
         },
@@ -26,9 +28,11 @@ export const columns: ColumnDef<SubmissionRow>[] = [
     },
     {
         accessorKey: 'student_email',
+        label: 'Email',
         header: ({ column }) => {
             return h(Button, {
                 variant: 'ghost',
+                class: 'cursor-pointer',
                 onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
             }, () => ['Email', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
         },
@@ -36,9 +40,11 @@ export const columns: ColumnDef<SubmissionRow>[] = [
     },
     {
         accessorKey: 'student_no',
+        label: 'Student No',
         header: ({ column }) => {
             return h(Button, {
                 variant: 'ghost',
+                class: 'cursor-pointer',
                 onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
             }, () => ['Student No.', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
         },
@@ -46,11 +52,12 @@ export const columns: ColumnDef<SubmissionRow>[] = [
     },
     {
         accessorKey: 'created_at',
+        label: 'Submitted At',
         header: ({ column }) => {
             return h(Button, {
                 variant: 'ghost',
+                class: 'cursor-pointer ml-auto flex',
                 onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-                class: 'ml-auto flex'
             }, () => ['Submitted At', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
         },
         cell: ({ row }) => {
@@ -65,6 +72,13 @@ export const columns: ColumnDef<SubmissionRow>[] = [
     {
         id: 'actions',
         enableHiding: false,
-        cell: ({ row }) => h(DropdownAction, { submission: row.original }),
+        cell: ({ row }) => {
+            const submission = row.original
+
+            return h('div', { class: 'relative' }, h(DropdownAction, {
+                submission,
+                onExpand: row.toggleExpanded,
+            }))
+        },
     }
 ]

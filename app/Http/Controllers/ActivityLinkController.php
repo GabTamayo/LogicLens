@@ -24,12 +24,17 @@ class ActivityLinkController extends Controller
         return redirect()->route('activities.show', $activity);
     }
 
-    public function show(Activity $activity, $linkId)
+    public function show(Activity $activity, $linkId, Request $request)
     {
         $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
-
         $submissions = $link->submissions()
             ->selectedAttributes()
+            ->when($request->input('student_name'), function ($query, $search) {
+                $query->where('student_name', 'like', '%' . $search . '%');
+            })
+            ->when($request->input('student_no'), function ($query, $search) {
+                $query->where('student_no', 'like', '%' . $search . '%');
+            })
             ->paginate(10)
             ->withQueryString();
 
@@ -38,6 +43,7 @@ class ActivityLinkController extends Controller
             'activityTitle' => $activity->title,
             'link' => $link,
             'submissions' => $submissions,
+            'filters' => $request->only(['student_name', 'student_no']),
         ]);
     }
 

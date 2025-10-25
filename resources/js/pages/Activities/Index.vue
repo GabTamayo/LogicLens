@@ -89,5 +89,4 @@ const activities = computed(() => page.props.activities as Activity[]);
             </Table>
         </div>
     </AppLayout>
-    <Toaster />
 </template>

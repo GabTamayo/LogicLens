@@ -111,7 +111,7 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
                                 <TableCell>{{ link.name }}</TableCell>
                                 <TableCell>
                                     <div class="flex">
-                                        <Badge class="w-18">
+                                        <Badge variant="outline" class="w-18">
                                             <Circle class="size-4" :class="link.is_open
                                                 ? 'fill-green-500 text-green-500'
                                                 : 'fill-red-500 text-red-500'" />
