@@ -68,26 +68,11 @@ export interface SubmissionPageProps {
     token: string
 }
 
-export type Paginated<T> = {
-    data: T[],
-    links: Array<{
-        url: string | null,
-        label: string,
-        active: boolean
-    }>,
-    meta: {
-        current_page: number,
-        last_page: number,
-        per_page: number,
-        total: number
-    }
-}
-
 export type Submission = {
     activityId: number,
     activityTitle: string,
     link: ActivityLink,
-    submissions: Paginated<{
+    submissions: Array<{
         id: number,
         student_name: string,
         student_email: string,

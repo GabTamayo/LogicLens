@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Submission extends Model
 {
     /** @use HasFactory<\Database\Factories\SubmissionFactory> */
-    use HasFactory;
+    use HasFactory, HasUuid;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
         'activity_link_id',
         'student_name',

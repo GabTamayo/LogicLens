@@ -18,14 +18,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        /**
-         *User::factory()->create([
-         *    'name' => 'Heihachi Mishima',
-         *    'email' => 'gabotamayo41@gmail.com',
-         *    'password' => bcrypt('191423angpogiko'),
-         *]);
-         */
+        User::factory()->create([
+            'name' => 'Heihachi Mishima',
+            'email' => 'gabotamayo41@gmail.com',
+            'password' => bcrypt('191423angpogiko'),
+        ]);
 
-        Submission::factory(50)->create();
+        User::factory()->create([
+            'name' => 'Kazuya Mishima',
+            'email' => 'gabotamayo@yahoo.com',
+            'password' => bcrypt('191423angpogiko'),
+        ]);
+
+        #Submission::factory(50)->create();
     }
 }

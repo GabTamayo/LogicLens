@@ -30,8 +30,7 @@ class ActivityLinkController extends Controller
 
         $submissions = $link->submissions()
             ->selectedAttributes()
-            ->orderBy('created_at', 'asc')
-            ->paginate(15)
+            ->paginate(10)
             ->withQueryString();
 
         return inertia('Submissions/Index', [

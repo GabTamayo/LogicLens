@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activity_links', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(\App\Models\Activity::class)->constrained()->onDelete('cascade');
+            $table->uuid('id')->primary();
+            $table->foreignUuid('activity_id')->constrained()->onDelete('cascade');
             $table->string('token')->unique();
             $table->string('name');
             $table->boolean('is_open',)->default(true);
