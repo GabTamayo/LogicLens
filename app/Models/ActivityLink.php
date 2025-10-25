@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,8 +12,10 @@ use Illuminate\Support\Facades\Storage;
 class ActivityLink extends Model
 {
     /** @use HasFactory<\Database\Factories\ActivityLinkFactory> */
-    use HasFactory;
+    use HasFactory, HasUuid;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     protected $fillable = [
         'name',
         'token',
@@ -38,6 +41,12 @@ class ActivityLink extends Model
     {
         return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at');
     }
+
+    public function scopeWithSubmissions($query)
+    {
+        return $query->with(['submissions' => fn($q) => $q->latest()]);
+    }
+
 
     protected static function booted()
     {

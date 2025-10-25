@@ -1,61 +1,53 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Head } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { type BreadcrumbItem, Submission } from '@/types'
-import {
-    Pagination,
-    PaginationContent,
-    PaginationEllipsis,
-    PaginationItem,
-    PaginationNext,
-    PaginationPrevious,
-} from "@/components/ui/pagination"
-import type {
-    ColumnDef,
-    ColumnFiltersState,
-    ExpandedState,
-    SortingState,
-    VisibilityState,
-} from "@tanstack/vue-table"
-import {
-    FlexRender,
-    getCoreRowModel,
-    getExpandedRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
-    useVueTable,
-} from "@tanstack/vue-table"
-import { ArrowUpDown, ChevronDown, Ellipsis } from "lucide-vue-next"
-
-import { h, ref, shallowRef } from "vue"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
+import { Search } from 'lucide-vue-next'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
+import DataTable from '@/components/DataTable.vue'
+import { columns } from '@/components/submissions/columns'
+import { ref } from 'vue'
+import { useDebounceFn } from '@vueuse/core'
 
-const props = defineProps<Submission>()
+const props = defineProps<Submission & { filters: Record<string, string> }>()
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
     { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
-];
+]
 
+const filters = ref({
+    student_name: props.filters?.student_name || '',
+    student_no: props.filters?.student_no || '',
+})
+
+const handlePageChange = (page: number) => {
+    router.visit(props.submissions.path, {
+        data: {
+            ...filters.value,
+            page: page
+        },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['submissions'],
+    })
+}
+
+const handleFilterChange = useDebounceFn(() => {
+    router.visit(props.submissions.path, {
+        data: filters.value,
+        preserveScroll: true,
+        preserveState: true,
+        only: ['submissions'],
+    })
+}, 300)
+
+const updateFilter = (column: string, value: string) => {
+    filters.value[column] = value
+    handleFilterChange()
+}
 </script>
 
 <template>
@@ -69,49 +61,27 @@ const breadcrumbs: BreadcrumbItem[] = [
         </template>
 
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-start space-x-4">
                 <div>
-                    <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Submissions for {{ props.link.name }}
-                    </h4>
+                    <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+                        Submissions for {{ props.link.name }}
+                    </h2>
+                    <template>
+                        <p class="leading-7 [&:not(:first-child)]:mt-6"> {{ props.activityTitle }} </p>
+                    </template>
                     <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
                 </div>
-                <div class="mt-4 text-center">
-                    <Button class="cursor-pointer">Detect Submission</Button>
+                <div>
+                    <Button class="cursor-pointer">
+                        <Search />Detect Submission
+                    </Button>
                 </div>
             </div>
 
-            <!--Use Data Table format Here check this out https://www.shadcn-vue.com/docs/components/data-table.html for reference-->
-            <div class="flex-1 overflow-y-auto">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Student Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Student No</TableHead>
-                            <TableHead class="text-right">Submitted At</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <template v-if="props.submissions.data.length > 0">
-                            <TableRow v-for="submission in props.submissions.data" :key="submission.id">
-                                <TableCell class="font-medium">{{ submission.student_name }}</TableCell>
-                                <TableCell>{{ submission.student_email }}</TableCell>
-                                <TableCell>{{ submission.student_no }}</TableCell>
-                                <TableCell class="text-right">
-                                    {{ new Date(submission.created_at).toLocaleString() }}
-                                </TableCell>
-                            </TableRow>
-                        </template>
-                        <template v-else>
-                            <TableRow>
-                                <TableCell colspan="5" class="text-center text-muted-foreground py-6">
-                                    No submissions found.
-                                </TableCell>
-                            </TableRow>
-                        </template>
-                    </TableBody>
-                </Table>
-            </div>
+            <DataTable :columns="columns" :data="props.submissions.data" :pagination="props.submissions" :filter-config="[
+                { column: 'student_name', placeholder: 'Filter by Student Name' },
+                { column: 'student_no', placeholder: 'Search Student No.' }
+            ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter" />
         </div>
     </AppLayout>
 </template>

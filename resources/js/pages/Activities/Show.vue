@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, ActivityDetail } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
@@ -110,14 +110,16 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
                             <TableRow v-for="link in activity.links" :key="link.id">
                                 <TableCell>{{ link.name }}</TableCell>
                                 <TableCell>
-                                    <Badge class="w-18">
-                                        <Circle class="size-4" :class="link.is_open
-                                            ? 'fill-green-500 text-green-500'
-                                            : 'fill-red-500 text-red-500'" />
-                                        {{ link.is_open ? 'Open' : 'Closed' }}
-                                    </Badge>
-                                    <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
-                                        @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                    <div class="flex">
+                                        <Badge variant="outline" class="w-18">
+                                            <Circle class="size-4" :class="link.is_open
+                                                ? 'fill-green-500 text-green-500'
+                                                : 'fill-red-500 text-red-500'" />
+                                            {{ link.is_open ? 'Open' : 'Closed' }}
+                                        </Badge>
+                                        <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
+                                            @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                    </div>
                                 </TableCell>
                                 <TableCell
                                     class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
