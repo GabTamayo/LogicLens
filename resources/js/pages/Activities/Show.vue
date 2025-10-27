@@ -45,7 +45,7 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
             preserveState: true,
         })
         toast.success('Link status updated', {
-            description: `The submission link ${name} is now ${value ? 'open' : 'closed'}.`,
+            description: `The submission link for ${name} is now ${value ? 'open' : 'closed'}.`,
         })
     } catch (error) {
         toast.error('Failed to update link status', {
@@ -64,7 +64,8 @@ const handlePageChange = (page: number) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" type="activity" buttonText="Delete Activity" />
+            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" type="activity" buttonText="Delete Activity"
+                :itemName="activity.title" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">

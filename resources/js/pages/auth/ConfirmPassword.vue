@@ -4,28 +4,23 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/AuthLayout.vue';
+import AuthSimpleLayout from '@/layouts/auth/AuthSimpleLayout.vue';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
 </script>
 
 <template>
-    <AuthLayout title="Confirm your password" description="This is a secure area of the application. Please confirm your password before continuing.">
+    <AuthSimpleLayout title="Confirm your password"
+        description="This is a secure area of the application. Please confirm your password before continuing.">
+
         <Head title="Confirm password" />
 
         <Form v-bind="ConfirmablePasswordController.store.form()" reset-on-success v-slot="{ errors, processing }">
             <div class="space-y-6">
                 <div class="grid gap-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        name="password"
-                        class="mt-1 block w-full"
-                        required
-                        autocomplete="current-password"
-                        autofocus
-                    />
+                    <Input id="password" type="password" name="password" class="mt-1 block w-full" required
+                        autocomplete="current-password" autofocus />
 
                     <InputError :message="errors.password" />
                 </div>
@@ -38,5 +33,5 @@ import { LoaderCircle } from 'lucide-vue-next';
                 </div>
             </div>
         </Form>
-    </AuthLayout>
+    </AuthSimpleLayout>
 </template>
