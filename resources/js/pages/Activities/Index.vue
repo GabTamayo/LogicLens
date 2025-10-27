@@ -2,15 +2,16 @@
 import { ModalLink } from '@inertiaui/modal-vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { Table, TableBody, TableCaption, TableCell, TableRow, } from '@/components/ui/table';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Badge } from '@/components/ui/badge';
 import { Plus, Disc, LoaderCircle } from 'lucide-vue-next';
 import { Button } from "@/components/ui/button"
-import type { Activity } from '@/types';
+import type { ActivityPagination } from '@/types'
 import { computed, ref } from 'vue';
+import PaginationComponent from '@/components/Pagination.vue';
 
 dayjs.extend(relativeTime)
 const isLoading = ref(false);
@@ -27,7 +28,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 const page = usePage();
-const activities = computed(() => page.props.activities as Activity[]);
+const activities = computed(() => page.props.activities as ActivityPagination);
+
+const handlePageChange = (pageNumber: number) => {
+    router.get('/activities', { page: pageNumber }, { preserveScroll: true });
+};
 </script>
 
 <template>
@@ -48,10 +53,10 @@ const activities = computed(() => page.props.activities as Activity[]);
 
             <Table>
                 <TableCaption>
-                    {{ activities.length ? 'A list of your recent activities.' : 'There is no recent activities yet.' }}
+                    {{ activities.data.length ? 'A list of your recent activities.' : 'There is no recent activities yet.' }}
                 </TableCaption>
                 <TableBody>
-                    <TableRow v-for="activity in activities" :key="activity.id" class="h-25">
+                    <TableRow v-for="activity in activities.data" :key="activity.id" class="h-25">
                         <TableCell>
                             <div class="flex flex-col space-y-2">
                                 <p class="font-medium">{{ activity.title }}</p>
@@ -87,6 +92,7 @@ const activities = computed(() => page.props.activities as Activity[]);
                     </TableRow>
                 </TableBody>
             </Table>
+            <PaginationComponent :pagination="activities" @page-change="handlePageChange" />
         </div>
     </AppLayout>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
+import { router } from '@inertiajs/vue3';
 import { type BreadcrumbItem, ActivityDetail } from '@/types';
+import PaginationComponent from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
@@ -22,11 +24,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: activity.title, href: `/activities/${activity.id}` },
 ];
-
 const form = useForm({
     name: '',
 });
-
 const submit = () => {
     form.post(`/activities/${activity.id}/links`, {
         onSuccess: () => {
@@ -37,7 +37,6 @@ const submit = () => {
         }
     })
 }
-
 const statusForm = useForm({ is_open: false });
 const updateStatus = async (id: number, name: string, value: boolean) => {
     statusForm.is_open = value
@@ -54,7 +53,9 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
         })
     }
 }
-
+const handlePageChange = (page: number) => {
+    router.get(`/activities/${activity.id}`, { page }, { preserveScroll: true })
+}
 </script>
 
 <template>
@@ -106,8 +107,8 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <template v-if="activity.links.length > 0">
-                            <TableRow v-for="link in activity.links" :key="link.id">
+                        <template v-if="activity.links.data.length > 0">
+                            <TableRow v-for="link in activity.links.data" :key="link.id">
                                 <TableCell>{{ link.name }}</TableCell>
                                 <TableCell>
                                     <div class="flex">
@@ -139,6 +140,7 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
                     </TableBody>
                 </Table>
             </div>
+            <PaginationComponent :pagination="activity.links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
     <Toaster />

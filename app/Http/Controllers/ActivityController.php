@@ -23,7 +23,8 @@ class ActivityController extends Controller
                     'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
                 ])
                 ->latest()
-                ->get(),
+                ->paginate(6)
+                ->withQueryString(),
         ]);
     }
 
@@ -49,14 +50,16 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        $activity->load([
-            'activityLinks' => fn($q) => $q->selectedAttributes()->orderBy('name')
-        ]);
+        $links = $activity->activityLinks()
+            ->selectedAttributes()
+            ->orderBy('name')
+            ->paginate(8)
+            ->withQueryString();
 
         return Inertia::render('Activities/Show', [
             'id' => $activity->id,
             'title' => $activity->title,
-            'links' => $activity->activityLinks,
+            'links' => $links,
             'appUrl' => config('app.url'),
         ]);
     }

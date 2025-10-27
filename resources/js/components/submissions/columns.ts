@@ -17,49 +17,25 @@ export const columns: ColumnDef<SubmissionRow>[] = [
     {
         accessorKey: 'student_name',
         label: 'Student Name',
-        header: ({ column }) => {
-            return h(Button, {
-                variant: 'ghost',
-                class: 'cursor-pointer',
-                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-            }, () => ['Student Name', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
-        },
+        header: () => h('div', { class: '' }, 'Student Name'),
         cell: ({ row }) => h('div', { class: '' }, row.getValue('student_name')),
     },
     {
         accessorKey: 'student_email',
         label: 'Email',
-        header: ({ column }) => {
-            return h(Button, {
-                variant: 'ghost',
-                class: 'cursor-pointer',
-                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-            }, () => ['Email', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
-        },
+        header: () => h('div', { class: '' }, 'Student Email'),
         cell: ({ row }) => h('div', { class: '' }, row.getValue('student_email')),
     },
     {
         accessorKey: 'student_no',
         label: 'Student No',
-        header: ({ column }) => {
-            return h(Button, {
-                variant: 'ghost',
-                class: 'cursor-pointer',
-                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-            }, () => ['Student No.', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
-        },
+        header: () => h('div', { class: '' }, 'Student No.'),
         cell: ({ row }) => h('div', { class: '' }, row.getValue('student_no')),
     },
     {
         accessorKey: 'created_at',
         label: 'Submitted At',
-        header: ({ column }) => {
-            return h(Button, {
-                variant: 'ghost',
-                class: 'cursor-pointer ml-auto flex',
-                onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-            }, () => ['Submitted At', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
-        },
+        header: () => h('div', { class: 'text-right' }, 'Submitted At'),
         cell: ({ row }) => {
             const date = new Date(row.getValue('created_at'))
             const formatted = date.toLocaleString('en-PH', {
