@@ -1,24 +1,19 @@
 <script setup lang="ts" generic="TData, TValue">
-import type { ColumnDef, SortingState, VisibilityState, ExpandedState } from '@tanstack/vue-table'
+import type { ColumnDef, VisibilityState, ExpandedState } from '@tanstack/vue-table'
 import { h, ref } from 'vue'
 import { Button } from '@/components/ui/button'
-import { Settings2 } from 'lucide-vue-next'
-import { FlexRender, getCoreRowModel, getSortedRowModel, getExpandedRowModel, useVueTable } from '@tanstack/vue-table'
+import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
+import { EllipsisVertical, FileScan } from 'lucide-vue-next'
+import { FlexRender, getCoreRowModel, getExpandedRowModel, useVueTable } from '@tanstack/vue-table'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { valueUpdater } from './ui/table/utils'
 import { Input } from '@/components/ui/input'
 import { computed } from 'vue'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
+import type { PaginationData } from '@/types'
+import PaginationComponent from '@/components/Pagination.vue'
+import debounce from 'lodash/debounce'
 
-export interface PaginationData {
-    current_page: number
-    per_page: number
-    total: number
-    from: number
-    to: number
-    last_page: number
-}
 export interface FilterConfig {
     column: string
     placeholder?: string
@@ -29,8 +24,8 @@ const props = defineProps<{
     pagination?: PaginationData
     filterConfig?: FilterConfig | FilterConfig[]
     filterValues?: Record<string, string>
+    showDetectButton?: boolean
 }>()
-const sorting = ref<SortingState>([])
 const columnVisibility = ref<VisibilityState>({})
 const expanded = ref<ExpandedState>({})
 
@@ -50,13 +45,10 @@ const table = computed(() => useVueTable({
     data: reactiveData.value,
     columns: reactiveColumns.value,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
-    onSortingChange: updaterOrValue => valueUpdater(updaterOrValue, sorting),
     onColumnVisibilityChange: updaterOrValue => valueUpdater(updaterOrValue, columnVisibility),
     onExpandedChange: updaterOrValue => valueUpdater(updaterOrValue, expanded),
     state: {
-        get sorting() { return sorting.value },
         get columnVisibility() { return columnVisibility.value },
         get expanded() { return expanded.value },
     },
@@ -65,9 +57,13 @@ const table = computed(() => useVueTable({
 const handlePageChange = (page: number) => {
     emit('page-change', page)
 }
-const handleFilterInput = (column: string, value: string) => {
-    emit('filter-change', column, value)
-}
+const handleFilterInput = debounce((column: string, value: string) => {
+    const formattedValue =
+        column === 'student_name'
+            ? value.replace(/\b\w/g, c => c.toUpperCase())
+            : value
+    emit('filter-change', column, formattedValue)
+}, 1000)
 </script>
 
 <template>
@@ -77,23 +73,28 @@ const handleFilterInput = (column: string, value: string) => {
                 :placeholder="filter.placeholder || `Filter ${filter.column}...`"
                 :model-value="filterValues?.[filter.column] || ''"
                 @update:model-value="handleFilterInput(filter.column, $event)" />
-            <DropdownMenu>
-                <DropdownMenuTrigger as-child>
-                    <Button variant="outline" class="ml-auto text-sm cursor-pointer">
-                        <Settings2 class="w-4 h-4 mr-2" />
-                        View
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuCheckboxItem
-                        v-for="column in table.getAllColumns().filter((column) => column.getCanHide())" :key="column.id"
-                        class="" :modelValue="column.getIsVisible()" @update:modelValue="(value) => {
-                            column.toggleVisibility(!!value)
-                        }">
-                        {{ column.columnDef.label || column.id }}
-                    </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            <ButtonGroup>
+                <Button variant="secondary" class="w-full">
+                    <FileScan />Detect Submission
+                </Button>
+                <ButtonGroupSeparator />
+                <DropdownMenu>
+                    <DropdownMenuTrigger as-child>
+                        <Button variant="secondary" size="icon">
+                            <EllipsisVertical />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" class="w-61">
+                        <DropdownMenuCheckboxItem
+                            v-for="column in table.getAllColumns().filter((column) => column.getCanHide())"
+                            :key="column.id" class="" :modelValue="column.getIsVisible()" @update:modelValue="(value) => {
+                                column.toggleVisibility(!!value)
+                            }">
+                            {{ column.columnDef.label || column.id }}
+                        </DropdownMenuCheckboxItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </ButtonGroup>
         </div>
         <div class="border rounded-md">
             <Table>
@@ -133,23 +134,6 @@ const handleFilterInput = (column: string, value: string) => {
                 </TableBody>
             </Table>
         </div>
-
-        <Pagination v-if="pagination && pagination.last_page > 1" v-slot="{ page }"
-            class="flex items-center justify-end gap-4" :total="pagination.total" :items-per-page="pagination.per_page"
-            :default-page="pagination.current_page" :sibling-count="1" show-edges @update:page="handlePageChange">
-            <div class="text-sm text-muted-foreground">
-                Showing {{ pagination.from }}–{{ pagination.to }} of {{ pagination.total }} results
-            </div>
-            <PaginationContent v-slot="{ items }">
-                <PaginationPrevious />
-                <template v-for="(item, index) in items" :key="index">
-                    <PaginationItem v-if="item.type === 'page'" :value="item.value" :is-active="item.value === page">
-                        {{ item.value }}
-                    </PaginationItem>
-                    <PaginationEllipsis v-else :index="index" />
-                </template>
-                <PaginationNext />
-            </PaginationContent>
-        </Pagination>
+        <PaginationComponent v-if="pagination" :pagination="pagination" @page-change="handlePageChange" />
     </div>
 </template>

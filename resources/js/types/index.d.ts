@@ -10,6 +10,16 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface PaginationData {
+    current_page: number
+    per_page: number
+    total: number
+    from: number
+    to: number
+    last_page: number
+}
+
+
 export interface NavItem {
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;
@@ -46,12 +56,17 @@ export interface Activity {
     open_links_count: number;
     closed_links_count: number;
 }
+export interface ActivityPagination extends PaginationData {
+    data: Activity[]
+}
 
 export interface ActivityDetail {
     id: number
     title: string
     appUrl: string
-    links: ActivityLink[]
+    links: {
+        data: ActivityLink[]
+    } & PaginationData
 }
 export interface ActivityLink {
     id: number

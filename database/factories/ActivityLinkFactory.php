@@ -17,10 +17,10 @@ class ActivityLinkFactory extends Factory
     public function definition(): array
     {
         return [
-            'activity_id' => 1,
+            'activity_id' => 'ba28ef80-a0a8-4196-b54a-847e5e249837',
             'token' => fake()->unique()->uuid(),
             'name' => fake()->word(),
-            'status' => fake()->randomElement(['active', 'closed', 'expired']),
+            'is_open' => true,
             'expires_at' => null,
         ];
     }
