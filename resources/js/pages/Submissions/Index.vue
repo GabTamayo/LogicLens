@@ -55,7 +55,7 @@ const updateFilter = (column: string, value: string) => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
             <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`" type="token"
-                buttonText="Delete Token" />
+                buttonText="Delete Token" :item-name="props.link.name" />
         </template>
 
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">

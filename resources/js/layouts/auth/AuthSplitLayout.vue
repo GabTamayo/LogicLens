@@ -17,7 +17,7 @@ defineProps<{
     <div
         class="relative grid h-dvh flex-col items-center justify-center px-8 sm:px-0 lg:max-w-none lg:grid-cols-2 lg:px-0">
         <div class="relative hidden h-full flex-col bg-muted p-10 text-white lg:flex dark:border-r">
-            <div class="absolute inset-0 bg-cover bg-center"
+            <div class="absolute inset-0 bg-cover bg-center" v-if="quote && quote.image"
                 :style="{ backgroundImage: `url(${quote.image})` }" />
 
             <div class="absolute inset-0 bg-black/30" />

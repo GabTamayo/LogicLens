@@ -13,20 +13,31 @@ import {
     AlertDialogCancel,
 } from '@/components/ui/alert-dialog/';
 import { Loader2 } from 'lucide-vue-next';
+import { toast } from 'vue-sonner'
 
 const props = defineProps<{
     endpoint: string;
     type: string;
     buttonText?: string;
+    itemName?: string;
 }>();
 
 const form = useForm({});
 
 const handleDelete = () => {
-    form.delete(props.endpoint);
+    form.delete(props.endpoint, {
+        onSuccess: () => {
+            toast.success(`${props.itemName.charAt(0).toUpperCase() + props.itemName.slice(1)} deleted`, {
+                description: `The ${props.type} has been permanently removed.`,
+            });
+        },
+        onError: () => {
+            toast.error(`Failed to delete ${props.type}`, {
+                description: 'Please try again later.',
+            });
+        },
+    });
 };
-
-
 </script>
 
 <template>
@@ -39,8 +50,9 @@ const handleDelete = () => {
             <AlertDialogHeader>
                 <AlertDialogTitle class="text-destructive">Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                    Deleting this {{ type }} will permanently remove the {{ type }} and
-                    all associated data from our servers.
+                    Deleting
+                    <span v-if="itemName" class="font-semibold">{{ itemName }}</span>
+                    will permanently remove the {{ type }} and all associated data from our servers.
                 </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

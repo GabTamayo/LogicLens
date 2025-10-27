@@ -2,7 +2,7 @@
 import EmailVerificationNotificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationNotificationController';
 import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
-import AuthLayout from '@/layouts/AuthLayout.vue';
+import AuthSimpleLayout from '@/layouts/auth/AuthSimpleLayout.vue';
 import { logout } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
 import { LoaderCircle } from 'lucide-vue-next';
@@ -13,7 +13,7 @@ defineProps<{
 </script>
 
 <template>
-    <AuthLayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
+    <AuthSimpleLayout title="Verify email" description="Please verify your email address by clicking on the link we just emailed to you.">
         <Head title="Email verification" />
 
         <div v-if="status === 'verification-link-sent'" class="mb-4 text-center text-sm font-medium text-green-600">
@@ -28,5 +28,5 @@ defineProps<{
 
             <TextLink :href="logout()" as="button" class="mx-auto block text-sm"> Log out </TextLink>
         </Form>
-    </AuthLayout>
+    </AuthSimpleLayout>
 </template>

@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button"
 import type { ActivityPagination } from '@/types'
 import { computed, ref } from 'vue';
 import PaginationComponent from '@/components/Pagination.vue';
+import { Toaster } from '@/components/ui/sonner';
+import 'vue-sonner/style.css';
 
 dayjs.extend(relativeTime)
 const isLoading = ref(false);
@@ -95,4 +97,5 @@ const handlePageChange = (pageNumber: number) => {
             <PaginationComponent :pagination="activities" @page-change="handlePageChange" />
         </div>
     </AppLayout>
+    <Toaster />
 </template>

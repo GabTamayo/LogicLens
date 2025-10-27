@@ -23,7 +23,7 @@ class ActivityController extends Controller
                     'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
                 ])
                 ->latest()
-                ->paginate(6)
+                ->paginate(8)
                 ->withQueryString(),
         ]);
     }

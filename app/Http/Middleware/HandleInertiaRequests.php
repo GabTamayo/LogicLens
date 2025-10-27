@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $quote = Inspiring::quoteWithImage();
+        $quoteString = Inspiring::quote();
         $user = $request->user();
 
         $shared = [
@@ -54,13 +54,29 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
 
-        if (!$user && ($request->is('login') || $request->is('register'))) {
-            $shared['name'] = config('app.name');
-            $shared['quote'] = [
-                'message' => $quote['text'],
-                'author' => $quote['author'],
-                'image' => asset($quote['image']),
+        if (
+            !$user &&
+            (
+                $request->is('login') ||
+                $request->is('register') ||
+                $request->is('forgot-password') ||
+                $request->is('reset-password/*')
+            )
+        ) {
+            // Parse the new Inspiring format: “ Quote text ” — Author
+            $quote = [
+                'message' => $quoteString,
+                'author' => null,
+                'image' => asset('images/clonewave-bg.jpg'),
             ];
+
+            if (preg_match('/“(.+)”\s+—\s+(.+)/s', strip_tags($quoteString), $matches)) {
+                $quote['message'] = trim($matches[1]);
+                $quote['author'] = trim($matches[2]);
+            }
+
+            $shared['name'] = config('app.name');
+            $shared['quote'] = $quote;
         }
 
         return $shared;
