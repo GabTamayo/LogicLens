@@ -49,4 +49,8 @@ return [
         ],
     ],
 
+    'history' => [
+        'encrypt' => true,
+    ]
+
 ];

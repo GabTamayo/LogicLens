@@ -32,6 +32,8 @@ class ProfileController extends Controller
         $request->user()->fill($request->validated());
         $request->user()->save();
 
+        inertia()->clearHistory();
+
         return to_route('profile.edit');
     }
 
