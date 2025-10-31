@@ -8,6 +8,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('dashboard', function () {
+    inertia()->clearHistory();
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 

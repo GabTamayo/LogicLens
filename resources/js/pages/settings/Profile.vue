@@ -43,7 +43,7 @@ function handleProfileUpdated() {
 
         <SettingsLayout>
             <div class="flex flex-col space-y-6">
-                <HeadingSmall title="Profile information" description="Update your name" />
+                <HeadingSmall title="Profile information" description="You can update your name" />
 
                 <Form v-bind="ProfileController.update.form()" class="space-y-6"
                     v-slot="{ errors, processing, recentlySuccessful }" @success="handleProfileUpdated">

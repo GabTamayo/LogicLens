@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import InputError from '@/components/InputError.vue';
+import { toast } from 'vue-sonner';
+import 'vue-sonner/style.css';
 
 const form = useForm({
     title: '',
@@ -12,7 +14,13 @@ const form = useForm({
 
 function submit(close: () => void) {
     form.post('/activities', {
-        onSuccess: () => close(),
+        onSuccess: () => {
+            toast.success('Activity created successfully!');
+            close();
+        },
+        onError: () => {
+            toast.error('Failed to create activity. Please try again.');
+        },
     });
 }
 
