@@ -15,8 +15,18 @@ class ConfirmablePasswordController extends Controller
     /**
      * Show the confirm password page.
      */
-    public function show(): Response
+    public function show(Request $request): Response|RedirectResponse
     {
+        if ($request->session()->has('auth.password_confirmed_at')) {
+            $confirmedAt = $request->session()->get('auth.password_confirmed_at');
+            $timeout = config('auth.password_timeout', 10800); // Default 3 hours
+
+            // If still within the timeout period, redirect away
+            if (time() - $confirmedAt < $timeout) {
+                return redirect()->intended(route('dashboard', absolute: false));
+            }
+        }
+
         return Inertia::render('auth/ConfirmPassword');
     }
 
@@ -35,6 +45,8 @@ class ConfirmablePasswordController extends Controller
         }
 
         $request->session()->put('auth.password_confirmed_at', time());
+
+        inertia()->clearHistory();
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

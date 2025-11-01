@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -22,6 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'verification_token',
     ];
 
     /**
@@ -50,5 +52,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function activities()
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->forceFill(['verification_token' => Str::random(60),])->save();
+
+        parent::sendEmailVerificationNotification();
+    }
+
+    public function getEmailForVerification()
+    {
+        // Include token in hash to invalidate old links
+        return $this->email . '|' . $this->verification_token;
     }
 }
