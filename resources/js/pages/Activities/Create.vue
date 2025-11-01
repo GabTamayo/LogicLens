@@ -27,7 +27,7 @@ function submit(close: () => void) {
 </script>
 
 <template>
-    <Modal max-width="md" position="top" v-slot="{ close }">
+    <Modal class="bg-white rounded dark:bg-stone-900" max-width="md" position="top" v-slot="{ close }">
         <Form class="space-y-6" @submit="submit(close)">
             <FormField name="title">
                 <FormItem>
