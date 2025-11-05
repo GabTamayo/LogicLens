@@ -1,8 +1,6 @@
 import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
-import { ArrowUpDown, ChevronDown } from 'lucide-vue-next'
-import Button from '../ui/button/Button.vue'
 
 export interface SubmissionRow {
     id: number
@@ -11,6 +9,8 @@ export interface SubmissionRow {
     student_no: string
     file_path: string
     created_at: string
+    file_content?: string
+    file_extension?: string
 }
 
 export const columns: ColumnDef<SubmissionRow>[] = [

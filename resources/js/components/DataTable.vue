@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TData, TValue">
 import type { ColumnDef, VisibilityState, ExpandedState } from '@tanstack/vue-table'
-import { h, ref } from 'vue'
+import { h, ref, onMounted, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { EllipsisVertical, FileScan } from 'lucide-vue-next'
@@ -13,6 +13,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { PaginationData } from '@/types'
 import PaginationComponent from '@/components/Pagination.vue'
 import debounce from 'lodash/debounce'
+// Import Prism.js
+import Prism from 'prismjs'
+import 'prismjs/themes/prism-tomorrow.css'
+// Import language support
+import 'prismjs/components/prism-java'
+// Import line numbers plugin
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
+import 'prismjs/plugins/line-numbers/prism-line-numbers'
 
 export interface FilterConfig {
     column: string
@@ -64,6 +72,22 @@ const handleFilterInput = debounce((column: string, value: string) => {
             : value
     emit('filter-change', column, formattedValue)
 }, 1000)
+const getLanguageFromExtension = (extension?: string): string => {
+    if (!extension) return 'plaintext'
+
+    const languageMap: Record<string, string> = {
+        txt: 'java'
+    }
+    return languageMap[extension.toLowerCase()] || 'plaintext'
+}
+
+watch(expanded, () => {
+    setTimeout(() => { Prism.highlightAll() }, 50)
+}, { deep: true })
+
+onMounted(() => {
+    Prism.highlightAll()
+})
 </script>
 
 <template>
@@ -116,10 +140,11 @@ const handleFilterInput = debounce((column: string, value: string) => {
                             </TableRow>
                             <TableRow v-if="row.getIsExpanded()">
                                 <TableCell :colspan="row.getAllCells().length">
-                                    <code
-                                        class="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold">
-                                    {{ JSON.stringify(row.original) }}
-                                    </code>
+                                    <div class="max-h-120 overflow-auto">
+                                        <pre class="line-numbers !m-0 !rounded-none"><code :class="`language-${getLanguageFromExtension(row.original.file_extension)}`">{{ row.original.file_content }}
+                                            </code>
+                                        </pre>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         </template>

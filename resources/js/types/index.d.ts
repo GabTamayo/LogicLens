@@ -94,5 +94,7 @@ export type Submission = {
         student_no: string,
         file_path: string,
         created_at: string,
+        file_content?: string
+        file_extension?: string
     }>
 }

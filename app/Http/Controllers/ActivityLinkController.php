@@ -38,6 +38,14 @@ class ActivityLinkController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        $submissions->getCollection()->transform(function ($submission) {
+            if ($submission->file_path && \Storage::disk('public')->exists($submission->file_path)) {
+                $submission->file_content = \Storage::disk('public')->get($submission->file_path);
+                $submission->file_extension = pathinfo($submission->file_path, PATHINFO_EXTENSION);
+            }
+            return $submission;
+        });
+
         return inertia('Submissions/Index', [
             'activityId' => $activity->id,
             'activityTitle' => $activity->title,
