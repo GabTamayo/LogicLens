@@ -12,7 +12,7 @@ import { Head, useForm, Link } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';
-import { Circle } from 'lucide-vue-next';
+import { Circle, Copy } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner';
@@ -34,7 +34,10 @@ const submit = () => {
             toast.success('Submission link generated', {
                 description: 'You can now use the link for student submissions.',
             });
-        }
+        },
+        onError: () => {
+            toast.error('Failed to generate link. Please try again.');
+        },
     })
 }
 const statusForm = useForm({ is_open: false });
@@ -44,7 +47,7 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
         await statusForm.patch(`/activities/${activity.id}/links/${id}`, {
             preserveState: true,
         })
-        toast.success('Link status updated', {
+        toast.info('Link status updated', {
             description: `The submission link for ${name} is now ${value ? 'open' : 'closed'}.`,
         })
     } catch (error) {
@@ -55,6 +58,11 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
 }
 const handlePageChange = (page: number) => {
     router.get(`/activities/${activity.id}`, { page }, { preserveScroll: true })
+}
+
+function copy(id: string) {
+    navigator.clipboard.writeText(id)
+    toast('Link copied to clipboard')
 }
 </script>
 
@@ -126,6 +134,9 @@ const handlePageChange = (page: number) => {
                                 <TableCell
                                     class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
                                         activity.appUrl }}/submit{{ link.token }}
+                                    <Button variant="outline" size="icon" @click="copy(`${activity.appUrl}/submit${link.token}`)">
+                                        <Copy class="w-2 h-2" />
+                                    </Button>
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <Link :href="`/activities/${activity.id}/links/${link.id}`"
@@ -144,5 +155,5 @@ const handlePageChange = (page: number) => {
             <PaginationComponent :pagination="activity.links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
-    <Toaster />
+    <Toaster rich-colors/>
 </template>

@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-
+import { toast } from 'vue-sonner';
 import type { SubmissionRow } from '@/components/submissions/columns'
 
 const { submission } = defineProps<{ submission: SubmissionRow }>()
@@ -20,7 +20,27 @@ defineEmits<{
 
 function copy(id: string) {
     navigator.clipboard.writeText(id)
+    toast('Student No. copied to clipboard')
 }
+
+function download(submission: SubmissionRow) {
+    if (!submission.file_content) {
+        alert('No file content found.')
+        return
+    }
+
+    const studName = submission.student_name?.replace(/\s+/g, '_') || 'student'
+    const fileName = `${submission.student_no}_${studName}.java`
+
+    const blob = new Blob([submission.file_content], { type: 'text/plain' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = fileName
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+}
+
 </script>
 
 <template>
@@ -33,17 +53,14 @@ function copy(id: string) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>
-                View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem @click="$emit('expand')">
-                Expand
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem @click="copy(submission.student_no)">
                 Copy Student No.
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem @click="$emit('expand')">
+                View Code
+            </DropdownMenuItem>
+            <DropdownMenuItem @click="download(submission)">
                 Download File
             </DropdownMenuItem>
         </DropdownMenuContent>

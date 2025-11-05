@@ -6,7 +6,6 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } fr
 import { Input } from "@/components/ui/input";
 import InputError from '@/components/InputError.vue';
 import { toast } from 'vue-sonner';
-import 'vue-sonner/style.css';
 
 const form = useForm({
     title: '',

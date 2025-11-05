@@ -29,6 +29,7 @@ class ActivityLinkController extends Controller
         $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
         $submissions = $link->submissions()
             ->selectedAttributes()
+            ->orderBy('created_at')
             ->when($request->input('student_name'), function ($query, $search) {
                 $query->where('student_name', 'like', '%' . $search . '%');
             })

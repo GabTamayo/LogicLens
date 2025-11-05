@@ -85,6 +85,17 @@ watch(expanded, () => {
     setTimeout(() => { Prism.highlightAll() }, 50)
 }, { deep: true })
 
+watch(
+    () => props.data,
+    () => {
+        // Collapse all expanded rows when table data changes
+        expanded.value = {}
+        // Re-highlight syntax after data updates
+        setTimeout(() => Prism.highlightAll(), 100)
+    },
+    { deep: true }
+)
+
 onMounted(() => {
     Prism.highlightAll()
 })

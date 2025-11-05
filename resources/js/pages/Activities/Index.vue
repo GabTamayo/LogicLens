@@ -103,5 +103,5 @@ const handlePageChange = (pageNumber: number) => {
             <PaginationComponent :pagination="activities" @page-change="handlePageChange" />
         </div>
     </AppLayout>
-    <Toaster />
+    <Toaster rich-colors/>
 </template>
