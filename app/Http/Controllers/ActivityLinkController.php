@@ -8,6 +8,7 @@ use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
 use App\Models\ActivityLink;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ActivityLinkController extends Controller
 {
@@ -47,7 +48,7 @@ class ActivityLinkController extends Controller
             return $submission;
         });
 
-        return inertia('Submissions/Index', [
+        return Inertia::render('Submissions/Index', [
             'activityId' => $activity->id,
             'activityTitle' => $activity->title,
             'link' => $link,

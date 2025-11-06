@@ -47,7 +47,6 @@ class ActivityLink extends Model
         return $query->with(['submissions' => fn($q) => $q->latest()]);
     }
 
-
     protected static function booted()
     {
         static::deleting(function ($activityLink) {

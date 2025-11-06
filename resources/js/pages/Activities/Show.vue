@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { router } from '@inertiajs/vue3';
 import { type BreadcrumbItem, ActivityDetail } from '@/types';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
@@ -8,12 +7,13 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } fr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, WhenVisible } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';
 import { Circle, Copy } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
+import { Skeleton } from "@/components/ui/skeleton"
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -106,54 +106,63 @@ function copy(id: string) {
                 <p class="text-sm text-muted-foreground">
                     You may need a cross detection or delete any of your existing submission links.
                 </p>
-                <Table class="mt-4">
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead class="w-[200px]">Name</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead class="text-center">Link</TableHead>
-                            <TableHead></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <template v-if="activity.links.data.length > 0">
-                            <TableRow v-for="link in activity.links.data" :key="link.id">
-                                <TableCell>{{ link.name }}</TableCell>
-                                <TableCell>
-                                    <div class="flex">
-                                        <Badge variant="outline" class="w-18">
-                                            <Circle class="size-4" :class="link.is_open
-                                                ? 'fill-green-500 text-green-500'
-                                                : 'fill-red-500 text-red-500'" />
-                                            {{ link.is_open ? 'Open' : 'Closed' }}
-                                        </Badge>
-                                        <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
-                                            @update:modelValue="updateStatus(link.id, link.name, $event)" />
-                                    </div>
-                                </TableCell>
-                                <TableCell
-                                    class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">{{
-                                        activity.appUrl }}/submit{{ link.token }}
-                                    <Button variant="outline" size="icon" @click="copy(`${activity.appUrl}/submit${link.token}`)">
-                                        <Copy class="w-2 h-2" />
-                                    </Button>
-                                </TableCell>
-                                <TableCell class="text-right">
-                                    <Link :href="`/activities/${activity.id}/links/${link.id}`"
-                                        class="text-gray-600 hover:underline text-sm">View Submissions</Link>
-                                </TableCell>
+                <WhenVisible data="activity.links.data">
+                    <template #fallback>
+                        <div class="mt-8 space-y-1">
+                            <Skeleton v-for="i in 8" :key="i" class="h-15 w-full rounded-xl" />
+                        </div>
+                    </template>
+                    <Table class="mt-4">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead class="w-[200px]">Name</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead class="text-center">Link</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
-                        </template>
-                        <template v-else>
-                            <TableCell colspan="4" class="text-center text-muted-foreground py-6">
-                                No submission links generated yet.
-                            </TableCell>
-                        </template>
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            <template v-if="activity.links.data.length > 0">
+                                <TableRow v-for="link in activity.links.data" :key="link.id">
+                                    <TableCell>{{ link.name }}</TableCell>
+                                    <TableCell>
+                                        <div class="flex">
+                                            <Badge variant="outline" class="w-18">
+                                                <Circle class="size-4" :class="link.is_open
+                                                    ? 'fill-green-500 text-green-500'
+                                                    : 'fill-red-500 text-red-500'" />
+                                                {{ link.is_open ? 'Open' : 'Closed' }}
+                                            </Badge>
+                                            <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
+                                                @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell
+                                        class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">
+                                        {{
+                                            activity.appUrl }}/submit{{ link.token }}
+                                        <Button variant="outline" size="icon"
+                                            @click="copy(`${activity.appUrl}/submit${link.token}`)">
+                                            <Copy class="w-2 h-2" />
+                                        </Button>
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <Link :href="`/activities/${activity.id}/links/${link.id}`"
+                                            class="text-gray-600 hover:underline text-sm">View Submissions</Link>
+                                    </TableCell>
+                                </TableRow>
+                            </template>
+                            <template v-else>
+                                <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                    No submission links generated yet.
+                                </TableCell>
+                            </template>
+                        </TableBody>
+                    </Table>
+                </WhenVisible>
             </div>
             <PaginationComponent :pagination="activity.links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
-    <Toaster rich-colors/>
+    <Toaster rich-colors />
 </template>

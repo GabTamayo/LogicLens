@@ -40,8 +40,7 @@ const handlePageChange = (pageNumber: number) => {
             <div v-if="activities.data.length">
                 <AddActivityButton />
             </div>
-
-            <template v-if="activities.data.length">
+            <template v-if="activities.data.length > 0">
                 <Table>
                     <TableCaption>A list of your recent activities.</TableCaption>
                     <TableBody>
@@ -52,17 +51,20 @@ const handlePageChange = (pageNumber: number) => {
                                     <div class="space-x-4 flex items-center">
                                         <div class="space-x-2">
                                             <Badge variant="outline">
-                                                <Disc class="w-3 h-3 text-green-600" /> {{ activity.open_links_count }}
+                                                <Disc class="w-3 h-3 text-green-600" /> {{ activity.open_links_count
+                                                }}
                                                 Active
                                             </Badge>
                                             <Badge variant="outline">
-                                                <Disc class="w-3 h-3 text-red-600" /> {{ activity.closed_links_count }}
+                                                <Disc class="w-3 h-3 text-red-600" /> {{ activity.closed_links_count
+                                                }}
                                                 Closed
                                             </Badge>
                                         </div>
                                         <p v-if="activity.open_links_count + activity.closed_links_count > 0"
                                             class="text-xs text-muted-foreground font-light">
-                                            {{ activity.open_links_count + activity.closed_links_count }} Total Activity
+                                            {{ activity.open_links_count + activity.closed_links_count }} Total
+                                            Activity
                                             Links
                                         </p>
                                         <p v-else class="text-xs text-muted-foreground italic">
@@ -103,5 +105,5 @@ const handlePageChange = (pageNumber: number) => {
             <PaginationComponent :pagination="activities" @page-change="handlePageChange" />
         </div>
     </AppLayout>
-    <Toaster rich-colors/>
+    <Toaster rich-colors />
 </template>

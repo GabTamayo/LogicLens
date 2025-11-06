@@ -16,15 +16,17 @@ class ActivityController extends Controller
     public function index()
     {
         return Inertia::render('Activities/Index', [
-            'activities' => Activity::where('user_id', Auth::id())
-                ->selectedAttributes()
-                ->withCount([
-                    'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
-                    'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
-                ])
-                ->latest()
-                ->paginate(8)
-                ->withQueryString(),
+            'activities' => function () {
+                return Activity::where('user_id', Auth::id())
+                    ->selectedAttributes()
+                    ->withCount([
+                        'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
+                        'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
+                    ])
+                    ->latest()
+                    ->paginate(8)
+                    ->withQueryString();
+            }
         ]);
     }
 
