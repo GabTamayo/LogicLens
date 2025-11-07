@@ -28,32 +28,35 @@ class ActivityLinkController extends Controller
     public function show(Activity $activity, $linkId, Request $request)
     {
         $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
-        $submissions = $link->submissions()
-            ->selectedAttributes()
-            ->orderBy('created_at')
-            ->when($request->input('student_name'), function ($query, $search) {
-                $query->where('student_name', 'like', '%' . $search . '%');
-            })
-            ->when($request->input('student_no'), function ($query, $search) {
-                $query->where('student_no', 'like', '%' . $search . '%');
-            })
-            ->paginate(10)
-            ->withQueryString();
-
-        $submissions->getCollection()->transform(function ($submission) {
-            if ($submission->file_path && \Storage::disk('public')->exists($submission->file_path)) {
-                $submission->file_content = \Storage::disk('public')->get($submission->file_path);
-                $submission->file_extension = pathinfo($submission->file_path, PATHINFO_EXTENSION);
-            }
-            return $submission;
-        });
 
         return Inertia::render('Submissions/Index', [
             'activityId' => $activity->id,
             'activityTitle' => $activity->title,
             'link' => $link,
-            'submissions' => $submissions,
             'filters' => $request->only(['student_name', 'student_no']),
+            'submissions' => Inertia::defer(function () use ($link, $request) {
+                $submissions = $link->submissions()
+                    ->selectedAttributes()
+                    ->orderBy('created_at')
+                    ->when($request->input('student_name'), function ($query, $search) {
+                        $query->where('student_name', 'like', '%' . $search . '%');
+                    })
+                    ->when($request->input('student_no'), function ($query, $search) {
+                        $query->where('student_no', 'like', '%' . $search . '%');
+                    })
+                    ->paginate(10)
+                    ->withQueryString();
+
+                $submissions->getCollection()->transform(function ($submission) {
+                    if ($submission->file_path && \Storage::disk('public')->exists($submission->file_path)) {
+                        $submission->file_content = \Storage::disk('public')->get($submission->file_path);
+                        $submission->file_extension = pathinfo($submission->file_path, PATHINFO_EXTENSION);
+                    }
+                    return $submission;
+                });
+
+                return $submissions;
+            }),
         ]);
     }
 

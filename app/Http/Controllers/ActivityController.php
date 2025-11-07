@@ -52,17 +52,17 @@ class ActivityController extends Controller
      */
     public function show(Activity $activity)
     {
-        $links = $activity->activityLinks()
-            ->selectedAttributes()
-            ->orderBy('name')
-            ->paginate(8)
-            ->withQueryString();
-
         return Inertia::render('Activities/Show', [
             'id' => $activity->id,
             'title' => $activity->title,
-            'links' => $links,
             'appUrl' => config('app.url'),
+            'links' => Inertia::defer(function () use ($activity) {
+                return $activity->activityLinks()
+                    ->selectedAttributes()
+                    ->orderBy('name')
+                    ->paginate(8)
+                    ->withQueryString();
+            }),
         ]);
     }
 

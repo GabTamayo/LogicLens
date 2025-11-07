@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
+import { Deferred } from '@inertiajs/vue3'
 import { Head, router, useRemember } from '@inertiajs/vue3'
 import { type BreadcrumbItem, Submission } from '@/types'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
 import DataTable from '@/components/DataTable.vue'
 import { columns } from '@/components/submissions/columns'
 import { useDebounceFn } from '@vueuse/core'
+import { LoaderCircle } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner';
 import 'vue-sonner/style.css';
 
@@ -67,12 +69,21 @@ const updateFilter = (column: string, value: string) => {
                 <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
             </div>
 
-            <DataTable :columns="columns" :data="props.submissions.data" :pagination="props.submissions" :filter-config="[
-                { column: 'student_name', placeholder: 'Filter by Student Name' },
-                { column: 'student_no', placeholder: 'Search Student No.' }
-            ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter"
-                :show-detect-button="true" />
+            <Deferred data="submissions">
+                <template #fallback>
+                    <div class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                        <span class="text-muted-foreground">Loading submissions</span>
+                        <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                </template>
+                <DataTable :columns="columns" :data="props.submissions.data" :pagination="props.submissions"
+                    :filter-config="[
+                        { column: 'student_name', placeholder: 'Filter by Student Name' },
+                        { column: 'student_no', placeholder: 'Search Student No.' }
+                    ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter"
+                    :show-detect-button="true" />
+            </Deferred>
         </div>
     </AppLayout>
-    <Toaster rich-colors/>
+    <Toaster rich-colors />
 </template>

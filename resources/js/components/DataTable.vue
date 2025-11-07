@@ -1,5 +1,4 @@
 <script setup lang="ts" generic="TData, TValue">
-import { WhenVisible } from '@inertiajs/vue3'
 import type { ColumnDef, VisibilityState, ExpandedState } from '@tanstack/vue-table'
 import { h, ref, onMounted, watch } from 'vue'
 import { Button } from '@/components/ui/button'
@@ -140,43 +139,31 @@ onMounted(() => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    <WhenVisible data="row.getVisibleCells()">
-                        <template #fallback>
-                            <TableRow>
-                                <TableCell :colspan="columns.length" class="h-24 text-center text-muted-foreground">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <span>Loading</span>
-                                        <LoaderCircle class="h-6 w-6 animate-spin" />
+                    <template v-if="table.getRowModel().rows?.length">
+                        <template v-for="row in table.getRowModel().rows" :key="row.id">
+                            <TableRow :data-state="row.getIsSelected() ? 'selected' : undefined">
+                                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+                                    <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
+                                </TableCell>
+                            </TableRow>
+                            <TableRow v-if="row.getIsExpanded()">
+                                <TableCell :colspan="row.getAllCells().length">
+                                    <div class="max-h-120 overflow-auto">
+                                        <pre class="line-numbers !m-0 !rounded-none"><code :class="`language-${getLanguageFromExtension(row.original.file_extension)}`">{{ row.original.file_content }}
+                                            </code>
+                                        </pre>
                                     </div>
                                 </TableCell>
                             </TableRow>
                         </template>
-                        <template v-if="table.getRowModel().rows?.length">
-                            <template v-for="row in table.getRowModel().rows" :key="row.id">
-                                <TableRow :data-state="row.getIsSelected() ? 'selected' : undefined">
-                                    <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                                        <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow v-if="row.getIsExpanded()">
-                                    <TableCell :colspan="row.getAllCells().length">
-                                        <div class="max-h-120 overflow-auto">
-                                            <pre class="line-numbers !m-0 !rounded-none"><code :class="`language-${getLanguageFromExtension(row.original.file_extension)}`">{{ row.original.file_content }}
-                                            </code>
-                                        </pre>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            </template>
-                        </template>
-                        <template v-else>
-                            <TableRow>
-                                <TableCell :colspan="columns.length" class="h-24 text-center text-muted-foreground">
-                                    No results.
-                                </TableCell>
-                            </TableRow>
-                        </template>
-                    </WhenVisible>
+                    </template>
+                    <template v-else>
+                        <TableRow>
+                            <TableCell :colspan="columns.length" class="h-24 text-center text-muted-foreground">
+                                No results.
+                            </TableCell>
+                        </TableRow>
+                    </template>
                 </TableBody>
             </Table>
         </div>

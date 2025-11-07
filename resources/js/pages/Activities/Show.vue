@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem, ActivityDetail } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link, router, WhenVisible } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, Deferred } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import InputError from '@/components/InputError.vue';
@@ -18,17 +18,25 @@ import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
 
-const activity = defineProps<ActivityDetail>()
+// Props are now flat, not nested under 'activity'
+const props = defineProps<{
+    id: string
+    title: string
+    appUrl: string
+    links: any // This will be deferred
+}>()
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
-    { title: activity.title, href: `/activities/${activity.id}` },
+    { title: props.title, href: `/activities/${props.id}` },
 ];
+
 const form = useForm({
     name: '',
 });
+
 const submit = () => {
-    form.post(`/activities/${activity.id}/links`, {
+    form.post(`/activities/${props.id}/links`, {
         onSuccess: () => {
             form.reset('name');
             toast.success('Submission link generated', {
@@ -40,12 +48,15 @@ const submit = () => {
         },
     })
 }
+
 const statusForm = useForm({ is_open: false });
-const updateStatus = async (id: number, name: string, value: boolean) => {
+
+const updateStatus = async (id: string, name: string, value: boolean) => {
     statusForm.is_open = value
     try {
-        await statusForm.patch(`/activities/${activity.id}/links/${id}`, {
+        await statusForm.patch(`/activities/${props.id}/links/${id}`, {
             preserveState: true,
+            only: ['links']
         })
         toast.info('Link status updated', {
             description: `The submission link for ${name} is now ${value ? 'open' : 'closed'}.`,
@@ -56,8 +67,15 @@ const updateStatus = async (id: number, name: string, value: boolean) => {
         })
     }
 }
+
 const handlePageChange = (page: number) => {
-    router.get(`/activities/${activity.id}`, { page }, { preserveScroll: true })
+    router.get(`/activities/${props.id}`,
+        { page },
+        {
+            preserveScroll: true,
+            only: ['links']
+        }
+    )
 }
 
 function copy(id: string) {
@@ -68,12 +86,12 @@ function copy(id: string) {
 
 <template>
 
-    <Head :title="`${activity.title}`" />
+    <Head :title="`${title}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${activity.id}`" type="activity" buttonText="Delete Activity"
-                :itemName="activity.title" />
+            <AlertDialogDelete :endpoint="`/activities/${id}`" type="activity" buttonText="Delete Activity"
+                :itemName="title" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
@@ -106,7 +124,7 @@ function copy(id: string) {
                 <p class="text-sm text-muted-foreground">
                     You may need a cross detection or delete any of your existing submission links.
                 </p>
-                <WhenVisible data="activity.links.data">
+                <Deferred data="links">
                     <template #fallback>
                         <div class="mt-8 space-y-1">
                             <Skeleton v-for="i in 8" :key="i" class="h-15 w-full rounded-xl" />
@@ -122,8 +140,8 @@ function copy(id: string) {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <template v-if="activity.links.data.length > 0">
-                                <TableRow v-for="link in activity.links.data" :key="link.id">
+                            <template v-if="links.data.length > 0">
+                                <TableRow v-for="link in links.data" :key="link.id">
                                     <TableCell>{{ link.name }}</TableCell>
                                     <TableCell>
                                         <div class="flex">
@@ -133,35 +151,39 @@ function copy(id: string) {
                                                     : 'fill-red-500 text-red-500'" />
                                                 {{ link.is_open ? 'Open' : 'Closed' }}
                                             </Badge>
-                                            <Switch class="ml-4" v-model="link.is_open" :disabled="form.processing"
+                                            <Switch class="ml-4" v-model="link.is_open"
+                                                :disabled="statusForm.processing"
                                                 @update:modelValue="updateStatus(link.id, link.name, $event)" />
                                         </div>
                                     </TableCell>
                                     <TableCell
                                         class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">
-                                        {{
-                                            activity.appUrl }}/submit{{ link.token }}
+                                        {{ appUrl }}/submit{{ link.token }}
                                         <Button variant="outline" size="icon"
-                                            @click="copy(`${activity.appUrl}/submit${link.token}`)">
+                                            @click="copy(`${appUrl}/submit${link.token}`)">
                                             <Copy class="w-2 h-2" />
                                         </Button>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <Link :href="`/activities/${activity.id}/links/${link.id}`"
-                                            class="text-gray-600 hover:underline text-sm">View Submissions</Link>
+                                        <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'
+                                            class="text-gray-600 hover:underline text-sm">
+                                        View Submissions
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             </template>
                             <template v-else>
-                                <TableCell colspan="4" class="text-center text-muted-foreground py-6">
-                                    No submission links generated yet.
-                                </TableCell>
+                                <TableRow>
+                                    <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                        No submission links generated yet.
+                                    </TableCell>
+                                </TableRow>
                             </template>
                         </TableBody>
                     </Table>
-                </WhenVisible>
+                </Deferred>
             </div>
-            <PaginationComponent :pagination="activity.links" @page-change="handlePageChange" />
+            <PaginationComponent v-if="links" :pagination="links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
     <Toaster rich-colors />
