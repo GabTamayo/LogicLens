@@ -152,7 +152,6 @@ function copy(id: string) {
                                                 {{ link.is_open ? 'Open' : 'Closed' }}
                                             </Badge>
                                             <Switch class="ml-4" v-model="link.is_open"
-                                                :disabled="statusForm.processing"
                                                 @update:modelValue="updateStatus(link.id, link.name, $event)" />
                                         </div>
                                     </TableCell>

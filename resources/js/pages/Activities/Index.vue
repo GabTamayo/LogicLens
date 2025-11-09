@@ -7,9 +7,8 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Badge } from '@/components/ui/badge';
 import { Disc, FolderOpen } from 'lucide-vue-next';
-import { Button } from "@/components/ui/button"
 import type { ActivityPagination } from '@/types'
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, } from '@/components/ui/empty'
 import AddActivityButton from '@/components/AddActivityButton.vue';
@@ -48,36 +47,31 @@ const handlePageChange = (pageNumber: number) => {
                             <TableCell>
                                 <div class="flex flex-col space-y-2">
                                     <p class="font-medium">{{ activity.title }}</p>
-                                    <div class="space-x-4 flex items-center">
-                                        <div class="space-x-2">
-                                            <Badge variant="outline">
-                                                <Disc class="w-3 h-3 text-green-600" /> {{ activity.open_links_count
-                                                }}
-                                                Active
+                                    <div class="space-x-4 flex items-baseline md:items-center">
+                                        <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
+                                            <Badge variant="outline" class="inline-flex items-center space-x-1">
+                                                <Disc class="w-3 h-3 text-green-600" />
+                                                <span>{{ activity.open_links_count }} Active</span>
                                             </Badge>
-                                            <Badge variant="outline">
-                                                <Disc class="w-3 h-3 text-red-600" /> {{ activity.closed_links_count
-                                                }}
-                                                Closed
+
+                                            <Badge variant="outline" class="inline-flex items-center space-x-1">
+                                                <Disc class="w-3 h-3 text-red-600" />
+                                                <span>{{ activity.closed_links_count }} Closed</span>
+                                            </Badge>
+                                            <Badge
+                                                :variant="activity.language_text === 'Java' ? 'destructive' : activity.language_text === 'Python' ? 'python' : 'default'"
+                                                class="inline-flex items-center">
+                                                <span>{{ activity.language_text }}</span>
                                             </Badge>
                                         </div>
-                                        <p v-if="activity.open_links_count + activity.closed_links_count > 0"
-                                            class="text-xs text-muted-foreground font-light">
-                                            {{ activity.open_links_count + activity.closed_links_count }} Total
-                                            Activity
-                                            Links
-                                        </p>
-                                        <p v-else class="text-xs text-muted-foreground italic">
-                                            No activity links yet
-                                        </p>
-                                        <span class="ms-8 text-xs text-muted-foreground font-light">
+                                        <span class="text-xs text-muted-foreground font-light">
                                             Activity {{ dayjs(activity.created_at).fromNow() }}
                                         </span>
                                     </div>
                                 </div>
                             </TableCell>
                             <TableCell class="text-right">
-                                <Link :href="`/activities/${activity.id}`"
+                                <Link :href="`/activities/${activity.id}`" prefetch='mount'
                                     class="text-gray-600 hover:underline text-sm">
                                 View Details
                                 </Link>

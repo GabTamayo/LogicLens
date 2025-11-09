@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ProgrammingLanguage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\App;
@@ -16,6 +17,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignIdFor(\App\Models\User::class)->constrained()->onDelete('cascade');
             $table->string('title');
+            $table->enum('language', ProgrammingLanguage::getValues())->nullable();
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ProgrammingLanguage;
 use App\Http\Requests\ActivityRequest;
 use App\Models\Activity;
 use Illuminate\Http\Request;
@@ -35,7 +36,9 @@ class ActivityController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Activities/Create');
+        return Inertia::render('Activities/Create', [
+            'languages' => ProgrammingLanguage::asSelectArray(),
+        ]);
     }
 
     /**

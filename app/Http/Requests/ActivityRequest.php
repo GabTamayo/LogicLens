@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ProgrammingLanguage;
+use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +26,7 @@ class ActivityRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:100'],
+            'language' => ['required', new EnumValue(ProgrammingLanguage::class)]
         ];
     }
 }

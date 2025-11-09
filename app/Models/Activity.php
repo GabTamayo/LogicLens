@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ProgrammingLanguage;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +18,9 @@ class Activity extends Model
     public $incrementing = false;
     protected $fillable = [
         'title',
+        'language',
     ];
+    protected $appends = ['language_text'];
 
     public function user(): BelongsTo
     {
@@ -31,7 +34,7 @@ class Activity extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'title', 'created_at');
+        return $query->select('id', 'user_id', 'title', 'language', 'created_at');
     }
 
     protected static function booted()
@@ -42,5 +45,10 @@ class Activity extends Model
                 $link->delete();
             }
         });
+    }
+
+    public function getLanguageTextAttribute(): ?string
+    {
+        return ProgrammingLanguage::response($this->language);
     }
 }

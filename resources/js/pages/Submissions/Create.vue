@@ -57,7 +57,8 @@ const submit = () => {
                     <div v-if="submitted" class="flex flex-col items-center gap-4 bg-card p-10">
                         <CheckCircle2 class="w-20 h-20 text-green-500" />
                         <h2 class="text-2xl font-bold text-center">Submission Successful!</h2>
-                        <p class="text-muted-foreground text-center text-sm">You have successfuly submitted your activity.</p>
+                        <p class="text-muted-foreground text-center text-sm">You have successfuly submitted your
+                            activity.</p>
                     </div>
 
                     <form v-else @submit.prevent="submit">
@@ -84,10 +85,11 @@ const submit = () => {
                             <div class="grid gap-2">
                                 <Label for="code_file">Code File</Label>
                                 <div class="relative">
-                                    <Input id="code_file" type="file" accept=".java" @change="(e: Event) => {
-                                        const target = e.target as HTMLInputElement
-                                        form.code_file = target.files?.[0] ?? null
-                                    }" class="pl-10" />
+                                    <Input id="code_file" type="file"
+                                        :accept="allowedExtensions.map(ext => `.${ext}`).join(',')" @change="(e: Event) => {
+                                            const target = e.target as HTMLInputElement
+                                            form.code_file = target.files?.[0] ?? null
+                                        }" class="pl-10" />
                                     <File class="absolute left-2 top-1/2 -translate-y-1/2 size-5 text-gray-500" />
                                 </div>
                                 <InputError :message="form.errors.code_file" />

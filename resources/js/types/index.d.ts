@@ -50,9 +50,9 @@ export type BreadcrumbItemType = BreadcrumbItem;
 export interface Activity {
     id: number;
     title: string;
+    language_text: string;
     user_id: number;
     created_at: string;
-    updated_at: string;
     open_links_count: number;
     closed_links_count: number;
 }
@@ -81,6 +81,7 @@ export interface SubmissionPageProps {
     name: string
     activityName: string
     token: string
+    allowedExtensions: string
 }
 
 export type Submission = {

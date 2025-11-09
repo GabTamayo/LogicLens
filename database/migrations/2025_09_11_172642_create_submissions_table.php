@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('student_email');
             $table->string('student_no');
             $table->string('file_path');
+            $table->string('language');
             $table->timestamps();
             $table->unique(['activity_link_id', 'student_email']);
         });

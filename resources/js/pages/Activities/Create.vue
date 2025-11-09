@@ -6,9 +6,12 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } fr
 import { Input } from "@/components/ui/input";
 import InputError from '@/components/InputError.vue';
 import { toast } from 'vue-sonner';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
 
+defineProps<{ languages: Record<string, string> }>();
 const form = useForm({
     title: '',
+    language: '',
 });
 
 function submit(close: () => void) {
@@ -42,6 +45,22 @@ function submit(close: () => void) {
                     </FormControl>
                     <InputError :message="form.errors.title" />
                 </FormItem>
+            </FormField>
+            <FormField name="language">
+                <Select v-model="form.language">
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select Programming Language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Programming Language</SelectLabel>
+                            <SelectItem v-for="(label, value) in languages" :key="value" :value="value">
+                                {{ label }}
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                    <InputError :message="form.errors.language" />
+                </Select>
             </FormField>
 
             <Button type="submit" :disabled="form.processing" class="cursor-pointer">

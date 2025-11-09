@@ -37,23 +37,12 @@ class ActivityLinkController extends Controller
             'submissions' => Inertia::defer(function () use ($link, $request) {
                 $submissions = $link->submissions()
                     ->selectedAttributes()
+                    ->filterByStudent($request->input('student_name'), $request->input('student_no'))
                     ->orderBy('created_at')
-                    ->when($request->input('student_name'), function ($query, $search) {
-                        $query->where('student_name', 'like', '%' . $search . '%');
-                    })
-                    ->when($request->input('student_no'), function ($query, $search) {
-                        $query->where('student_no', 'like', '%' . $search . '%');
-                    })
                     ->paginate(10)
                     ->withQueryString();
 
-                $submissions->getCollection()->transform(function ($submission) {
-                    if ($submission->file_path && \Storage::disk('public')->exists($submission->file_path)) {
-                        $submission->file_content = \Storage::disk('public')->get($submission->file_path);
-                        $submission->file_extension = pathinfo($submission->file_path, PATHINFO_EXTENSION);
-                    }
-                    return $submission;
-                });
+                $submissions->getCollection()->transform(fn($submission) => $submission->attachFileContent());
 
                 return $submissions;
             }),
