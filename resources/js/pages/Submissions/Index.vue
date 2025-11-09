@@ -9,9 +9,12 @@ import { columns } from '@/components/submissions/columns'
 import { useDebounceFn } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner';
+import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css';
+import { ref } from 'vue'
 
 const props = defineProps<Submission & { filters: Record<string, string> }>()
+const isDetecting = ref(false)
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
@@ -23,6 +26,24 @@ const filters = useRemember({
     student_name: props.filters?.student_name || '',
     student_no: props.filters?.student_no || '',
 }, 'submissions-filters')
+
+const handleDetectSubmission = () => {
+    if (isDetecting.value) return
+
+    isDetecting.value = true
+
+    router.post(`/activities/${props.activityId}/links/${props.link.id}/detect`, {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Detection successfull!');
+        },
+        onError: (errors) => {
+            const errorMessage = Object.values(errors)[0] as string
+            toast.error(errorMessage || 'Detection failed')
+            isDetecting.value = false
+        },
+    })
+}
 
 const handlePageChange = (page: number) => {
     router.visit(props.submissions.path, {
@@ -81,6 +102,7 @@ const updateFilter = (column: string, value: string) => {
                         { column: 'student_name', placeholder: 'Filter by Student Name' },
                         { column: 'student_no', placeholder: 'Search Student No.' }
                     ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter"
+                    :is-detecting="isDetecting" @detect-submission="handleDetectSubmission"
                     :show-detect-button="true" />
             </Deferred>
         </div>

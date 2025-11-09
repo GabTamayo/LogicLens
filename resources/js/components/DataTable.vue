@@ -30,6 +30,7 @@ const props = defineProps<{
     filterConfig?: FilterConfig | FilterConfig[]
     filterValues?: Record<string, string>
     showDetectButton?: boolean
+    isDetecting?: boolean
 }>()
 const columnVisibility = ref<VisibilityState>({})
 const expanded = ref<ExpandedState>({})
@@ -37,6 +38,7 @@ const expanded = ref<ExpandedState>({})
 const emit = defineEmits<{
     'page-change': [page: number]
     'filter-change': [column: string, value: string]
+    'detect-submission': []
 }>()
 const reactiveData = computed(() => props.data ?? [])
 const reactiveColumns = computed(() => props.columns ?? [])
@@ -81,7 +83,6 @@ const getLanguageFromExtension = (extension?: string): string => {
 watch(expanded, () => {
     setTimeout(() => { Prism.highlightAll() }, 50)
 }, { deep: true })
-
 watch(
     () => props.data,
     () => {
@@ -106,8 +107,10 @@ onMounted(() => {
                 :model-value="filterValues?.[filter.column] || ''"
                 @update:model-value="handleFilterInput(filter.column, $event)" />
             <ButtonGroup>
-                <Button variant="secondary" class="w-full">
-                    <FileScan />Detect Submission
+                <Button variant="secondary" class="w-full" :disabled="isDetecting" @click="$emit('detect-submission')">
+                    <LoaderCircle v-if="isDetecting" class="animate-spin" />
+                    <FileScan v-else />
+                    {{ isDetecting ? 'Detecting...' : 'Detect Submission' }}
                 </Button>
                 <ButtonGroupSeparator />
                 <DropdownMenu>

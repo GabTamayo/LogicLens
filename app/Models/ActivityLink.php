@@ -37,6 +37,11 @@ class ActivityLink extends Model
         return $this->hasMany(Submission::class);
     }
 
+    public function detections(): HasMany
+    {
+        return $this->hasMany(Detection::class);
+    }
+
     public function scopeSelectedAttributes($query)
     {
         return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at');

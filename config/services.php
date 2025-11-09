@@ -35,4 +35,7 @@ return [
         ],
     ],
 
+    'plagiarism_detector' => [
+        'url' => env('PLAGIARISM_DETECTOR_URL'),
+    ],
 ];
