@@ -28,7 +28,7 @@ class SubmissionService
         $content = file_get_contents($file->getRealPath());
 
         $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $activityTitle = str_replace([' ', '/', '\\'], '_', strtoupper($activityLink->activity->title));
+        $activityTitle = str_replace([' ', '/', '\\'], '_', strtoupper($activityLink->name));
         $extension = 'txt';
 
         do {

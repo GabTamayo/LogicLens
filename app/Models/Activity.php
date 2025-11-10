@@ -40,7 +40,9 @@ class Activity extends Model
     protected static function booted()
     {
         static::deleting(function ($activity) {
-            $activity->activityLinks()->delete(); // More efficient
+            foreach ($activity->activityLinks as $link) {
+                $link->delete();
+            }
         });
     }
 
