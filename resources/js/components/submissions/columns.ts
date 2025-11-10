@@ -8,6 +8,7 @@ export interface SubmissionRow {
     student_email: string
     student_no: string
     file_path: string
+    language: string
     created_at: string
     file_content?: string
     file_extension?: string

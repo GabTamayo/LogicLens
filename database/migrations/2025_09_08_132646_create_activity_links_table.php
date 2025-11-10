@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('token')->unique();
             $table->string('name');
             $table->boolean('is_open',)->default(true);
-            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }

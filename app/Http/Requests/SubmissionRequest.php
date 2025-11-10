@@ -6,23 +6,14 @@ use App\Enums\ProgrammingLanguage;
 use App\Models\ActivityLink;
 use App\Models\Submission;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\File;
 
 class SubmissionRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -36,37 +27,53 @@ class SubmissionRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
-            $activityLink = ActivityLink::where('token', $this->route('token'))->with('activity')->first();
-            if (! $activityLink) return;
+            $activityLink = ActivityLink::where('token', $this->route('token'))
+                ->with('activity')
+                ->first();
 
-            $fields = [
-                'student_email' => 'email',
-                'student_no' => 'student number',
-            ];
-            foreach ($fields as $field => $label) {
-                $value = $this->input($field);
-                if (Submission::where('activity_link_id', $activityLink->id)
-                    ->where($field, $value)
-                    ->exists()
-                ) {
-                    $validator->errors()->add($field, "This {$label} has already submitted for this activity.");
-                }
-            }
+            if (!$activityLink) return;
 
-            $file = $this->file('code_file');
-            $language = $activityLink->activity->language ?? null;
-            if ($file && $language) {
-                $allowedExtensions = ProgrammingLanguage::fileExtensions($language);
-
-                $ext = strtolower($file->getClientOriginalExtension());
-                if (! in_array($ext, $allowedExtensions)) {
-                    $validator->errors()->add(
-                        'code_file',
-                        'The code file must be a valid ' . ProgrammingLanguage::response($language) . ' file.'
-                    );
-                }
-            }
+            $this->validateUniqueSubmission($validator, $activityLink);
+            $this->validateFileExtension($validator, $activityLink);
         });
+    }
+
+    private function validateUniqueSubmission($validator, ActivityLink $activityLink): void
+    {
+        $fields = [
+            'student_email' => 'email',
+            'student_no' => 'student number',
+        ];
+
+        foreach ($fields as $field => $label) {
+            if (Submission::where('activity_link_id', $activityLink->id)
+                ->where($field, $this->input($field))
+                ->exists()
+            ) {
+                $validator->errors()->add(
+                    $field,
+                    "This {$label} has already submitted for this activity."
+                );
+            }
+        }
+    }
+
+    private function validateFileExtension($validator, ActivityLink $activityLink): void
+    {
+        $file = $this->file('code_file');
+        $language = $activityLink->activity->language ?? null;
+
+        if (!$file || !$language) return;
+
+        $allowedExtensions = ProgrammingLanguage::fileExtensions($language);
+        $ext = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($ext, $allowedExtensions)) {
+            $validator->errors()->add(
+                'code_file',
+                'The code file must be a valid ' . ProgrammingLanguage::response($language) . ' file.'
+            );
+        }
     }
 
     public function messages(): array

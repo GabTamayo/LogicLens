@@ -7,6 +7,7 @@ use App\Http\Requests\ActivityLinkRequest;
 use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
 use App\Models\ActivityLink;
+use App\Services\ActivityLinkService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,7 +15,7 @@ class ActivityLinkController extends Controller
 {
     public function store(ActivityLinkRequest $request, Activity $activity, GenerateActivityLink $generateActivityLink)
     {
-        $generateActivityLink->execute($activity, $request->validated()['name']);
+        $generateActivityLink->execute($activity, $request->validated('name'));
         return redirect()->route('activities.show', $activity);
     }
 
@@ -25,38 +26,17 @@ class ActivityLinkController extends Controller
         return redirect()->route('activities.show', $activity);
     }
 
-    public function show(Activity $activity, $linkId, Request $request)
+    public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService)
     {
         $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
-
-        return Inertia::render('Submissions/Index', [
-            'activityId' => $activity->id,
-            'activityTitle' => $activity->title,
-            'link' => $link,
-            'filters' => $request->only(['student_name', 'student_no']),
-            'submissions' => Inertia::defer(function () use ($link, $request) {
-                $submissions = $link->submissions()
-                    ->selectedAttributes()
-                    ->filterByStudent($request->input('student_name'), $request->input('student_no'))
-                    ->orderBy('created_at')
-                    ->paginate(10)
-                    ->withQueryString();
-
-                $submissions->getCollection()->transform(fn($submission) => $submission->attachFileContent());
-
-                return $submissions;
-            }),
-        ]);
+        $data = $activityLinkService->getSubmissions($link, $request);
+        return Inertia::render('Submissions/Index', $data);
     }
 
-    public function destroy($activityId, $linkId)
+    public function destroy(Activity $activity, $linkId)
     {
-        $link = ActivityLink::where('id', $linkId)
-            ->where('activity_id', $activityId)
-            ->firstOrFail();
-
+        $link = $activity->activityLinks()->findOrFail($linkId);
         $link->delete();
-
-        return redirect()->route('activities.show', ['activity' => $activityId]);
+        return redirect()->route('activities.show', $activity);
     }
 }

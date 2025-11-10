@@ -24,7 +24,6 @@ class ActivityLink extends Model
 
     protected $casts = [
         'is_open' => 'boolean',
-        'expires_at' => 'datetime',
     ];
 
     public function activity(): BelongsTo
@@ -44,7 +43,7 @@ class ActivityLink extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at');
+        return $query->select('id', 'activity_id', 'name', 'token', 'is_open');
     }
 
     public function scopeWithSubmissions($query)

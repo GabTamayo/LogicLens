@@ -31,7 +31,7 @@ class Submission extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_link_id', 'student_name', 'student_email', 'student_no', 'file_path', 'created_at');
+        return $query->select('id', 'student_name', 'student_email', 'student_no', 'file_path', 'language', 'created_at');
     }
 
     public function scopeFilterByStudent($query, ?string $name = null, ?string $number = null)

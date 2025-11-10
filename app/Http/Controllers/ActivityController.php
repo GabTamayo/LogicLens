@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ProgrammingLanguage;
 use App\Http\Requests\ActivityRequest;
 use App\Models\Activity;
+use App\Services\ActivityService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
@@ -14,21 +15,10 @@ class ActivityController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(ActivityService $activityService)
     {
-        return Inertia::render('Activities/Index', [
-            'activities' => function () {
-                return Activity::where('user_id', Auth::id())
-                    ->selectedAttributes()
-                    ->withCount([
-                        'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
-                        'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false)
-                    ])
-                    ->latest()
-                    ->paginate(8)
-                    ->withQueryString();
-            }
-        ]);
+        $data = $activityService->getActivitiesList();
+        return Inertia::render('Activities/Index', $data);
     }
 
     /**
@@ -46,27 +36,17 @@ class ActivityController extends Controller
      */
     public function store(ActivityRequest $request)
     {
-        $request->user()->activities()->create($request->validated());
+        Auth::user()->activities()->create($request->validated());
         return redirect()->route('activities.index');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Activity $activity)
+    public function show(Activity $activity, ActivityService $activityService)
     {
-        return Inertia::render('Activities/Show', [
-            'id' => $activity->id,
-            'title' => $activity->title,
-            'appUrl' => config('app.url'),
-            'links' => Inertia::defer(function () use ($activity) {
-                return $activity->activityLinks()
-                    ->selectedAttributes()
-                    ->orderBy('name')
-                    ->paginate(8)
-                    ->withQueryString();
-            }),
-        ]);
+        $data = $activityService->getActivityDetails($activity);
+        return Inertia::render('Activities/Show', $data);
     }
 
     /**
@@ -91,7 +71,6 @@ class ActivityController extends Controller
     public function destroy(Activity $activity)
     {
         $activity->delete();
-
         return redirect()->route('activities.index');
     }
 }

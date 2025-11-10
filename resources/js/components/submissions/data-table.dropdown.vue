@@ -1,14 +1,7 @@
 <script setup lang="ts">
 import { MoreHorizontal } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { toast } from 'vue-sonner';
 import type { SubmissionRow } from '@/components/submissions/columns'
 
@@ -25,20 +18,52 @@ function copy(id: string) {
 
 function download(submission: SubmissionRow) {
     if (!submission.file_content) {
-        alert('No file content found.')
-        return
+        alert('No file content found.');
+        return;
     }
 
-    const studName = submission.student_name?.replace(/\s+/g, '_') || 'student'
-    const fileName = `${submission.student_no}_${studName}.java`
+    const originalName = submission.file_path
+        .split('/') // get filename from path
+        .pop() || 'file.txt';
 
-    const blob = new Blob([submission.file_content], { type: 'text/plain' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = fileName
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    // Extract the base name from stored filename, stripping _ACTIVITY_RANDOM
+    const baseNameMatch = originalName.match(/^(.*?)_/);
+    let baseName = baseNameMatch ? baseNameMatch[1] : originalName.replace(/\.txt$/, '');
+
+    // Decide extension based on backend-provided language
+    const extensionMap: Record<string, string> = {
+        java: 'java',
+        python: 'py',
+        php: 'php',
+        cpp: 'cpp',
+        c: 'c',
+        javascript: 'js',
+        typescript: 'ts',
+        plaintext: 'txt',
+    };
+    const extension = extensionMap[submission.language?.toLowerCase()] || 'txt';
+
+    const fileName = `${baseName}.${extension}`;
+
+    const mimeTypes: Record<string, string> = {
+        java: 'text/x-java-source',
+        py: 'text/x-python',
+        php: 'application/x-httpd-php',
+        js: 'application/javascript',
+        ts: 'application/typescript',
+        cpp: 'text/x-c++src',
+        c: 'text/x-csrc',
+        txt: 'text/plain',
+    };
+    const mimeType = mimeTypes[extension] || 'text/plain';
+    const blob = new Blob([submission.file_content], { type: mimeType });
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 </script>

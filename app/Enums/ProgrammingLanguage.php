@@ -48,7 +48,7 @@ final class ProgrammingLanguage extends Enum
         return match ($language) {
             self::JAVA   => ['java'],
             self::PYTHON => ['py'],
-            default           => ['txt'],
+            default      => ['txt'],
         };
     }
 
