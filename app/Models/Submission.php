@@ -6,6 +6,7 @@ use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 
 class Submission extends Model
@@ -27,6 +28,11 @@ class Submission extends Model
     public function activityLink(): BelongsTo
     {
         return $this->belongsTo(ActivityLink::class);
+    }
+
+    public function detection(): HasMany
+    {
+        return $this->hasMany(Detection::class);
     }
 
     public function scopeSelectedAttributes($query)

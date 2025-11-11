@@ -86,9 +86,7 @@ watch(expanded, () => {
 watch(
     () => props.data,
     () => {
-        // Collapse all expanded rows when table data changes
         expanded.value = {}
-        // Re-highlight syntax after data updates
         setTimeout(() => Prism.highlightAll(), 100)
     },
     { deep: true }
@@ -106,7 +104,7 @@ onMounted(() => {
                 :placeholder="filter.placeholder || `Filter ${filter.column}...`"
                 :model-value="filterValues?.[filter.column] || ''"
                 @update:model-value="handleFilterInput(filter.column, $event)" />
-            <ButtonGroup>
+            <ButtonGroup v-if="showDetectButton">
                 <Button variant="secondary" class="w-full" :disabled="isDetecting" @click="$emit('detect-submission')">
                     <LoaderCircle v-if="isDetecting" class="animate-spin" />
                     <FileScan v-else />
@@ -130,6 +128,23 @@ onMounted(() => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </ButtonGroup>
+
+            <DropdownMenu v-else>
+                <DropdownMenuTrigger as-child>
+                    <Button variant="secondary" size="icon">
+                        <EllipsisVertical />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" class="w-61">
+                    <DropdownMenuCheckboxItem
+                        v-for="column in table.getAllColumns().filter((column) => column.getCanHide())" :key="column.id"
+                        class="" :modelValue="column.getIsVisible()" @update:modelValue="(value) => {
+                            column.toggleVisibility(!!value)
+                        }">
+                        {{ column.columnDef.label || column.id }}
+                    </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
         <div class="border rounded-md">
             <Table>

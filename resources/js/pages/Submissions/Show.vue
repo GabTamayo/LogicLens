@@ -1,87 +1,97 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table"
+import { Deferred } from '@inertiajs/vue3'
+import { Head, router, useRemember } from '@inertiajs/vue3'
+import { type BreadcrumbItem, type DetectionPageProps } from '@/types'
+import DataTable from '@/components/DataTable.vue'
+import { columns } from '@/components/detections/columns'
+import { useDebounceFn } from '@vueuse/core'
+import { LoaderCircle } from 'lucide-vue-next'
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from 'lucide-vue-next'
 
-const invoices = [
-    {
-        invoice: "INV001",
-        paymentStatus: "Paid",
-        totalAmount: "$250.00",
-        paymentMethod: "Credit Card",
-    },
-    {
-        invoice: "INV002",
-        paymentStatus: "Pending",
-        totalAmount: "$150.00",
-        paymentMethod: "PayPal",
-    },
-    {
-        invoice: "INV003",
-        paymentStatus: "Unpaid",
-        totalAmount: "$350.00",
-        paymentMethod: "Bank Transfer",
-    },
-    {
-        invoice: "INV004",
-        paymentStatus: "Paid",
-        totalAmount: "$450.00",
-        paymentMethod: "Credit Card",
-    },
-    {
-        invoice: "INV005",
-        paymentStatus: "Paid",
-        totalAmount: "$550.00",
-        paymentMethod: "PayPal",
-    },
-    {
-        invoice: "INV006",
-        paymentStatus: "Pending",
-        totalAmount: "$200.00",
-        paymentMethod: "Bank Transfer",
-    },
-    {
-        invoice: "INV007",
-        paymentStatus: "Unpaid",
-        totalAmount: "$300.00",
-        paymentMethod: "Credit Card",
-    },
+const props = defineProps<DetectionPageProps>()
+
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Activities', href: '/activities' },
+    { title: props.activityTitle, href: `/activities/${props.activityId}` },
+    { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
 ]
+
+const filters = useRemember({
+    student_name_a: props.filters?.student_name_a || '',
+    student_name_b: props.filters?.student_name_b || '',
+    min_score: props.filters?.min_score || '',
+}, 'detection-filters')
+
+const handlePageChange = (page: number) => {
+    router.visit(props.detections.path, {
+        data: {
+            ...filters.value,
+            page: page
+        },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['detections'],
+    })
+}
+
+const handleFilterChange = useDebounceFn(() => {
+    router.visit(props.detections.path, {
+        data: filters.value,
+        preserveScroll: true,
+        preserveState: true,
+        only: ['detections'],
+    })
+}, 300)
+
+const updateFilter = (column: string, value: string) => {
+    filters.value[column] = value
+    handleFilterChange()
+}
 </script>
 
 <template>
-    <div>
-        <AppLayout>
-            <Table>
-                <TableCaption>A list of your recent invoices.</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead class="w-[100px]">
-                            Invoice
-                        </TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Method</TableHead>
-                        <TableHead class="text-right">
-                            Amount
-                        </TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    <TableRow v-for="invoice in invoices" :key="invoice.invoice">
-                        <TableCell class="font-medium">
-                            {{ invoice.invoice }}
-                        </TableCell>
-                        <TableCell>{{ invoice.paymentStatus }}</TableCell>
-                        <TableCell>{{ invoice.paymentMethod }}</TableCell>
-                        <TableCell class="text-right">
-                            {{ invoice.totalAmount }}
-                        </TableCell>
-                    </TableRow>
-                </TableBody>
-            </Table>
-        </AppLayout>
-    </div>
+
+    <Head :title="`Detection Results - ${props.link.name}`" />
+
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div>
+                <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
+                    Detection Results for {{ props.link.name }}
+                </h2>
+                <div class="flex items-center">
+                    <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
+                    <span v-if="props.activityDate" class="ml-2 text-xs text-muted-foreground">
+                        ({{ props.activityDate }})
+                    </span>
+                </div>
+            </div>
+
+            <Deferred data="detections">
+                <template #fallback>
+                    <div class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                        <span class="text-muted-foreground">Loading detection results</span>
+                        <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                    </div>
+                </template>
+
+                <Alert v-if="props.detections.total === 0" class="mb-4">
+                    <AlertCircle class="h-4 w-4" />
+                    <AlertDescription>
+                        No plagiarism detections found. All submissions appear to be unique.
+                    </AlertDescription>
+                </Alert>
+
+                <DataTable v-else :columns="columns" :data="props.detections.data" :pagination="props.detections"
+                    :filter-config="[
+                        { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
+                        { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
+                        { column: 'min_score', placeholder: 'Min Score (e.g., 0.8)' }
+                    ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter"
+                    :show-detect-button="false" />
+            </Deferred>
+        </div>
+    </AppLayout>
 </template>
-
-<script setup lang="ts">
-
-</script>

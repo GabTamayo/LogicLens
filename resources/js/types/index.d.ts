@@ -98,3 +98,35 @@ export type Submission = {
         file_extension?: string
     }>
 }
+
+// Add these to your existing types.ts file
+
+export interface DetectionRow {
+    id: string
+    submission_a: {
+        id: number
+        student_name: string
+        student_no: string
+        student_email: string
+    }
+    submission_b: {
+        id: number
+        student_name: string
+        student_no: string
+        student_email: string
+    }
+    similarity_score: number
+    created_at: string
+}
+
+export interface DetectionPageProps {
+    activityId: number
+    activityTitle: string
+    activityDate: string
+    link: ActivityLink
+    detections: PaginationData & {
+        data: DetectionRow[]
+        path: string
+    }
+    filters: Record<string, string>
+}

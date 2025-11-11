@@ -21,7 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('activities/{activity}/links/{link}', [ActivityLinkController::class, 'destroy'])->name('submissions.destroy')->middleware('password.confirm');
 
     // Detection routes
-    Route::post('activities/{activity}/links/{link}/detect', [DetectionController::class, 'detect'])->name('detections.detect');
+    Route::post('activities/{activity}/links/{link}/detect', [DetectionController::class, 'store'])->name('detections.detect');
     Route::get('activities/{activity}/links/{link}/results', [DetectionController::class, 'index'])->name('detections.result');
 });
 

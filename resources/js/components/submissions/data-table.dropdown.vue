@@ -23,14 +23,12 @@ function download(submission: SubmissionRow) {
     }
 
     const originalName = submission.file_path
-        .split('/') // get filename from path
+        .split('/')
         .pop() || 'file.txt';
 
-    // Extract the base name from stored filename, stripping _ACTIVITY_RANDOM
     const baseNameMatch = originalName.match(/^(.*?)_/);
     let baseName = baseNameMatch ? baseNameMatch[1] : originalName.replace(/\.txt$/, '');
 
-    // Decide extension based on backend-provided language
     const extensionMap: Record<string, string> = {
         java: 'java',
         python: 'py',

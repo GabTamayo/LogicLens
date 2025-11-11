@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
 import { Deferred } from '@inertiajs/vue3'
-import { Head, router, useRemember } from '@inertiajs/vue3'
+import { Head, router, useRemember, Link } from '@inertiajs/vue3'
+import { Button } from '@/components/ui/button'
 import { type BreadcrumbItem, Submission } from '@/types'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
 import DataTable from '@/components/DataTable.vue'
 import { columns } from '@/components/submissions/columns'
 import { useDebounceFn } from '@vueuse/core'
-import { LoaderCircle } from 'lucide-vue-next'
+import { LoaderCircle, FileSearch } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css';
@@ -34,15 +35,20 @@ const handleDetectSubmission = () => {
 
     router.post(`/activities/${props.activityId}/links/${props.link.id}/detect`, {}, {
         preserveScroll: true,
-        onSuccess: () => {
-            toast.success('Detection successfull!');
+        onSuccess: (page) => {
+            if (page.props.successMessage) {
+                toast.success(page.props.successMessage);
+            } else {
+                toast.success('Detection successful!');
+            }
+            isDetecting.value = false;
         },
         onError: (errors) => {
-            const errorMessage = Object.values(errors)[0] as string
-            toast.error(errorMessage || 'Detection failed')
-            isDetecting.value = false
+            const errorMessage = Object.values(errors)[0] as string || 'Detection failed';
+            toast.error(errorMessage);
+            isDetecting.value = false;
         },
-    })
+    });
 }
 
 const handlePageChange = (page: number) => {
@@ -89,6 +95,13 @@ const updateFilter = (column: string, value: string) => {
                 </h2>
                 <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
             </div>
+
+            <Link :href="`/activities/${props.activityId}/links/${props.link.id}/results`" prefetch>
+            <Button variant="outline" size="sm">
+                <FileSearch class="mr-2" />
+                View Detection Results
+            </Button>
+            </Link>
 
             <Deferred data="submissions">
                 <template #fallback>

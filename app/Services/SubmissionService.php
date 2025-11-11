@@ -33,7 +33,7 @@ class SubmissionService
 
         do {
             $random = bin2hex(random_bytes(8));
-            $filename = "{$baseName}_{$activityTitle}_{$random}.{$extension}";
+            $filename = "{$baseName}_{$activityTitle}_" . now()->timestamp . "{$random}.{$extension}";
             $path = "submissions/{$filename}";
         } while (Storage::disk('public')->exists($path));
 
