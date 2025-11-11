@@ -6,6 +6,11 @@ use App\Models\Activity;
 use App\Models\ActivityLink;
 use App\Models\Detection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class DetectionService
@@ -61,5 +66,80 @@ class DetectionService
             'student_no' => $submission->student_no,
             'student_email' => $submission->student_email,
         ];
+    }
+
+    protected string $fastApiUrl;
+
+    public function __construct()
+    {
+        $this->fastApiUrl = config('services.fastapi.url', 'http://localhost:8001');
+    }
+
+    public function detectAndStore(string $activityLinkId, array $submissionsData, string $language): void
+    {
+        $submissions = $this->loadSubmissions($submissionsData);
+
+        if (empty($submissions)) {
+            Log::warning("No valid submissions for {$activityLinkId}");
+            return;
+        }
+
+        $response = Http::timeout(120)->post("{$this->fastApiUrl}/detect", [
+            'submissions' => $submissions,
+            'language' => $language,
+        ]);
+
+        if ($response->successful()) {
+            $this->storeDetections($activityLinkId, $response->json()['results'] ?? []);
+        } else {
+            Log::error("Detection API failed: {$response->body()}");
+            throw new \Exception("Detection API returned error: {$response->status()}");
+        }
+    }
+
+    private function loadSubmissions(array $submissionsData): array
+    {
+        return collect($submissionsData)
+            ->map(fn($s) => $this->loadContent($s))
+            ->filter()
+            ->values()
+            ->toArray();
+    }
+
+    private function loadContent(array $submission): ?array
+    {
+        if (!Storage::disk('public')->exists($submission['file_path'])) return null;
+
+        $size = Storage::disk('public')->size($submission['file_path']);
+        if ($size > 10 * 1024 * 1024) { // 10MB limit
+            Log::warning("File too large, skipping: {$submission['id']}");
+            return null;
+        }
+
+        return [
+            'id' => $submission['id'],
+            'file_content' => Storage::disk('public')->get($submission['file_path']),
+        ];
+    }
+
+    private function storeDetections(string $activityLinkId, array $results): void
+    {
+        if (empty($results)) return;
+
+        DB::transaction(function () use ($activityLinkId, $results) {
+            Detection::where('activity_link_id', $activityLinkId)->delete();
+
+            $data = collect($results)->map(fn($r) => [
+                'id' => (string) Str::uuid(),
+                'activity_link_id' => $activityLinkId,
+                'submission_a_id' => $r['submission_a_id'],
+                'submission_b_id' => $r['submission_b_id'],
+                'similarity_score' => $r['similarity_score'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
+
+            Detection::insert($data);
+        });
     }
 }
