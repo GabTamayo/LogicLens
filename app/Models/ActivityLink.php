@@ -20,10 +20,12 @@ class ActivityLink extends Model
         'name',
         'token',
         'is_open',
+        'expires_at',
     ];
 
     protected $casts = [
         'is_open' => 'boolean',
+        'expires_at' => 'datetime',
     ];
 
     public function activity(): BelongsTo
@@ -43,7 +45,7 @@ class ActivityLink extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_id', 'name', 'token', 'is_open');
+        return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at');
     }
 
     public function scopeWithSubmissions($query)
@@ -57,6 +59,14 @@ class ActivityLink extends Model
             foreach ($activityLink->submissions as $submission) {
                 if ($submission->file_path && Storage::disk('public')->exists($submission->file_path)) {
                     Storage::disk('public')->delete($submission->file_path);
+                }
+            }
+        });
+
+        static::retrieved(function ($activityLink) {
+            if ($activityLink->expires_at && now()->greaterThanOrEqualTo($activityLink->expires_at)) {
+                if ($activityLink->is_open) {
+                    $activityLink->update(['is_open' => false]);
                 }
             }
         });

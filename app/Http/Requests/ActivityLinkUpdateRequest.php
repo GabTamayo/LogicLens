@@ -23,7 +23,8 @@ class ActivityLinkUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_open' => ['required', 'boolean'],
+            'is_open'    => ['required', 'boolean'],
+            'expires_at' => ['nullable', 'date', 'after_or_equal:today'],
         ];
     }
 }

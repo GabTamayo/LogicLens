@@ -31,12 +31,12 @@ class Detection extends Model
 
     public function submissionA(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_a_id');
+        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email']);
     }
 
     public function submissionB(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_b_id');
+        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email']);
     }
 
     public function scopeForLink($query, $linkId)

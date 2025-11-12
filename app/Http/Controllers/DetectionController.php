@@ -29,7 +29,7 @@ class DetectionController extends Controller
             ->toArray();
 
         if (count($submissionsData) < 2) {
-            return back()->withErrors(['error' => 'Need at least 2 valid submissions to detect plagiarism.']);
+            return back()->withErrors(['error' => 'At least 2 submissions are required for detection.']);
         }
 
         $language = $activityLink->submissions->first()->language;
@@ -40,13 +40,16 @@ class DetectionController extends Controller
 
         DetectionJob::dispatch($linkId, $submissionsData, $language);
 
-        return redirect()
-            ->route('activities.links.show', ['activity' => $activity->id, 'link' => $linkId])
-            ->with('success', 'Plagiarism detection started! Refresh the page to see results.');
+        return redirect()->route('activities.links.show', ['activity' => $activity->id, 'link' => $linkId]);
     }
 
     public function index(Activity $activity, ActivityLink $link, Request $request, DetectionService $detectionService)
     {
+        $hasDetections = Detection::where('activity_link_id', $link->id)->exists();
+        if (!$hasDetections) {
+            abort(404);
+        }
+
         $data = $detectionService->getDetections($activity, $link, $request);
         return Inertia::render('Submissions/Show', $data);
     }

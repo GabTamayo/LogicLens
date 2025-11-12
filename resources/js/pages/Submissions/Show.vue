@@ -15,7 +15,8 @@ const props = defineProps<DetectionPageProps>()
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
-    { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
+    { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` },
+    { title: 'Results', href: `/activities/${props.activityId}/links/${props.link.id}/results` }
 ]
 
 const filters = useRemember({
@@ -59,7 +60,7 @@ const updateFilter = (column: string, value: string) => {
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
                 <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-                    Detection Results for {{ props.link.name }}
+                    Detection Summary
                 </h2>
                 <div class="flex items-center">
                     <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
@@ -76,15 +77,7 @@ const updateFilter = (column: string, value: string) => {
                         <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
                 </template>
-
-                <Alert v-if="props.detections.total === 0" class="mb-4">
-                    <AlertCircle class="h-4 w-4" />
-                    <AlertDescription>
-                        No plagiarism detections found. All submissions appear to be unique.
-                    </AlertDescription>
-                </Alert>
-
-                <DataTable v-else :columns="columns" :data="props.detections.data" :pagination="props.detections"
+                <DataTable :columns="columns" :data="props.detections.data" :pagination="props.detections"
                     :filter-config="[
                         { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
                         { column: 'student_name_b', placeholder: 'Filter by Student B Name' },

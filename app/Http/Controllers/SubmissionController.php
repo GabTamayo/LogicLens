@@ -18,6 +18,11 @@ class SubmissionController extends Controller
      */
     public function create($token, SubmissionService $service)
     {
+        $activityLink = ActivityLink::where('token', $token)->firstOrFail();
+        if (! $activityLink->is_open) {
+            abort(404);
+        }
+
         $data = $service->getSubmissionFormData($token);
         return Inertia::render('Submissions/Create', $data);
     }

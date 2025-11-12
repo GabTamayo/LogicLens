@@ -14,7 +14,7 @@ import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css';
 import { ref } from 'vue'
 
-const props = defineProps<Submission & { filters: Record<string, string> }>()
+const props = defineProps<Submission & { filters: Record<string, string>, hasDetections: boolean }>()
 const isDetecting = ref(false)
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -39,13 +39,17 @@ const handleDetectSubmission = () => {
             if (page.props.successMessage) {
                 toast.success(page.props.successMessage);
             } else {
-                toast.success('Detection successful!');
+                toast.success('Detection successful!', {
+                    description: 'You can view the result'
+                });
             }
             isDetecting.value = false;
         },
         onError: (errors) => {
             const errorMessage = Object.values(errors)[0] as string || 'Detection failed';
-            toast.error(errorMessage);
+            toast.error('Something went wrong!', {
+                description: errorMessage
+            });
             isDetecting.value = false;
         },
     });
@@ -94,14 +98,14 @@ const updateFilter = (column: string, value: string) => {
                     Submissions for {{ props.link.name }}
                 </h2>
                 <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
+                <Link v-if="props.hasDetections"
+                    :href="`/activities/${props.activityId}/links/${props.link.id}/results`" prefetch>
+                <Button variant="outline" size="sm" class="mt-4">
+                    <FileSearch class="mr-2" />
+                    View Detection Results
+                </Button>
+                </Link>
             </div>
-
-            <Link :href="`/activities/${props.activityId}/links/${props.link.id}/results`" prefetch>
-            <Button variant="outline" size="sm">
-                <FileSearch class="mr-2" />
-                View Detection Results
-            </Button>
-            </Link>
 
             <Deferred data="submissions">
                 <template #fallback>

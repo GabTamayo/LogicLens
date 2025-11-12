@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ActivityLink;
+use App\Models\Detection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,6 +16,7 @@ class ActivityLinkService
             'activityTitle' => $link->activity->title,
             'link' => $link,
             'filters' => $request->only(['student_name', 'student_no']),
+            'hasDetections' => Detection::where('activity_link_id', $link->id)->exists(),
             'submissions' => Inertia::defer(function () use ($link, $request) {
                 $submissions = $link->submissions()
                     ->selectedAttributes()

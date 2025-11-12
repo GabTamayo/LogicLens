@@ -105,7 +105,7 @@ onMounted(() => {
                 :model-value="filterValues?.[filter.column] || ''"
                 @update:model-value="handleFilterInput(filter.column, $event)" />
             <ButtonGroup v-if="showDetectButton">
-                <Button variant="secondary" class="w-full" :disabled="isDetecting" @click="$emit('detect-submission')">
+                <Button class="w-full" :disabled="isDetecting" @click="$emit('detect-submission')">
                     <LoaderCircle v-if="isDetecting" class="animate-spin" />
                     <FileScan v-else />
                     {{ isDetecting ? 'Detecting...' : 'Detect Submission' }}
@@ -113,7 +113,7 @@ onMounted(() => {
                 <ButtonGroupSeparator />
                 <DropdownMenu>
                     <DropdownMenuTrigger as-child>
-                        <Button variant="secondary" size="icon">
+                        <Button size="icon">
                             <EllipsisVertical />
                         </Button>
                     </DropdownMenuTrigger>
@@ -131,8 +131,9 @@ onMounted(() => {
 
             <DropdownMenu v-else>
                 <DropdownMenuTrigger as-child>
-                    <Button variant="secondary" size="icon">
-                        <EllipsisVertical />
+                    <Button variant="outline" class="mr-auto">
+                        <span class="lg:hidden">Columns</span>
+                        <EllipsisVertical class="ml-2 sm:ml-0 h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-61">
