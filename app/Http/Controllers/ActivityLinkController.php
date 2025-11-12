@@ -15,7 +15,8 @@ class ActivityLinkController extends Controller
 {
     public function store(ActivityLinkRequest $request, Activity $activity, GenerateActivityLink $generateActivityLink)
     {
-        $generateActivityLink->execute($activity, $request->validated('name'));
+        $data = $request->validated();
+        $generateActivityLink->execute($activity, $data['name'], $data['expires_at'] ?? null);
         return redirect()->route('activities.show', $activity);
     }
 

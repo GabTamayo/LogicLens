@@ -24,7 +24,15 @@ class ActivityLinkRequest extends FormRequest
     {
         return [
             'name'       => ['required', 'string', 'max:100'],
-            'expires_at' => ['nullable', 'date', 'after_or_equal:today'],
+            'expires_at' => ['nullable', 'date', 'after_or_equal:now'],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'expires_at.date' => 'The expiration date must be a valid date.',
+            'expires_at.after_or_equal' => 'The expiration date cannot be earlier than today.',
         ];
     }
 }

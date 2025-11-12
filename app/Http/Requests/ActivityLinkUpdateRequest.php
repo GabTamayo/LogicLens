@@ -27,4 +27,40 @@ class ActivityLinkUpdateRequest extends FormRequest
             'expires_at' => ['nullable', 'date', 'after_or_equal:today'],
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            // Get the link from the route
+            $linkId = $this->route('link') ?? $this->route()->parameter('link');
+            $activity = $this->route('activity');
+
+            if ($activity && $linkId) {
+                $link = $activity->activityLinks()->find($linkId);
+
+                // Warn if trying to open a link with a past expiration date
+                // without updating the expiration date
+                if (
+                    $link &&
+                    $this->input('is_open') === true &&
+                    $link->expires_at &&
+                    $link->expires_at->isPast() &&
+                    (!$this->has('expires_at') || $this->input('expires_at') === $link->expires_at->format('Y-m-d'))
+                ) {
+                    $validator->errors()->add(
+                        'expires_at',
+                        'This link has an expired date. Please update the expiration date to a future date or remove it to keep the link open.'
+                    );
+                }
+            }
+        });
+    }
+
+    public function messages()
+    {
+        return [
+            'expires_at.date' => 'The expiration date must be a valid date.',
+            'expires_at.after_or_equal' => 'The expiration date cannot be earlier than today.',
+        ];
+    }
 }

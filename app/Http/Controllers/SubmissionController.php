@@ -20,7 +20,7 @@ class SubmissionController extends Controller
     {
         $activityLink = ActivityLink::where('token', $token)->firstOrFail();
         if (! $activityLink->is_open) {
-            abort(404);
+            abort(403);
         }
 
         $data = $service->getSubmissionFormData($token);

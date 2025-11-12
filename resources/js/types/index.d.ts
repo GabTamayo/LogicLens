@@ -73,6 +73,7 @@ export interface ActivityLink {
     name: string
     token: string
     is_open: boolean
+    expires_at: string | null
 }
 
 export interface SubmissionPageProps {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasUuid;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +28,14 @@ class ActivityLink extends Model
         'is_open' => 'boolean',
         'expires_at' => 'datetime',
     ];
+
+    /**
+     * Prepare a date for array / JSON serialization.
+     */
+    protected function serializeDate(\DateTimeInterface $date): string
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 
     public function activity(): BelongsTo
     {
@@ -53,20 +62,29 @@ class ActivityLink extends Model
         return $query->with(['submissions' => fn($q) => $q->latest()]);
     }
 
+    public function scopeExpired($query)
+    {
+        return $query->whereNotNull('expires_at')->where('expires_at', '<=', now());
+    }
+
+    public function setExpiresAtAttribute($value)
+    {
+        $this->attributes['expires_at'] = $value
+            ? Carbon::parse($value)->timezone('Asia/Manila')
+            : null;
+    }
+
+    public function getExpiresAtAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->timezone('Asia/Manila') : null;
+    }
+
     protected static function booted()
     {
         static::deleting(function ($activityLink) {
             foreach ($activityLink->submissions as $submission) {
                 if ($submission->file_path && Storage::disk('public')->exists($submission->file_path)) {
                     Storage::disk('public')->delete($submission->file_path);
-                }
-            }
-        });
-
-        static::retrieved(function ($activityLink) {
-            if ($activityLink->expires_at && now()->greaterThanOrEqualTo($activityLink->expires_at)) {
-                if ($activityLink->is_open) {
-                    $activityLink->update(['is_open' => false]);
                 }
             }
         });

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Activity;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,11 +18,41 @@ class ActivityLinkFactory extends Factory
     public function definition(): array
     {
         return [
-            'activity_id' => 'ba28ef80-a0a8-4196-b54a-847e5e249837',
-            'token' => fake()->unique()->uuid(),
-            'name' => fake()->word(),
+            'activity_id' => Activity::factory(), // Creates a real activity
+            'token' => bin2hex(random_bytes(16)), // Matches your GenerateActivityLink format
+            'name' => fake()->words(3, true), // e.g., "submission link one"
             'is_open' => true,
             'expires_at' => null,
         ];
+    }
+
+    /**
+     * Create an expired activity link
+     */
+    public function expired(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'expires_at' => now()->subDay(),
+        ]);
+    }
+
+    /**
+     * Create an activity link with future expiration
+     */
+    public function withExpiration(int $days = 7): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'expires_at' => now()->addDays($days),
+        ]);
+    }
+
+    /**
+     * Create a closed activity link
+     */
+    public function closed(): static
+    {
+        return $this->state(fn(array $attributes) => [
+            'is_open' => false,
+        ]);
     }
 }

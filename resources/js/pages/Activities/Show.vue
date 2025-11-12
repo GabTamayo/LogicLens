@@ -1,30 +1,26 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
+import { ActivityDetail, type BreadcrumbItem } from '@/types';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
 import { Head, useForm, Link, router, Deferred } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
-import InputError from '@/components/InputError.vue';
-import { Circle, Copy } from 'lucide-vue-next';
+import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
+import DateTimePicker from '@/components/DateTimePicker.vue';
+import { formatDistanceToNow, parseISO } from 'date-fns'
 
-// Props are now flat, not nested under 'activity'
-const props = defineProps<{
-    id: string
-    title: string
-    appUrl: string
-    links: any // This will be deferred
-}>()
+const props = defineProps<ActivityDetail>()
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
@@ -33,39 +29,45 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
     name: '',
+    expires_at: null,
 });
 
 const submit = () => {
+    const formatToServerDateTime = (date: Date): string => {
+        return date.toISOString(); // '2025-11-12T12:00:00.000Z'
+    };
+
     form.post(`/activities/${props.id}/links`, {
+        data: {
+            name: form.name,
+            expires_at: form.expires_at ? formatToServerDateTime(form.expires_at as Date) : null
+        },
         onSuccess: () => {
-            form.reset('name');
+            form.reset('name', 'expires_at');
             toast.success('Submission link generated', {
                 description: 'You can now use the link for student submissions.',
             });
         },
         onError: () => {
-            toast.error('Failed to generate link. Please try again.');
+            toast.error('Failed to generate link.', {
+                description: form.errors.name || form.errors.expires_at,
+            });
         },
     })
 }
 
-const statusForm = useForm({ is_open: false });
+const updateStatus = (id: string, name: string, value: boolean) => {
+    // Create a unique form instance for each update to avoid callback conflicts
+    const linkStatusForm = useForm({ is_open: value });
 
-const updateStatus = async (id: string, name: string, value: boolean) => {
-    statusForm.is_open = value
-    try {
-        await statusForm.patch(`/activities/${props.id}/links/${id}`, {
-            preserveState: true,
-            only: ['links']
-        })
-        toast.info('Link status updated', {
-            description: `The submission link for ${name} is now ${value ? 'open' : 'closed'}.`,
-        })
-    } catch (error) {
-        toast.error('Failed to update link status', {
-            description: 'Please try again later.',
-        })
-    }
+    linkStatusForm.patch(`/activities/${props.id}/links/${id}`, {
+        onError: () => {
+            const errorMessage = (linkStatusForm.errors as any).expires_at || 'Failed to update link status. Please try again.';
+            toast.error('Cannot update link status', {
+                description: errorMessage,
+            })
+        }
+    })
 }
 
 const handlePageChange = (page: number) => {
@@ -76,6 +78,28 @@ const handlePageChange = (page: number) => {
             only: ['links']
         }
     )
+}
+
+function formatRelativeDeadline(expires_at: string | null) {
+    if (!expires_at) return 'No deadline'
+    const date = parseISO(expires_at)
+    const now = new Date()
+
+    const distance = formatDistanceToNow(date, { addSuffix: true })
+    return distance
+}
+
+function formatExpiresAt(expires_at: string | null) {
+    if (!expires_at) return '';
+    const date = new Date(expires_at);
+    return new Intl.DateTimeFormat('en-GB', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false, // military time
+    }).format(date);
 }
 
 function copy(id: string) {
@@ -100,20 +124,32 @@ function copy(id: string) {
                 <p class="text-sm text-muted-foreground">
                     A submission link allows you to store student submissions for later detection.
                 </p>
-                <Form @submit="submit" class="space-y-6 flex items-center justify-center space-x-12 m-6">
-                    <Button type="submit" :disabled="form.processing">Generate</Button>
-                    <FormField name="name">
+                <Form @submit="submit"
+                    class="space-y-6 flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-12 m-6">
+                    <Button type="submit" :disabled="form.processing" class="hidden lg:block">Generate</Button>
+                    <FormField name="activity">
                         <FormItem class="w-full">
                             <FormLabel>Link Submission Name</FormLabel>
                             <FormControl>
-                                <Input type="text" v-model="form.name" />
+                                <Input type="text" v-model="form.name" :message="form.errors.name" />
                             </FormControl>
                             <FormDescription>
                                 Enter your desired submission link submission name.
                             </FormDescription>
-                            <InputError :message="form.errors.name" />
                         </FormItem>
+                        <FormField name="expires_at">
+                            <FormItem class="w-full">
+                                <FormLabel>Optional (Deadline)</FormLabel>
+                                <FormControl>
+                                    <DateTimePicker v-model="form.expires_at" />
+                                </FormControl>
+                                <FormDescription>
+                                    Select the date and time for the deadline.
+                                </FormDescription>
+                            </FormItem>
+                        </FormField>
                     </FormField>
+                    <Button type="submit" :disabled="form.processing" class="block lg:hidden">Generate</Button>
                 </Form>
             </div>
 
@@ -133,9 +169,9 @@ function copy(id: string) {
                     <Table class="mt-4">
                         <TableHeader>
                             <TableRow>
-                                <TableHead class="w-[200px]">Name</TableHead>
+                                <TableHead>Name</TableHead>
                                 <TableHead>Status</TableHead>
-                                <TableHead class="text-center">Link</TableHead>
+                                <TableHead>Link</TableHead>
                                 <TableHead></TableHead>
                             </TableRow>
                         </TableHeader>
@@ -153,21 +189,53 @@ function copy(id: string) {
                                             </Badge>
                                             <Switch class="ml-4" v-model="link.is_open"
                                                 @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                            <span class="ms-2 text-2xs lg:text-xs text-muted-foreground font-light">
+                                                <div>
+                                                    {{ formatExpiresAt(link.expires_at) }}
+                                                </div>
+                                                <div class="hidden lg:block">
+                                                    ({{ formatRelativeDeadline(link.expires_at) }})
+                                                </div>
+                                            </span>
                                         </div>
                                     </TableCell>
-                                    <TableCell
-                                        class="text-center font-mono max-w-xs overflow-hidden whitespace-nowrap truncate">
-                                        {{ appUrl }}/submit{{ link.token }}
-                                        <Button variant="outline" size="icon"
-                                            @click="copy(`${appUrl}/submit${link.token}`)">
-                                            <Copy class="w-2 h-2" />
-                                        </Button>
+                                    <TableCell>
+                                        <div
+                                            class="flex items-center space-x-2 font-mono max-w-xs md:max-w-full truncate">
+                                            <span class="truncate">{{ appUrl }}/submit{{ link.token }}</span>
+                                            <Button variant="outline" size="icon"
+                                                @click="copy(`${appUrl}/submit${link.token}`)">
+                                                <Copy class="w-4 h-4" />
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'
-                                            class="text-gray-600 hover:underline text-sm">
-                                        View Submissions
-                                        </Link>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger as-child>
+                                                <Button variant="ghost" size="icon" class="w-8 h-8 p-0 cursor-pointer">
+                                                    <span class="sr-only">Open menu</span>
+                                                    <MoreHorizontal class="w-4 h-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'>
+                                                <DropdownMenuItem>
+                                                    <Eye class="w-4 h-4 mr-1" />
+                                                    View Submissions
+                                                </DropdownMenuItem>
+                                                </Link>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem>
+                                                    <Delete class="w-4 h-4 mr-2" />
+                                                    Remove Deadline
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem>
+                                                    <CalendarCog class="w-4 h-4 mr-2" />
+                                                    Set Deadline
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             </template>

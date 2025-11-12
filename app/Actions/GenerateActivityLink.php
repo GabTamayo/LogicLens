@@ -7,7 +7,7 @@ use App\Models\ActivityLink;
 
 class GenerateActivityLink
 {
-    public function execute(Activity $activity, string $name): ActivityLink
+    public function execute(Activity $activity, string $name, ?string $expiresAt = null): ActivityLink
     {
         do {
             $token = bin2hex(random_bytes(16));
@@ -17,6 +17,7 @@ class GenerateActivityLink
             'name'   => $name,
             'token'  => $token,
             'is_open' => true,
+            'expires_at' => $expiresAt,
         ]);
     }
 }
