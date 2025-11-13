@@ -12,19 +12,15 @@ import type { DateValue } from '@internationalized/date'
 const props = defineProps<{
     modelValue: Date | null
 }>()
-
 const emit = defineEmits<{
     (e: 'update:modelValue', value: Date | null): void
 }>()
-
 const open = ref(false)
 const calendarValue = ref<DateValue | null>(null)
 const selectedDateTime = ref<Date | null>(props.modelValue)
-
 watch(() => props.modelValue, (newValue) => {
     selectedDateTime.value = newValue
 })
-
 const resetDateTime = () => {
     selectedDateTime.value = null
     calendarValue.value = null
@@ -43,7 +39,6 @@ const updateCalendarValue = (value: DateValue) => {
     emit('update:modelValue', newDate)
     calendarValue.value = value
 }
-
 function handleTimeChange(type: 'hour' | 'minute', value: number) {
     const currentDate = selectedDateTime.value || new Date()
     const newDate = new Date(currentDate)
@@ -51,7 +46,6 @@ function handleTimeChange(type: 'hour' | 'minute', value: number) {
     selectedDateTime.value = newDate
     emit('update:modelValue', newDate)
 }
-
 const hours = Array.from({ length: 24 }, (_, i) => i)
 const minutes = Array.from({ length: 12 }, (_, i) => i * 5)
 </script>
@@ -71,7 +65,6 @@ const minutes = Array.from({ length: 12 }, (_, i) => i * 5)
                 <Calendar v-model="calendarValue" @update:modelValue="updateCalendarValue" initial-focus />
 
                 <div class="flex flex-col sm:flex-row sm:h-[300px] divide-y sm:divide-y-0 sm:divide-x">
-                    <!-- Hours -->
                     <ScrollArea class="w-64 sm:w-auto">
                         <div class="flex sm:flex-col p-2">
                             <Button v-for="hour in hours" :key="hour" size="icon"

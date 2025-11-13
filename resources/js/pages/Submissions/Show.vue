@@ -16,7 +16,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
     { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` },
-    { title: 'Results', href: `/activities/${props.activityId}/links/${props.link.id}/results` }
 ]
 
 const filters = useRemember({

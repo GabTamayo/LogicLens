@@ -49,7 +49,7 @@ class ActivityLinkUpdateRequest extends FormRequest
                 ) {
                     $validator->errors()->add(
                         'expires_at',
-                        'This link has an expired date. Please update the expiration date to a future date or remove it to keep the link open.'
+                        'This link has reached the deadline. Please update the deadline to a future date or remove it.'
                     );
                 }
             }

@@ -26,7 +26,7 @@ const getSimilarityBadge = (score: number) => {
         return h(Badge, { variant: 'destructive' }, () => 'Very High')
     }
     if (score >= 0.85) {
-        return h(Badge, { variant: 'default' }, () => 'High')
+        return h(Badge, { variant: 'customYellow' }, () => 'High')
     }
     if (score >= 0.8) {
         return h(Badge, { variant: 'secondary' }, () => 'Medium')

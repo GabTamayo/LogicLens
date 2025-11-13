@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { MoreHorizontal } from 'lucide-vue-next'
+import { MoreHorizontal, Code, Copy, Download } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { toast } from 'vue-sonner';
@@ -76,14 +76,17 @@ function download(submission: SubmissionRow) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem @click="copy(submission.student_no)">
-                Copy Student No.
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem @click="$emit('expand')">
+                <Code class="w-4 h-4 mr-2" />
                 View Code
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem @click="copy(submission.student_no)">
+                <Copy class="w-4 h-4 mr-2" />
+                Copy Student No.
+            </DropdownMenuItem>
             <DropdownMenuItem @click="download(submission)">
+                <Download class="w-4 h-4 mr-2" />
                 Download File
             </DropdownMenuItem>
         </DropdownMenuContent>

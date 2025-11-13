@@ -100,12 +100,12 @@ onMounted(() => {
 <template>
     <div class="space-y-4">
         <div v-if="filterConfigs.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-2 py-2">
-            <Input v-for="(filter, index) in filterConfigs" :key="index" class="max-w-sm"
+            <Input v-for="(filter, index) in filterConfigs" :key="index" class="max-w-xs"
                 :placeholder="filter.placeholder || `Filter ${filter.column}...`"
                 :model-value="filterValues?.[filter.column] || ''"
                 @update:model-value="handleFilterInput(filter.column, $event)" />
             <ButtonGroup v-if="showDetectButton">
-                <Button class="w-full" :disabled="isDetecting" @click="$emit('detect-submission')">
+                <Button :disabled="isDetecting" @click="$emit('detect-submission')">
                     <LoaderCircle v-if="isDetecting" class="animate-spin" />
                     <FileScan v-else />
                     {{ isDetecting ? 'Detecting...' : 'Detect Submission' }}

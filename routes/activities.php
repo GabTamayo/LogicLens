@@ -19,6 +19,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('activities/{activity}/links/{link}', [ActivityLinkController::class, 'update'])->name('activities.links.update');
     Route::get('activities/{activity}/links/{link}', [ActivityLinkController::class, 'show'])->name('activities.links.show');
     Route::delete('activities/{activity}/links/{link}', [ActivityLinkController::class, 'destroy'])->name('submissions.destroy')->middleware('password.confirm');
+    Route::delete('/activities/{activity}/links/{link}/deadline', [ActivityLinkController::class, 'removeDeadline'])->name('activities.links.deadline.destroy');
 
     // Detection routes
     Route::post('activities/{activity}/links/{link}/detect', [DetectionController::class, 'store'])->name('detections.detect');

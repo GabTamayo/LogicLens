@@ -17,7 +17,9 @@ export const badgeVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         python:
-          "border-transparent bg-purple-500 dark:bg-purple-900 text-white [a&]:hover:bg-purple/90"
+          "border-transparent bg-purple-500 dark:bg-purple-900 text-white [a&]:hover:bg-purple/90",
+        customYellow:
+          "border-transparent bg-yellow-500 dark:bg-yellow-900 text-white [a&]:hover:bg-yellow/90",
       },
     },
     defaultVariants: {

@@ -40,4 +40,11 @@ class ActivityLinkController extends Controller
         $link->delete();
         return redirect()->route('activities.show', $activity);
     }
+
+    public function removeDeadline(Activity $activity, $linkId)
+    {
+        $link = $activity->activityLinks()->findOrFail($linkId);
+        $link->update(['expires_at' => null]);
+        return redirect()->route('activities.show', $activity);
+    }
 }
