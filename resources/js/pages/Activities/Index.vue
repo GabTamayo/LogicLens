@@ -59,7 +59,7 @@ const handlePageChange = (pageNumber: number) => {
                                                 <span>{{ activity.closed_links_count }} Closed</span>
                                             </Badge>
                                             <Badge
-                                                :variant="activity.language_text === 'Java' ? 'destructive' : activity.language_text === 'Python' ? 'python' : 'default'"
+                                                :variant="activity.language_text === 'Java' ? 'destructive' : activity.language_text === 'Python' ? 'customYellow' : 'default'"
                                                 class="inline-flex items-center">
                                                 <span>{{ activity.language_text }}</span>
                                             </Badge>

@@ -24,7 +24,7 @@ class ActivityLinkUpdateRequest extends FormRequest
     {
         return [
             'is_open'    => ['required', 'boolean'],
-            'expires_at' => ['nullable', 'date', 'after_or_equal:today'],
+            'expires_at' => ['nullable', 'date', 'after_or_equal:now'],
         ];
     }
 

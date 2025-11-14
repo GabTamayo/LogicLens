@@ -6,7 +6,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Rows3, Archive } from 'lucide-vue-next';
+import { LayoutGrid, SquarePen, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -18,14 +18,12 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Activities',
         href: '/activities',
-        icon: Rows3,
-        items: [
-            {
-                title: 'Archive',
-                href: '#',
-                icon: Archive,
-            },
-        ],
+        icon: SquarePen,
+    },
+    {
+        title: 'Sections',
+        href: '#',
+        icon: Users
     },
 ];
 
