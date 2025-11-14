@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ProgrammingLanguage;
 use App\Jobs\DetectionJob;
 use App\Models\Activity;
 use App\Models\ActivityLink;
@@ -33,10 +32,6 @@ class DetectionController extends Controller
         }
 
         $language = $activityLink->submissions->first()->language;
-
-        if (!in_array($language, ProgrammingLanguage::getValues())) {
-            return back()->withErrors(['error' => "Unsupported language: {$language}"]);
-        }
 
         DetectionJob::dispatch($linkId, $submissionsData, $language);
 

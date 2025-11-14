@@ -7,8 +7,6 @@ import DataTable from '@/components/DataTable.vue'
 import { columns } from '@/components/detections/columns'
 import { useDebounceFn } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from 'lucide-vue-next'
 
 const props = defineProps<DetectionPageProps>()
 
