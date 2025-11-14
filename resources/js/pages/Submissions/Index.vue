@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Deferred } from '@inertiajs/vue3'
+import { Deferred, usePoll } from '@inertiajs/vue3'
 import { Head, router, useRemember, Link } from '@inertiajs/vue3'
 import { Button } from '@/components/ui/button'
 import { type BreadcrumbItem, Submission } from '@/types'
@@ -80,6 +80,14 @@ const updateFilter = (column: string, value: string) => {
     filters.value[column] = value
     handleFilterChange()
 }
+
+const isInitialLoadDone = ref(false)
+
+usePoll(20000, {
+    only: ['submissions'],
+    preserveState: true,
+    preserveScroll: true,
+})
 </script>
 
 <template>
@@ -107,9 +115,9 @@ const updateFilter = (column: string, value: string) => {
                 </Link>
             </div>
 
-            <Deferred data="submissions">
+            <Deferred data="submissions" @resolve="isInitialLoadDone = true">
                 <template #fallback>
-                    <div class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                    <div v-if="!isInitialLoadDone" class="flex items-center justify-center gap-2 h-64 border rounded-md">
                         <span class="text-muted-foreground">Loading submissions</span>
                         <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>

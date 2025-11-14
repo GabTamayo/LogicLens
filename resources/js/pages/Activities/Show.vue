@@ -12,7 +12,7 @@ import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
 import { ref } from "vue"
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link, router, Deferred } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog } from 'lucide-vue-next';
@@ -149,6 +149,15 @@ const handleSaveDeadline = (payload: { linkId: string, date: Date }) => {
         }
     })
 }
+
+const isInitialLoadDone = ref(false)
+
+usePoll(60000, {
+    only: ['links'],
+    preserveState: true,
+    preserveScroll: true,
+})
+
 </script>
 
 <template>
@@ -200,12 +209,9 @@ const handleSaveDeadline = (payload: { linkId: string, date: Date }) => {
 
             <div>
                 <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Manage Link Submission</h4>
-                <p class="text-sm text-muted-foreground">
-                    You may need a cross detection or delete any of your existing submission links.
-                </p>
-                <Deferred data="links">
+                <Deferred data="links" @resolve="isInitialLoadDone = true">
                     <template #fallback>
-                        <div class="mt-8 space-y-1">
+                        <div v-if="!isInitialLoadDone" class="mt-8 space-y-1">
                             <Skeleton v-for="i in 8" :key="i" class="h-15 w-full rounded-xl" />
                         </div>
                     </template>
