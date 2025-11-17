@@ -82,12 +82,6 @@ const updateFilter = (column: string, value: string) => {
 }
 
 const isInitialLoadDone = ref(false)
-
-usePoll(20000, {
-    only: ['submissions'],
-    preserveState: true,
-    preserveScroll: true,
-})
 </script>
 
 <template>

@@ -22,13 +22,13 @@ export interface DetectionRow {
 }
 
 const getSimilarityBadge = (score: number) => {
-    if (score >= 0.9) {
+    if (score >= 0.90) {
         return h(Badge, { variant: 'destructive' }, () => 'Very High')
     }
     if (score >= 0.85) {
         return h(Badge, { variant: 'customYellow' }, () => 'High')
     }
-    if (score >= 0.8) {
+    if (score >= 0.80) {
         return h(Badge, { variant: 'secondary' }, () => 'Medium')
     }
     return h(Badge, { variant: 'outline' }, () => 'Low')

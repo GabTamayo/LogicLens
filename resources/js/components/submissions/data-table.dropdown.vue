@@ -22,22 +22,13 @@ function download(submission: SubmissionRow) {
         return;
     }
 
-    const originalName = submission.file_path
-        .split('/')
-        .pop() || 'file.txt';
+    const originalName = submission.file_path.split('/').pop() || 'file.txt';
 
-    const baseNameMatch = originalName.match(/^(.*?)_/);
-    let baseName = baseNameMatch ? baseNameMatch[1] : originalName.replace(/\.txt$/, '');
+    const baseName = originalName.replace(/\.[^/.]+$/, "");
 
     const extensionMap: Record<string, string> = {
         java: 'java',
         python: 'py',
-        php: 'php',
-        cpp: 'cpp',
-        c: 'c',
-        javascript: 'js',
-        typescript: 'ts',
-        plaintext: 'txt',
     };
     const extension = extensionMap[submission.language?.toLowerCase()] || 'txt';
 
@@ -46,12 +37,6 @@ function download(submission: SubmissionRow) {
     const mimeTypes: Record<string, string> = {
         java: 'text/x-java-source',
         py: 'text/x-python',
-        php: 'application/x-httpd-php',
-        js: 'application/javascript',
-        ts: 'application/typescript',
-        cpp: 'text/x-c++src',
-        c: 'text/x-csrc',
-        txt: 'text/plain',
     };
     const mimeType = mimeTypes[extension] || 'text/plain';
     const blob = new Blob([submission.file_content], { type: mimeType });

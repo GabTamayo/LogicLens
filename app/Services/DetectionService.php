@@ -72,7 +72,7 @@ class DetectionService
 
     public function __construct()
     {
-        $this->fastApiUrl = config('services.fastapi.url', 'http://localhost:8001');
+        $this->fastApiUrl = config('services.plagiarism_detector.url');
     }
 
     public function detectAndStore(string $activityLinkId, array $submissionsData, string $language): void

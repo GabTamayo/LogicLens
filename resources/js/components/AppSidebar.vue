@@ -20,11 +20,6 @@ const mainNavItems: NavItem[] = [
         href: '/activities',
         icon: SquarePen,
     },
-    {
-        title: 'Sections',
-        href: '#',
-        icon: Users
-    },
 ];
 
 const footerNavItems: NavItem[] = [];
