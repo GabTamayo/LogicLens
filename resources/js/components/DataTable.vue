@@ -16,6 +16,7 @@ import debounce from 'lodash/debounce'
 import Prism from 'prismjs'
 import 'prismjs/themes/prism-tomorrow.css'
 import 'prismjs/components/prism-java'
+import 'prismjs/components/prism-python'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 
@@ -71,13 +72,21 @@ const handleFilterInput = debounce((column: string, value: string) => {
             : value
     emit('filter-change', column, formattedValue)
 }, 1000)
-const getLanguageFromExtension = (extension?: string): string => {
-    if (!extension) return 'plaintext'
+const getLanguageFromExtension = (input?: string): string => {
+    if (!input) return 'plaintext'
+
+    // If input is a filename like 'Main.py' or path, extract extension
+    const token = input.includes('.') ? input.split('.').pop() || input : input
+    const ext = token.toLowerCase()
 
     const languageMap: Record<string, string> = {
-        txt: 'java'
+        txt: 'java',
+        java: 'java',
+        py: 'python',
+        python: 'python',
     }
-    return languageMap[extension.toLowerCase()] || 'plaintext'
+
+    return languageMap[ext] || (ext || 'plaintext')
 }
 
 watch(expanded, () => {
@@ -168,7 +177,7 @@ onMounted(() => {
                             <TableRow v-if="row.getIsExpanded()">
                                 <TableCell :colspan="row.getAllCells().length">
                                     <div class="max-h-200 overflow-auto">
-                                        <pre class="line-numbers !m-0 !rounded-none"><code :class="`language-${getLanguageFromExtension(row.original.file_extension)}`">{{ row.original.file_content }}
+                                        <pre class="line-numbers"><code :class="`language-${getLanguageFromExtension(row.original.language)}`">{{ row.original.file_content }}
                                             </code>
                                         </pre>
                                     </div>

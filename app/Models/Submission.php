@@ -51,7 +51,6 @@ class Submission extends Model
     {
         if ($this->file_path && Storage::disk('public')->exists($this->file_path)) {
             $this->file_content = Storage::disk('public')->get($this->file_path);
-            $this->file_extension = pathinfo($this->file_path, PATHINFO_EXTENSION);
         }
         return $this;
     }

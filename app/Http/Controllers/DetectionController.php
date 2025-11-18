@@ -17,54 +17,37 @@ class DetectionController extends Controller
      * Display a listing of the resource.
      */
 
-    public function store(Activity $activity, $linkId)
+    public function store(Activity $activity, $linkId, DetectionService $service)
     {
-        $activityLink = ActivityLink::with('submissions')->findOrFail($linkId);
+        [$valid, $error, $payload] = $service->validateForDetection($activity, $linkId);
 
-        $submissionsData = $activityLink->submissions
-            ->filter(fn($s) => $s->file_path && Storage::disk('public')->exists($s->file_path))
-            ->map(fn($s) => ['id' => $s->id, 'file_path' => $s->file_path])
-            ->values()
-            ->toArray();
-
-        if (count($submissionsData) < 2) {
-            return back()->withErrors(['error' => 'At least 2 submissions are required for detection.']);
+        if (! $valid) {
+            return back()->withErrors(['error' => $error]);
         }
 
-        $language = $activityLink->submissions->first()->language;
+        DetectionJob::dispatch(
+            $linkId,
+            $payload['submissions'],
+            $payload['language']
+        );
 
-        DetectionJob::dispatch($linkId, $submissionsData, $language);
-
-        return redirect()->route('activities.links.show', ['activity' => $activity->id, 'link' => $linkId]);
+        return redirect()->route('activities.links.show', [
+            'activity' => $activity->id,
+            'link' => $linkId,
+        ]);
     }
 
-    public function index(Activity $activity, ActivityLink $link, Request $request, DetectionService $detectionService)
+    public function index(Activity $activity, ActivityLink $link, Request $request, DetectionService $service)
     {
-        $hasDetections = Detection::where('activity_link_id', $link->id)->exists();
-        if (!$hasDetections) {
+        if (! $service->hasDetections($link)) {
             abort(404);
         }
 
-        $data = $detectionService->getDetections($activity, $link, $request);
-        return Inertia::render('Submissions/Show', $data);
+        return Inertia::render('Submissions/Show', $service->getDetections($activity, $link, $request));
     }
 
-    public function show(Detection $detection)
+    public function show(Detection $detection, DetectionService $service)
     {
-        $detection->load(['submissionA', 'submissionB']);
-
-        $fileA = Storage::disk('public')->exists($detection->submissionA->file_path)
-            ? Storage::disk('public')->get($detection->submissionA->file_path)
-            : null;
-
-        $fileB = Storage::disk('public')->exists($detection->submissionB->file_path)
-            ? Storage::disk('public')->get($detection->submissionB->file_path)
-            : null;
-
-        return Inertia::modal('Detections/Show', [
-            'detection' => $detection,
-            'fileA' => $fileA,
-            'fileB' => $fileB,
-        ]);
+        return Inertia::modal('Detections/Show', $service->getDetectionDetail($detection));
     }
 }

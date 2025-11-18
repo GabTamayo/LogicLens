@@ -19,7 +19,6 @@ export interface PaginationData {
     last_page: number
 }
 
-
 export interface NavItem {
     title: string;
     href: NonNullable<InertiaLinkProps['href']>;
@@ -68,6 +67,7 @@ export interface ActivityDetail {
         data: ActivityLink[]
     } & PaginationData
 }
+
 export interface ActivityLink {
     id: number
     name: string
@@ -97,11 +97,9 @@ export type Submission = {
         created_at: string,
         file_content?: string
         file_extension?: string
+        language: string
     }>
 }
-
-// Add these to your existing types.ts file
-
 export interface DetectionRow {
     id: string
     submission_a: {
@@ -132,7 +130,6 @@ export interface DetectionPageProps {
     filters: Record<string, string>
 }
 
-// Props for the "Detection Comparison" modal/page
 export interface DetectionShowProps {
     detection: {
         id: string
@@ -156,6 +153,7 @@ export interface DetectionShowProps {
             student_no: string
             student_email: string
             file_path: string
+            language: string
         }
     }
     fileA: string

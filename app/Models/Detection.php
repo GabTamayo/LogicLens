@@ -32,12 +32,12 @@ class Detection extends Model
 
     public function submissionA(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path']);
+        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path', 'language']);
     }
 
     public function submissionB(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path']);
+        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path', 'language']);
     }
 
     public function getFileContentA()

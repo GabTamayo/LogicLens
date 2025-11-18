@@ -15,6 +15,39 @@ use Inertia\Inertia;
 
 class DetectionService
 {
+    public function validateForDetection(Activity $activity, $linkId): array
+    {
+        $link = ActivityLink::with('submissions')->findOrFail($linkId);
+
+        $submissions = $link->submissions->filter(
+            fn($s) =>
+            $s->file_path && Storage::disk('public')->exists($s->file_path)
+        );
+
+        if ($submissions->count() < 2) {
+            return [false, "At least 2 submissions are required for detection.", null];
+        }
+
+        if (! $submissions->every(fn($s) => $s->language === $activity->language)) {
+            return [false, "One or more submissions use a different programming language than {$activity->language}.", null];
+        }
+
+        $payload = [
+            'submissions' => $submissions
+                ->map(fn($s) => ['id' => $s->id, 'file_path' => $s->file_path, 'language' => $s->language])
+                ->values()
+                ->toArray(),
+            'language' => $activity->language,
+        ];
+
+        return [true, null, $payload];
+    }
+
+    public function hasDetections(ActivityLink $link): bool
+    {
+        return Detection::where('activity_link_id', $link->id)->exists();
+    }
+
     public function getDetections(Activity $activity, ActivityLink $link, Request $request): array
     {
         $filters = $request->only(['student_name_a', 'student_name_b', 'min_score']);
@@ -66,6 +99,24 @@ class DetectionService
             'student_no' => $submission->student_no,
             'student_email' => $submission->student_email,
         ];
+    }
+
+    public function getDetectionDetail(Detection $detection): array
+    {
+        $detection->load(['submissionA', 'submissionB']);
+
+        return [
+            'detection' => $detection,
+            'fileA' => $this->loadFile($detection->submissionA->file_path),
+            'fileB' => $this->loadFile($detection->submissionB->file_path),
+        ];
+    }
+
+    private function loadFile(string $path = null): ?string
+    {
+        return ($path && Storage::disk('public')->exists($path))
+            ? Storage::disk('public')->get($path)
+            : null;
     }
 
     protected string $fastApiUrl;
