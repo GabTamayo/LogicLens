@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
 import { ref } from "vue"
 import { Separator } from '@/components/ui/separator'
@@ -178,7 +179,17 @@ usePoll(60000, {
                 </p>
                 <Form @submit="submit"
                     class="space-y-6 flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-12 m-6">
-                    <Button type="submit" :disabled="form.processing" class="hidden lg:block">Generate</Button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger as-child>
+                                <Button type="submit" :disabled="form.processing"
+                                    class="hidden lg:block">Generate</Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Generate a new submission link</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                     <FormField name="activity">
                         <FormItem class="w-full">
                             <FormLabel>Link Submission Name</FormLabel>

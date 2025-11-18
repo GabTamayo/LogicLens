@@ -6,6 +6,7 @@ use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Detection extends Model
 {
@@ -31,12 +32,22 @@ class Detection extends Model
 
     public function submissionA(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email']);
+        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path']);
     }
 
     public function submissionB(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email']);
+        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path']);
+    }
+
+    public function getFileContentA()
+    {
+        return Storage::disk('public')->get($this->submissionA->file_path);
+    }
+
+    public function getFileContentB()
+    {
+        return Storage::disk('public')->get($this->submissionB->file_path);
     }
 
     public function scopeForLink($query, $linkId)

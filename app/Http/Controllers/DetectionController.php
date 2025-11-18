@@ -48,4 +48,23 @@ class DetectionController extends Controller
         $data = $detectionService->getDetections($activity, $link, $request);
         return Inertia::render('Submissions/Show', $data);
     }
+
+    public function show(Detection $detection)
+    {
+        $detection->load(['submissionA', 'submissionB']);
+
+        $fileA = Storage::disk('public')->exists($detection->submissionA->file_path)
+            ? Storage::disk('public')->get($detection->submissionA->file_path)
+            : null;
+
+        $fileB = Storage::disk('public')->exists($detection->submissionB->file_path)
+            ? Storage::disk('public')->get($detection->submissionB->file_path)
+            : null;
+
+        return Inertia::modal('Detections/Show', [
+            'detection' => $detection,
+            'fileA' => $fileA,
+            'fileB' => $fileB,
+        ]);
+    }
 }

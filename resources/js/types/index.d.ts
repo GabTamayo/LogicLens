@@ -131,3 +131,33 @@ export interface DetectionPageProps {
     }
     filters: Record<string, string>
 }
+
+// Props for the "Detection Comparison" modal/page
+export interface DetectionShowProps {
+    detection: {
+        id: string
+        activity_link_id: string
+        submission_a_id: string
+        submission_b_id: string
+        similarity_score: number
+        created_at: string
+        updated_at: string
+        submission_a: {
+            id: string
+            student_name: string
+            student_no: string
+            student_email: string
+            file_path: string
+            language: string
+        }
+        submission_b: {
+            id: string
+            student_name: string
+            student_no: string
+            student_email: string
+            file_path: string
+        }
+    }
+    fileA: string
+    fileB: string
+}

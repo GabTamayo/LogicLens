@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
     // Detection routes
     Route::post('activities/{activity}/links/{link}/detect', [DetectionController::class, 'store'])->name('detections.detect');
     Route::get('activities/{activity}/links/{link}/results', [DetectionController::class, 'index'])->name('detections.result');
+    Route::get('detections/{detection}', [DetectionController::class, 'show'])->name('detections.show');
 });
 
 //Student Submission Routes

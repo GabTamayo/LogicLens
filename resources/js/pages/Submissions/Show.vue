@@ -7,6 +7,7 @@ import DataTable from '@/components/DataTable.vue'
 import { columns } from '@/components/detections/columns'
 import { useDebounceFn } from '@vueuse/core'
 import { LoaderCircle } from 'lucide-vue-next'
+import Separator from '@/components/ui/separator/Separator.vue';
 
 const props = defineProps<DetectionPageProps>()
 
@@ -61,7 +62,8 @@ const updateFilter = (column: string, value: string) => {
                 </h2>
                 <div class="flex items-center">
                     <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
-                    <span v-if="props.activityDate" class="ml-2 text-xs text-muted-foreground">
+                    <Separator orientation="vertical" class="mx-2 h-4" />
+                    <span v-if="props.activityDate" class="text-xs text-muted-foreground">
                         ({{ props.activityDate }})
                     </span>
                 </div>
