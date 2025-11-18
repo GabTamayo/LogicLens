@@ -9,6 +9,7 @@ import Prism from 'prismjs'
 import 'prismjs/themes/prism-tomorrow.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
+import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue'
 
 const props = defineProps<DetectionShowProps>()
 
@@ -48,7 +49,7 @@ watch(
             panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]" position="top">
             <div class="flex justify-between mb-4">
                 <div class="flex items-center">
-                    <h1 class="text-2xl font-bold">Comparison Details</h1>
+                    <h1 class="text-2xl font-bold tracking-tight">Comparison Details</h1>
                     <Separator orientation="vertical" class="mx-4 h-6" />
                     <p class="font-semibold">{{ Math.round(props.detection.similarity_score * 100) }}%</p>
                 </div>
@@ -57,7 +58,7 @@ watch(
                 </div>
             </div>
 
-            <div class="flex justify-between mb-6 items-start">
+            <div class="flex justify-between mb-6 items-start tracking-tight">
                 <div class="flex flex-col">
                     <span class="font-medium">{{ props.detection.submission_a.student_name }}</span>
                     <span class="text-xs text-muted-foreground">{{ props.detection.submission_a.student_no }}</span>
@@ -68,22 +69,26 @@ watch(
                 </div>
             </div>
 
-            <ResizablePanelGroup direction="horizontal" class="h-170 border rounded-md">
+            <ResizablePanelGroup direction="horizontal" class="bg-neutral-800 h-170 border rounded-md tracking-tight">
                 <ResizablePanel :default-size="50">
-                    <div>
-                        <div class="overflow-auto text-xs h-170">
-                            <pre
-                                class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_a.file_path?.split('.').pop())}`">{{ props.fileA }}</code></pre>
-                        </div>
+                    <div class="h-170">
+                        <ScrollArea class="h-full">
+                            <div class="overflow-auto text-xs">
+                                <pre
+                                    class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_a.file_path?.split('.').pop())}`">{{ props.fileA }}</code></pre>
+                            </div>
+                        </ScrollArea>
                     </div>
                 </ResizablePanel>
                 <ResizableHandle />
                 <ResizablePanel :default-size="50">
-                    <div>
-                        <div class="overflow-auto text-xs h-170">
-                            <pre
-                                class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_b.file_path?.split('.').pop())}`">{{ props.fileB }}</code></pre>
-                        </div>
+                    <div class="h-170">
+                        <ScrollArea class="h-full">
+                            <div class="overflow-auto text-xs">
+                                <pre
+                                    class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_b.file_path?.split('.').pop())}`">{{ props.fileB }}</code></pre>
+                            </div>
+                        </ScrollArea>
                     </div>
                 </ResizablePanel>
             </ResizablePanelGroup>
