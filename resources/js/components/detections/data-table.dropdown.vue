@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import { MoreHorizontal, Eye, Flag } from 'lucide-vue-next'
+import { MoreHorizontal, Eye, Flag, FlagOff } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { DetectionRow } from './columns'
 import { ModalLink } from '@inertiaui/modal-vue';
+import { router } from '@inertiajs/vue3'
 
 const { detection } = defineProps<{ detection: DetectionRow }>()
 
-function viewComparison() {
-    // TODO: Open a modal or navigate to a comparison view
-}
-
 function flagDetection() {
-    // TODO: Flag this detection for review
-    console.log('Flag detection:', detection.id)
+    router.patch(`/detections/${detection.id}/flag`)
 }
 </script>
 
@@ -28,15 +24,15 @@ function flagDetection() {
         <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <ModalLink :href="`/detections/${detection.id}`">
-                <DropdownMenuItem @click="viewComparison">
+            <ModalLink :href="`/detections/${detection.id}`" position="top">
+                <DropdownMenuItem>
                     <Eye class="w-4 h-4 mr-2" />
                     View Comparison
                 </DropdownMenuItem>
             </ModalLink>
             <DropdownMenuItem @click="flagDetection">
-                <Flag class="w-4 h-4 mr-2" />
-                Flag Detection
+                <component :is="detection.flagged ? FlagOff : Flag" class="w-4 h-4 mr-2 text-destructive" />
+                {{ detection.flagged ? 'Remove Flag' : 'Flag Detection' }}
             </DropdownMenuItem>
         </DropdownMenuContent>
     </DropdownMenu>

@@ -85,6 +85,7 @@ class DetectionService
             'submission_a' => $this->transformSubmission($detection->submissionA),
             'submission_b' => $this->transformSubmission($detection->submissionB),
             'similarity_score' => $detection->similarity_score,
+            'flagged' => $detection->flagged,
             'created_at' => $detection->created_at,
         ];
     }
@@ -98,6 +99,7 @@ class DetectionService
             'student_name' => $submission->student_name,
             'student_no' => $submission->student_no,
             'student_email' => $submission->student_email,
+            'language' => $submission->language,
         ];
     }
 
@@ -106,7 +108,7 @@ class DetectionService
         $detection->load(['submissionA', 'submissionB']);
 
         return [
-            'detection' => $detection,
+            'detection' => $this->transformDetection($detection),
             'fileA' => $this->loadFile($detection->submissionA->file_path),
             'fileB' => $this->loadFile($detection->submissionB->file_path),
         ];

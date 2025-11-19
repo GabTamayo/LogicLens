@@ -14,7 +14,7 @@ import type { PaginationData } from '@/types'
 import PaginationComponent from '@/components/Pagination.vue'
 import debounce from 'lodash/debounce'
 import Prism from 'prismjs'
-import 'prismjs/themes/prism-tomorrow.css'
+import '../../css/themes/prism-atom-dark.css'
 import 'prismjs/components/prism-java'
 import 'prismjs/components/prism-python'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
@@ -90,13 +90,13 @@ const getLanguageFromExtension = (input?: string): string => {
 }
 
 watch(expanded, () => {
-    setTimeout(() => { Prism.highlightAll() }, 50)
+    setTimeout(() => { Prism.highlightAll() }, 0)
 }, { deep: true })
 watch(
     () => props.data,
     () => {
         expanded.value = {}
-        setTimeout(() => Prism.highlightAll(), 100)
+        setTimeout(() => Prism.highlightAll(), 0)
     },
     { deep: true }
 )

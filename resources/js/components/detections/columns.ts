@@ -2,9 +2,11 @@ import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
 import { Badge } from '@/components/ui/badge'
+import { Flag } from 'lucide-vue-next'
 
 export interface DetectionRow {
     id: string
+    flagged?: boolean
     submission_a: {
         id: number
         student_name: string
@@ -35,6 +37,17 @@ const getSimilarityBadge = (score: number) => {
 }
 
 export const columns: ColumnDef<DetectionRow>[] = [
+    {
+        id: 'flag',
+        label: 'Flag',
+        header: () => h('div', { class: 'text-center' }, ''),
+        cell: ({ row }) => {
+            const flagged = !!row.original.flagged
+            return h('div', { class: 'flex justify-center' }, flagged ? h(Flag, { class: 'w-4 h-4 text-destructive', title: 'Flagged' }) : undefined)
+        },
+        enableHiding: false,
+        size: 36,
+    },
     {
         accessorKey: 'submission_a.student_name',
         label: 'Student A',

@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { DetectionShowProps } from '@/types'
-import { onMounted, watch, h } from 'vue'
+import { onMounted, watch, h, nextTick } from 'vue'
 import Prism from 'prismjs'
-import 'prismjs/themes/prism-tomorrow.css'
+import '../../../css/themes/prism-atom-dark.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
 import 'prismjs/plugins/line-numbers/prism-line-numbers'
 import 'prismjs/components/prism-java'
@@ -25,83 +25,104 @@ const getLanguageFromExtension = (input?: string): string => {
     }
     return languageMap[ext] || (ext || 'plaintext')
 }
+
 const getSimilarityBadge = (score: number) => {
+    const percentage = Math.round(score * 100) + '%'
+    let variant = 'outline'
+    let label = 'Low'
+
     if (score >= 0.90) {
-        return h(Badge, { variant: 'destructive' }, () => 'Very High')
+        variant = 'destructive'
+        label = 'Very High'
+    } else if (score >= 0.85) {
+        variant = 'customOrange'
+        label = 'High'
+    } else if (score >= 0.75) {
+        variant = 'customYellow'
+        label = 'Moderate'
     }
-    if (score >= 0.85) {
-        return h(Badge, { variant: 'customOrange' }, () => 'High')
-    }
-    if (score >= 0.75) {
-        return h(Badge, { variant: 'customYellow' }, () => 'Moderate')
-    }
-    return h(Badge, { variant: 'outline' }, () => 'Low')
+
+    return h(
+        Badge,
+        { variant },
+        () => `${percentage} ${label}`
+    )
 }
 
+
 onMounted(() => {
-    setTimeout(() => Prism.highlightAll(), 50)
+    nextTick(() => {
+        setTimeout(() => Prism.highlightAll(), 0)
+    })
 })
 
 watch(
     () => [props.fileA, props.fileB],
-    () => setTimeout(() => Prism.highlightAll(), 100),
+    () => {
+        nextTick(() => {
+            setTimeout(() => Prism.highlightAll(), 0)
+        })
+    },
     { deep: true }
 )
+
 </script>
 
 
 <template>
     <div>
         <Modal class="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]" max-width="7xl"
-            panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]" position="top">
-            <div class="flex justify-between mb-4">
-                <div class="text-2xl font-bold tracking-tight">
-                    <h1>Comparison Details</h1>
-                </div>
-                <div class="flex items-center mr-8">
-                    <p class="text-xl font-bold tracking-tight">{{ Math.round(props.detection.similarity_score * 100)
-                        }}%</p>
-                    <Separator orientation="vertical" class="mx-4 h-8" />
-                    <component :is="getSimilarityBadge(props.detection.similarity_score)" />
-                </div>
-            </div>
-
-            <div class="flex justify-between mb-6 items-start tracking-tight">
-                <div class="flex flex-col text-start">
-                    <span class="font-medium">{{ props.detection.submission_a.student_name }}</span>
-                    <span class="text-xs text-muted-foreground font-light">{{ props.detection.submission_a.student_no
-                        }}</span>
-                </div>
-                <div class="flex flex-col text-end">
-                    <span class="font-medium">{{ props.detection.submission_b.student_name }}</span>
-                    <span class="text-xs text-muted-foreground font-light">{{ props.detection.submission_b.student_no
-                        }}</span>
-                </div>
-            </div>
-
-            <ResizablePanelGroup direction="horizontal" class="bg-neutral-800 border rounded-md tracking-tight">
-                <ResizablePanel :default-size="50">
-                    <div class="h-180">
-                        <ScrollArea class="h-full">
-                            <div class="overflow-x-auto text-xs">
-                                <pre
-                                    class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_a.language?.split('.').pop())}`">{{ props.fileA }}</code></pre>
-                            </div>
-                        </ScrollArea>
+            panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]">
+            <div class="flex flex-col h-screen">
+                <div class="flex justify-between mb-4">
+                    <div class="text-lg sm:text-2xl font-bold tracking-tight">
+                        <h1>Comparison Details</h1>
                     </div>
-                </ResizablePanel>
-                <ResizableHandle />
-                <ResizablePanel :default-size="50">
-                    <div class="h-180">
-                        <ScrollArea class="h-full">
-                            <div class="overflow-x-auto text-xs">
-                                <pre
-                                    class="line-numbers p-4"><code :class="`language-${getLanguageFromExtension(props.detection.submission_b.language?.split('.').pop())}`">{{ props.fileB }}</code></pre>
-                            </div>
-                        </ScrollArea>
+                    <div class="flex items-start mr-8">
+                        <component :is="getSimilarityBadge(props.detection.similarity_score)"
+                            class="text-2xs sm:text-sm" />
                     </div>
-                </ResizablePanel>
-            </ResizablePanelGroup>
+                </div>
+
+                <div class="flex justify-between mb-6 items-start tracking-tight">
+                    <div class="flex flex-col text-start">
+                        <span class="font-medium">{{ props.detection.submission_a.student_name }}</span>
+                        <span class="text-xs text-muted-foreground font-light">{{
+                            props.detection.submission_a.student_no
+                        }}</span>
+                    </div>
+                    <div class="flex flex-col text-end">
+                        <span class="font-medium">{{ props.detection.submission_b.student_name }}</span>
+                        <span class="text-xs text-muted-foreground font-light">{{
+                            props.detection.submission_b.student_no
+                        }}</span>
+                    </div>
+                </div>
+
+                <ResizablePanelGroup direction="horizontal" class="bg-neutral-800 border rounded-md tracking-tight">
+                    <ResizablePanel :default-size="50">
+                        <div class="flex h-full">
+                            <ScrollArea class="flex-1 min-h-0">
+                                <div class="overflow-x-auto text-xs">
+                                    <pre
+                                        class="line-numbers p-2"><code :class="`language-${getLanguageFromExtension(props.detection.submission_a.language?.split('.').pop())}`">{{ props.fileA }}</code></pre>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </ResizablePanel>
+                    <ResizableHandle />
+                    <ResizablePanel :default-size="50">
+                        <div class="flex h-full">
+                            <ScrollArea class="flex-1 min-h-0">
+                                <div class="overflow-x-auto text-xs">
+                                    <pre
+                                        class="line-numbers p-2"><code :class="`language-${getLanguageFromExtension(props.detection.submission_b.language?.split('.').pop())}`">{{ props.fileB }}</code></pre>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </ResizablePanel>
+                </ResizablePanelGroup>
+            </div>
         </Modal>
     </div>
 </template>

@@ -50,4 +50,10 @@ class DetectionController extends Controller
     {
         return Inertia::modal('Detections/Show', $service->getDetectionDetail($detection));
     }
+
+    public function flag(Detection $detection)
+    {
+        $detection->update(attributes: ['flagged' => !$detection->flagged]);
+        return back()->with('success', 'Detection flag updated.');
+    }
 }

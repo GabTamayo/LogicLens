@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('submission_a_id')->constrained('submissions')->onDelete('cascade');
             $table->foreignUuid('submission_b_id')->constrained('submissions')->onDelete('cascade');
             $table->decimal('similarity_score', 5, 4);
+            $table->boolean('flagged')->default(false);
             $table->timestamps();
 
             // Prevent duplicate pairs

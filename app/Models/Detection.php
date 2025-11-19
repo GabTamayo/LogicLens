@@ -19,10 +19,12 @@ class Detection extends Model
         'submission_a_id',
         'submission_b_id',
         'similarity_score',
+        'flagged',
     ];
 
     protected $casts = [
         'similarity_score' => 'float',
+        'flagged' => 'boolean',
     ];
 
     public function activityLink(): BelongsTo
@@ -50,6 +52,11 @@ class Detection extends Model
         return Storage::disk('public')->get($this->submissionB->file_path);
     }
 
+    public function flag()
+    {
+        $this->update(['flagged' => true]);
+    }
+
     public function scopeForLink($query, $linkId)
     {
         return $query->where('activity_link_id', $linkId);
@@ -69,6 +76,6 @@ class Detection extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_link_id', 'submission_a_id', 'submission_b_id', 'similarity_score', 'created_at');
+        return $query->select('id', 'activity_link_id', 'submission_a_id', 'submission_b_id', 'similarity_score', 'flagged', 'created_at');
     }
 }
