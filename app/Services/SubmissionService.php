@@ -15,7 +15,7 @@ class SubmissionService
         $language = $activityLink->activity->language;
 
         return [
-            'bgImage' => asset('storage/images/clonewave-bg.jpg'),
+            'bgImage' => asset('images/clonewave-bg.jpg'),
             'name' => $activityLink->name,
             'activityName' => $activityLink->activity->title,
             'token' => $token,
