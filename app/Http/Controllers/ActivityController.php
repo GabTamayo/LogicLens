@@ -50,6 +50,7 @@ class ActivityController extends Controller
     public function destroy(Activity $activity)
     {
         $activity->delete();
+        inertia()->clearHistory();
         return redirect()->route('activities.index');
     }
 }
