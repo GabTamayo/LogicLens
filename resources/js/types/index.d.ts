@@ -134,16 +134,17 @@ export interface DetectionShowProps {
     detection: {
         id: string
         activity_link_id: string
-        submission_a_id: string
-        submission_b_id: string
-        similarity_score: number
-        created_at: string
-        updated_at: string
+        seq_score: number
+        struct_score: number
+        avg_score: number
+        line_matches: Array<{
+            code_a: [number, number]
+            code_b: [number, number]
+        }>
         submission_a: {
             id: string
             student_name: string
             student_no: string
-            student_email: string
             file_path: string
             language: string
         }

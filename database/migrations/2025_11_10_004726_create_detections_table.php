@@ -16,7 +16,10 @@ return new class extends Migration
             $table->foreignUuid('activity_link_id')->constrained()->onDelete('cascade');
             $table->foreignUuid('submission_a_id')->constrained('submissions')->onDelete('cascade');
             $table->foreignUuid('submission_b_id')->constrained('submissions')->onDelete('cascade');
-            $table->decimal('similarity_score', 5, 4);
+            $table->decimal('seq_score', 5, 4);
+            $table->decimal('struct_score', 5, 4);
+            $table->decimal('avg_score', 5, 4);
+            $table->json('line_matches')->nullable();
             $table->boolean('flagged')->default(false);
             $table->timestamps();
 
