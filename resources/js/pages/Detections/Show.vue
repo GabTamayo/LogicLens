@@ -94,7 +94,7 @@ watch(
                                 {{ Math.round(props.detection.avg_score * 100) }}%
                             </span>
                         </div>
-                        <span class="text-xs text-muted-foreground font-medium">Similarity</span>
+                        <span class="text-xs text-muted-foreground font-medium">Similarity Score</span>
                     </div>
                 </div>
 
