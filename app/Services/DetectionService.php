@@ -201,12 +201,6 @@ class DetectionService
         DB::transaction(function () use ($activityLinkId, $results) {
             Detection::where('activity_link_id', $activityLinkId)->delete();
 
-            foreach ($results as &$r) {
-                if ($r['submission_a_id'] > $r['submission_b_id']) {
-                    [$r['submission_a_id'], $r['submission_b_id']] = [$r['submission_b_id'], $r['submission_a_id']];
-                }
-            }
-
             $data = collect($results)->map(fn($r) => [
                 'id' => (string) Str::uuid(),
                 'activity_link_id' => $activityLinkId,

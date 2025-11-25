@@ -8,7 +8,6 @@ use App\Models\ActivityLink;
 use App\Models\Detection;
 use App\Services\DetectionService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class DetectionController extends Controller
