@@ -71,11 +71,30 @@ class DetectionService
             ->filter($filters)
             ->selectedAttributes()
             ->with(['submissionA', 'submissionB'])
-            ->orderByDesc('similarity_score');
+            ->orderByDesc('flagged')
+            ->orderByDesc('avg_score');
 
         return $query->paginate(10)
-            ->through(fn($detection) => $this->transformDetection($detection))
+            ->through(fn($detection) => $this->transformDetectionSummary($detection))
             ->withQueryString();
+    }
+
+    private function transformDetectionSummary($detection): array
+    {
+        return [
+            'id' => $detection->id,
+            'submission_a' => [
+                'student_name' => $detection->submissionA->student_name,
+                'student_no' => $detection->submissionA->student_no,
+            ],
+            'submission_b' => [
+                'student_name' => $detection->submissionB->student_name,
+                'student_no' => $detection->submissionB->student_no,
+            ],
+            'avg_score' => $detection->avg_score,
+            'flagged' => $detection->flagged,
+            'created_at' => $detection->created_at,
+        ];
     }
 
     private function transformDetection($detection): array
@@ -84,9 +103,10 @@ class DetectionService
             'id' => $detection->id,
             'submission_a' => $this->transformSubmission($detection->submissionA),
             'submission_b' => $this->transformSubmission($detection->submissionB),
-            'similarity_score' => $detection->similarity_score,
-            'flagged' => $detection->flagged,
-            'created_at' => $detection->created_at,
+            'seq_score' => $detection->seq_score,
+            'struct_score' => $detection->struct_score,
+            'avg_score' => $detection->avg_score,
+            'line_matches' => $detection->line_matches,
         ];
     }
 
@@ -98,7 +118,6 @@ class DetectionService
             'id' => $submission->id,
             'student_name' => $submission->student_name,
             'student_no' => $submission->student_no,
-            'student_email' => $submission->student_email,
             'language' => $submission->language,
         ];
     }
@@ -187,7 +206,11 @@ class DetectionService
                 'activity_link_id' => $activityLinkId,
                 'submission_a_id' => $r['submission_a_id'],
                 'submission_b_id' => $r['submission_b_id'],
-                'similarity_score' => $r['similarity_score'],
+                'seq_score' => $r['seq_score'],
+                'struct_score' => $r['struct_score'],
+                'avg_score' => $r['avg_score'],
+                'line_matches' => $r['line_matches'],
+                'flagged' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ])->toArray();

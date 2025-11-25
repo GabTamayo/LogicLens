@@ -141,3 +141,28 @@ pre[class*="language-"] {
 .token.italic {
     font-style: italic;
 }
+
+pre[data-line] {
+    overflow-x: hidden;
+    font-weight: bold;
+}
+
+pre[data-line] .line-highlight {
+    position: absolute;
+    width: 100% !important;
+    background: #ff040030 !important;
+    counter-increment: line-highlight-counter;
+}
+
+pre[data-line] .line-highlight::after {
+    content: counter(line-highlight-counter);
+    position: absolute;
+    left: 29px;
+    top: 0.1rem;
+    font-size: 0.85em;
+    padding: 0.15rem 0.24rem;
+    border-radius: 0.24rem;
+    background: black;
+    color: #ff5f5f;
+    line-height: 1;
+}

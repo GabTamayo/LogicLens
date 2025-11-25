@@ -19,7 +19,7 @@ export interface DetectionRow {
         student_no: string
         student_email: string
     }
-    similarity_score: number
+    avg_score: number
     created_at: string
 }
 
@@ -73,11 +73,11 @@ export const columns: ColumnDef<DetectionRow>[] = [
         },
     },
     {
-        accessorKey: 'similarity_score',
+        accessorKey: 'avg_score',
         label: 'Similarity Score',
         header: () => h('div', { class: 'text-center' }, 'Similarity Score'),
         cell: ({ row }) => {
-            const score = row.getValue('similarity_score') as number
+            const score = row.getValue('avg_score') as number
             return h('div', { class: 'text-center font-mono font-semibold' }, `${(score * 100).toFixed(2)}%`)
         },
     },
@@ -86,7 +86,7 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Level',
         header: () => h('div', { class: 'text-center' }, 'Level'),
         cell: ({ row }) => {
-            const score = row.original.similarity_score
+            const score = row.original.avg_score
             return h('div', { class: 'flex justify-center' }, getSimilarityBadge(score))
         },
     },

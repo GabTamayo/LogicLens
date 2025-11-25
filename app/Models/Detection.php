@@ -18,12 +18,18 @@ class Detection extends Model
         'activity_link_id',
         'submission_a_id',
         'submission_b_id',
-        'similarity_score',
+        'seq_score',
+        'struct_score',
+        'avg_score',
+        'line_matches',
         'flagged',
     ];
 
     protected $casts = [
-        'similarity_score' => 'float',
+        'seq_score' => 'float',
+        'struct_score' => 'float',
+        'avg_score' => 'float',
+        'line_matches' => 'array',
         'flagged' => 'boolean',
     ];
 
@@ -76,6 +82,17 @@ class Detection extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_link_id', 'submission_a_id', 'submission_b_id', 'similarity_score', 'flagged', 'created_at');
+        return $query->select(
+            'id',
+            'activity_link_id',
+            'submission_a_id',
+            'submission_b_id',
+            'seq_score',
+            'struct_score',
+            'avg_score',
+            'line_matches',
+            'flagged',
+            'created_at'
+        );
     }
 }

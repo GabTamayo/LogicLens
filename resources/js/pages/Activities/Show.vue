@@ -197,7 +197,7 @@ usePoll(60000, {
                                 <Input type="text" v-model="form.name" :message="form.errors.name" />
                             </FormControl>
                             <FormDescription>
-                                Enter your desired submission link submission name.
+                                Enter your desired link submission name.
                             </FormDescription>
                         </FormItem>
                         <FormField name="expires_at">
