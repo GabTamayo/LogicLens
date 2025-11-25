@@ -38,6 +38,7 @@ class ActivityLinkController extends Controller
     {
         $link = $activity->activityLinks()->findOrFail($linkId);
         $link->delete();
+        inertia()->clearHistory();
         return redirect()->route('activities.show', $activity);
     }
 
