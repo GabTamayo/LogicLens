@@ -76,8 +76,8 @@ class Detection extends Model
             })
             ->when($filters['student_name_b'] ?? null, function ($q, $name) {
                 $q->whereHas('submissionB', fn($s) => $s->where('student_name', 'like', "%{$name}%"));
-            })
-            ->when($filters['min_score'] ?? null, fn($q, $score) => $q->where('similarity_score', '>=', (float) $score));
+            });
+        //->when($filters['min_score'] ?? null, fn($q, $score) => $q->where('similarity_score', '>=', (float) $score));
     }
 
     public function scopeSelectedAttributes($query)
