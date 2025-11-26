@@ -3,37 +3,26 @@
 namespace App\Services;
 
 use App\Models\ActivityLink;
-use App\Models\Detection;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ActivityLinkService
 {
-    public function getSubmissions(ActivityLink $link, Request $request): array
+    public function querySubmissions(ActivityLink $link, Request $request)
     {
-        return [
-            'activityId' => $link->activity_id,
-            'activityTitle' => $link->activity->title,
-            'link' => $link,
-            'filters' => $request->only(['student_name', 'student_no']),
-            'hasDetections' => Detection::where('activity_link_id', $link->id)->exists(),
-            'submissions' => Inertia::defer(function () use ($link, $request) {
-                $submissions = $link->submissions()
-                    ->selectedAttributes()
-                    ->filterByStudent(
-                        $request->input('student_name'),
-                        $request->input('student_no')
-                    )
-                    ->orderBy('created_at')
-                    ->paginate(10)
-                    ->withQueryString();
+        $submissions = $link->submissions()
+            ->selectedAttributes()
+            ->filterByStudent(
+                $request->input('student_name'),
+                $request->input('student_no')
+            )
+            ->orderBy('created_at')
+            ->paginate(10)
+            ->withQueryString();
 
-                // Attach file content to each submission
-                $submissions->getCollection()
-                    ->transform(fn($submission) => $submission->attachFileContent());
+        $submissions->getCollection()
+            ->transform(fn($submission) => $submission->attachFileContent());
 
-                return $submissions;
-            }),
-        ];
+        return $submissions;
     }
 }

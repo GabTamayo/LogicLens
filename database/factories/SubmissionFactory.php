@@ -17,7 +17,7 @@ class SubmissionFactory extends Factory
     public function definition(): array
     {
         return [
-            'activity_link_id' => '3a5f470c-9d94-4240-a5dd-47170fb8a396',
+            'activity_link_id' => '99062b03-6560-4000-b491-37716f86fb10',
             'student_name' => fake()->name(),
             'student_email' => fake()->unique()->safeEmail(),
             'student_no' => fake()->unique()->numerify('S########'),

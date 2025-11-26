@@ -35,9 +35,9 @@ class SubmissionService
             $random = bin2hex(random_bytes(8));
             $filename = "{$baseName}_{$activityTitle}_" . now()->timestamp . "{$random}.{$extension}";
             $path = "submissions/{$filename}";
-        } while (Storage::disk('public')->exists($path));
+        } while (Storage::disk(env('FILESYSTEM_DISK'))->exists($path));
 
-        Storage::disk('public')->put($path, $content);
+        Storage::disk(env('FILESYSTEM_DISK'))->put($path, $content);
 
         $language = ProgrammingLanguage::fromFileExtension($file->getClientOriginalExtension());
 

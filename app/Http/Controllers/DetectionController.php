@@ -36,15 +36,6 @@ class DetectionController extends Controller
         ]);
     }
 
-    public function index(Activity $activity, ActivityLink $link, Request $request, DetectionService $service)
-    {
-        if (! $service->hasDetections($link)) {
-            abort(404);
-        }
-
-        return Inertia::render('Submissions/Show', $service->getDetections($activity, $link, $request));
-    }
-
     public function show(Detection $detection, DetectionService $service)
     {
         return Inertia::modal('Detections/Show', $service->getDetectionDetail($detection));

@@ -54,7 +54,7 @@ class ActivityLink extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at');
+        return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at', 'created_at');
     }
 
     public function scopeWithSubmissions($query)
@@ -83,8 +83,8 @@ class ActivityLink extends Model
     {
         static::deleting(function ($activityLink) {
             foreach ($activityLink->submissions as $submission) {
-                if ($submission->file_path && Storage::disk('public')->exists($submission->file_path)) {
-                    Storage::disk('public')->delete($submission->file_path);
+                if ($submission->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($submission->file_path)) {
+                    Storage::disk(env('FILESYSTEM_DISK'))->delete($submission->file_path);
                 }
             }
         });

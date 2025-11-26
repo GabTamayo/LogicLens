@@ -49,8 +49,8 @@ class Submission extends Model
 
     public function attachFileContent()
     {
-        if ($this->file_path && Storage::disk('public')->exists($this->file_path)) {
-            $this->file_content = Storage::disk('public')->get($this->file_path);
+        if ($this->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($this->file_path)) {
+            $this->file_content = Storage::disk(env('FILESYSTEM_DISK'))->get($this->file_path);
         }
         return $this;
     }

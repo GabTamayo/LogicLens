@@ -7,7 +7,9 @@ use App\Http\Requests\ActivityLinkRequest;
 use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
 use App\Models\ActivityLink;
+use App\Models\Detection;
 use App\Services\ActivityLinkService;
+use App\Services\DetectionService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,11 +29,28 @@ class ActivityLinkController extends Controller
         return redirect()->route('activities.show', $activity);
     }
 
-    public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService)
+    public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService, DetectionService $detectionService)
     {
         $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
-        $data = $activityLinkService->getSubmissions($link, $request);
-        return Inertia::render('Submissions/Index', $data);
+        $activeTab = $request->get('tab', 'submission');
+
+        $baseData = [
+            'link' => $link,
+            'activityId' => $activity->id,
+            'activityTitle' => $activity->title,
+            'activeTab' => $activeTab,
+            'hasDetections' => Detection::where('activity_link_id', $link->id)->exists(),
+        ];
+
+        $tabData = $activeTab === 'detection'
+            ? ['detections' => Inertia::defer(fn() => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b']))), 'submissions' => null]
+            : ['submissions' => Inertia::defer(fn() => $activityLinkService->querySubmissions($link, $request)), 'detections' => null];
+
+        return Inertia::render('Submissions/Index', [
+            ...$baseData,
+            ...$tabData,
+            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b'] : ['student_name', 'student_no']),
+        ]);
     }
 
     public function destroy(Activity $activity, $linkId)

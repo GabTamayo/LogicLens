@@ -165,4 +165,21 @@ pre[data-line] .line-highlight::after {
     background: black;
     color: #ff5f5f;
     line-height: 1;
+    box-shadow: 0 0 4px 1px #ff5f5f60;
+    animation: ping-minimal 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes ping-minimal {
+    0% {
+        box-shadow: 0 0 4px 1px #ff5f5f60;
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 8px 2px #ff5f5f80;
+        transform: scale(1.06);
+    }
+    100% {
+        box-shadow: 0 0 4px 1px #ff5f5f60;
+        transform: scale(1);
+    }
 }
