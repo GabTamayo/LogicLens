@@ -21,7 +21,7 @@ class DetectionService
 
         $submissions = $link->submissions->filter(
             fn($s) =>
-            $s->file_path && Storage::disk('public')->exists($s->file_path)
+            $s->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($s->file_path)
         );
 
         if ($submissions->count() < 2) {
@@ -43,11 +43,6 @@ class DetectionService
         return [true, null, $payload];
     }
 
-    public function hasDetections(ActivityLink $link): bool
-    {
-        return Detection::where('activity_link_id', $link->id)->exists();
-    }
-
     public function getDetections(Activity $activity, ActivityLink $link, Request $request): array
     {
         $filters = $request->only(['student_name_a', 'student_name_b', 'min_score']);
@@ -55,26 +50,21 @@ class DetectionService
         return [
             'activityId' => $activity->id,
             'activityTitle' => $activity->title,
-            'activityDate' => $activity->created_at->format('M d, Y'),
-            'link' => [
-                'id' => $link->id,
-                'name' => $link->name,
-            ],
+            'link' => $link,
             'filters' => $filters,
             'detections' => Inertia::defer(fn() => $this->queryDetections($link, $filters)),
         ];
     }
 
-    private function queryDetections(ActivityLink $link, array $filters)
+    public function queryDetections(ActivityLink $link, array $filters)
     {
-        $query = Detection::forLink($link->id)
+        return Detection::forLink($link->id)
             ->filter($filters)
             ->selectedAttributes()
             ->with(['submissionA', 'submissionB'])
             ->orderByDesc('flagged')
-            ->orderByDesc('avg_score');
-
-        return $query->paginate(10)
+            ->orderByDesc('avg_score')
+            ->paginate(10)
             ->through(fn($detection) => $this->transformDetectionSummary($detection))
             ->withQueryString();
     }
@@ -93,7 +83,6 @@ class DetectionService
             ],
             'avg_score' => $detection->avg_score,
             'flagged' => $detection->flagged,
-            'created_at' => $detection->created_at,
         ];
     }
 
@@ -135,8 +124,8 @@ class DetectionService
 
     private function loadFile(string $path = null): ?string
     {
-        return ($path && Storage::disk('public')->exists($path))
-            ? Storage::disk('public')->get($path)
+        return ($path && Storage::disk(env('FILESYSTEM_DISK'))->exists($path))
+            ? Storage::disk(env('FILESYSTEM_DISK'))->get($path)
             : null;
     }
 
@@ -180,9 +169,9 @@ class DetectionService
 
     private function loadContent(array $submission): ?array
     {
-        if (!Storage::disk('public')->exists($submission['file_path'])) return null;
+        if (!Storage::disk(env('FILESYSTEM_DISK'))->exists($submission['file_path'])) return null;
 
-        $size = Storage::disk('public')->size($submission['file_path']);
+        $size = Storage::disk(env('FILESYSTEM_DISK'))->size($submission['file_path']);
         if ($size > 10 * 1024 * 1024) { // 10MB limit
             Log::warning("File too large, skipping: {$submission['id']}");
             return null;
@@ -190,7 +179,7 @@ class DetectionService
 
         return [
             'id' => $submission['id'],
-            'file_content' => Storage::disk('public')->get($submission['file_path']),
+            'file_content' => Storage::disk(env('FILESYSTEM_DISK'))->get($submission['file_path']),
         ];
     }
 

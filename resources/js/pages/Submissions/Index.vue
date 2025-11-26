@@ -1,21 +1,45 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Deferred, usePoll } from '@inertiajs/vue3'
-import { Head, router, useRemember, Link } from '@inertiajs/vue3'
-import { Button } from '@/components/ui/button'
-import { type BreadcrumbItem, Submission } from '@/types'
+import { Deferred } from '@inertiajs/vue3'
+import { Head, router, useRemember } from '@inertiajs/vue3'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { type BreadcrumbItem, Submission, DetectionPageProps } from '@/types'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
 import DataTable from '@/components/DataTable.vue'
-import { columns } from '@/components/submissions/columns'
+import { columns as submissionColumns } from '@/components/submissions/columns'
+import { columns as detectionColumns } from '@/components/detections/columns'
 import { useDebounceFn } from '@vueuse/core'
-import { LoaderCircle, FileSearch } from 'lucide-vue-next'
-import { Toaster } from '@/components/ui/sonner';
+import { LoaderCircle } from 'lucide-vue-next'
+import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'vue-sonner'
-import 'vue-sonner/style.css';
-import { ref } from 'vue'
+import 'vue-sonner/style.css'
+import { ref, watch } from 'vue'
 
-const props = defineProps<Submission & { filters: Record<string, string>, hasDetections: boolean }>()
+interface TabbedPageProps {
+    activityId: number
+    activityTitle: string
+    link: {
+        id: number
+        name: string
+        token: string
+        is_open: boolean
+        expires_at: string | null
+        created_at: string
+    }
+    filters: Record<string, string>
+    submissions?: Submission['submissions'] & { data: any[], path: string }
+    detections?: DetectionPageProps['detections']
+    activeTab: string
+}
+
+const props = defineProps<TabbedPageProps>()
 const isDetecting = ref(false)
+const activeTab = ref(props.activeTab || 'submission')
+
+// Track pagination state per tab
+const submissionPage = ref(1)
+const detectionPage = ref(1)
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
@@ -23,10 +47,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
 ]
 
-const filters = useRemember({
+const submissionFilters = useRemember({
     student_name: props.filters?.student_name || '',
     student_no: props.filters?.student_no || '',
 }, 'submissions-filters')
+
+const detectionFilters = useRemember({
+    student_name_a: props.filters?.student_name_a || '',
+    student_name_b: props.filters?.student_name_b || '',
+}, 'detection-filters')
+
+// Watch for tab changes and fetch data accordingly
+watch(activeTab, (newTab) => {
+    const page = newTab === 'detection' ? detectionPage.value : submissionPage.value
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { tab: newTab, page },
+        preserveScroll: true,
+        preserveState: true,
+        only: newTab === 'detection' ? ['detections', 'activeTab'] : ['submissions', 'activeTab'],
+    })
+})
 
 const handleDetectSubmission = () => {
     if (isDetecting.value) return
@@ -37,48 +77,70 @@ const handleDetectSubmission = () => {
         preserveScroll: true,
         onSuccess: (page) => {
             if (page.props.successMessage) {
-                toast.success(page.props.successMessage);
+                toast.success(page.props.successMessage)
             } else {
                 toast.success('Detection successful!', {
                     description: 'You can view the result'
-                });
+                })
             }
-            isDetecting.value = false;
+            isDetecting.value = false
         },
         onError: (errors) => {
-            const errorMessage = Object.values(errors)[0] as string || 'Detection failed';
-            toast.error('Something went wrong!', {
+            const errorMessage = Object.values(errors)[0] as string || 'Detection failed'
+            toast.error('Unable to run detection', {
                 description: errorMessage
-            });
-            isDetecting.value = false;
+            })
+            isDetecting.value = false
         },
-    });
+    })
 }
 
-const handlePageChange = (page: number) => {
-    router.visit(props.submissions.path, {
-        data: {
-            ...filters.value,
-            page: page
-        },
+const handleSubmissionPageChange = (page: number) => {
+    submissionPage.value = page
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...submissionFilters.value, page, tab: 'submission' },
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
     })
 }
 
-const handleFilterChange = useDebounceFn(() => {
-    router.visit(props.submissions.path, {
-        data: filters.value,
+const handleDetectionPageChange = (page: number) => {
+    detectionPage.value = page
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...detectionFilters.value, page, tab: 'detection' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['detections'],
+    })
+}
+
+const handleSubmissionFilterChange = useDebounceFn(() => {
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...submissionFilters.value, tab: 'submission' },
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
     })
 }, 300)
 
-const updateFilter = (column: string, value: string) => {
-    filters.value[column] = value
-    handleFilterChange()
+const handleDetectionFilterChange = useDebounceFn(() => {
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...detectionFilters.value, tab: 'detection' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['detections'],
+    })
+}, 300)
+
+const updateSubmissionFilter = (column: string, value: string) => {
+    submissionFilters.value[column] = value
+    handleSubmissionFilterChange()
+}
+
+const updateDetectionFilter = (column: string, value: string) => {
+    detectionFilters.value[column] = value
+    handleDetectionFilterChange()
 }
 
 const isInitialLoadDone = ref(false)
@@ -97,33 +159,81 @@ const isInitialLoadDone = ref(false)
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
                 <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-                    Submissions for {{ props.link.name }}
+                    {{ props.link.name }}
                 </h2>
-                <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
-                <Link v-if="props.hasDetections"
-                    :href="`/activities/${props.activityId}/links/${props.link.id}/results`" prefetch>
-                <Button variant="outline" size="sm" class="mt-4">
-                    <FileSearch class="mr-2" />
-                    View Detection Results
-                </Button>
-                </Link>
-            </div>
+                <div class="flex items-center gap-2">
+                    <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
 
-            <Deferred data="submissions" @resolve="isInitialLoadDone = true">
-                <template #fallback>
-                    <div v-if="!isInitialLoadDone" class="flex items-center justify-center gap-2 h-64 border rounded-md">
-                        <span class="text-muted-foreground">Loading submissions</span>
-                        <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                </template>
-                <DataTable :columns="columns" :data="props.submissions.data" :pagination="props.submissions"
-                    :filter-config="[
-                        { column: 'student_name', placeholder: 'Filter by Student Name' },
-                        { column: 'student_no', placeholder: 'Search Student No.' }
-                    ]" :filter-values="filters" @page-change="handlePageChange" @filter-change="updateFilter"
-                    :is-detecting="isDetecting" @detect-submission="handleDetectSubmission"
-                    :show-detect-button="true" />
-            </Deferred>
+                    <Separator orientation="vertical" class="h-4"/>
+
+                    <p class="text-xs text-muted-foreground">
+                        {{ new Date(props.link.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                        day: 'numeric'
+                        }) }}
+                    </p>
+                </div>
+
+
+                <Tabs v-model="activeTab" class="mt-2">
+                    <TabsList>
+                        <TabsTrigger value="submission">
+                            Submissions
+                        </TabsTrigger>
+                        <TabsTrigger value="detection">
+                            Detections
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="submission">
+                        <template v-if="props.submissions">
+                            <Deferred data="submissions" @resolve="isInitialLoadDone = true">
+                                <template #fallback>
+                                    <div class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                                        <span class="text-muted-foreground">Loading submissions</span>
+                                        <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                    </div>
+                                </template>
+                                <DataTable :columns="submissionColumns" :data="props.submissions.data"
+                                    :pagination="props.submissions" :filter-config="[
+                                        { column: 'student_name', placeholder: 'Filter by Student Name' },
+                                        { column: 'student_no', placeholder: 'Search Student No.' }
+                                    ]" :filter-values="submissionFilters" @page-change="handleSubmissionPageChange"
+                                    @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
+                                    @detect-submission="handleDetectSubmission" :show-detect-button="true" />
+                            </Deferred>
+                        </template>
+                        <div v-else class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                            <span class="text-muted-foreground">Loading submissions</span>
+                            <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="detection">
+                        <template v-if="props.detections">
+                            <Deferred data="detections">
+                                <template #fallback>
+                                    <div class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                                        <span class="text-muted-foreground">Loading detection results</span>
+                                        <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                    </div>
+                                </template>
+                                <DataTable :columns="detectionColumns" :data="props.detections?.data || []"
+                                    :pagination="props.detections" :filter-config="[
+                                        { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
+                                        { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
+                                    ]" :filter-values="detectionFilters" @page-change="handleDetectionPageChange"
+                                    @filter-change="updateDetectionFilter" :show-detect-button="false" />
+                            </Deferred>
+                        </template>
+                        <div v-else class="flex items-center justify-center gap-2 h-64 border rounded-md">
+                            <span class="text-muted-foreground">Loading detection results</span>
+                            <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
         </div>
     </AppLayout>
     <Toaster rich-colors />

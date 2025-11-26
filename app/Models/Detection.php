@@ -50,12 +50,12 @@ class Detection extends Model
 
     public function getFileContentA()
     {
-        return Storage::disk('public')->get($this->submissionA->file_path);
+        return Storage::disk(env('FILESYSTEM_DISK'))->get($this->submissionA->file_path);
     }
 
     public function getFileContentB()
     {
-        return Storage::disk('public')->get($this->submissionB->file_path);
+        return Storage::disk(env('FILESYSTEM_DISK'))->get($this->submissionB->file_path);
     }
 
     public function flag()
@@ -92,7 +92,6 @@ class Detection extends Model
             'avg_score',
             'line_matches',
             'flagged',
-            'created_at'
         );
     }
 }
