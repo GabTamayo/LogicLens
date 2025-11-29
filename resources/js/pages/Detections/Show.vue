@@ -79,8 +79,7 @@ watch(
 
 <template>
     <div>
-        <Modal class="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]" max-width="7xl"
-            panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]">
+        <Modal max-width="7xl" panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]">
             <div class="flex flex-col h-screen gap-4 p-1">
                 <div class="flex items-center justify-between">
                     <div>
