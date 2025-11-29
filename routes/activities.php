@@ -6,7 +6,7 @@ use App\Http\Controllers\DetectionController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     //Activity Routes
     Route::get('activities', [ActivityController::class, 'index'])->name('activities.index');
     Route::get('activities/create', [ActivityController::class, 'create'])->name('activities.create');

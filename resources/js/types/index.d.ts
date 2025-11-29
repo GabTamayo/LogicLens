@@ -11,12 +11,12 @@ export interface BreadcrumbItem {
 }
 
 export interface PaginationData {
-    current_page: number
-    per_page: number
-    total: number
-    from: number
-    to: number
-    last_page: number
+    current_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    last_page: number;
 }
 
 export interface NavItem {
@@ -56,107 +56,117 @@ export interface Activity {
     closed_links_count: number;
 }
 export interface ActivityPagination extends PaginationData {
-    data: Activity[]
+    data: Activity[];
 }
 
 export interface ActivityDetail {
-    id: number
-    title: string
-    appUrl: string
+    id: number;
+    title: string;
+    appUrl: string;
     links: {
-        data: ActivityLink[]
-    } & PaginationData
+        data: ActivityLink[];
+    } & PaginationData;
 }
 
 export interface ActivityLink {
-    id: number
-    name: string
-    token: string
-    is_open: boolean
-    expires_at: string | null
+    id: number;
+    name: string;
+    token: string;
+    is_open: boolean;
+    expires_at: string | null;
 }
 
 export interface SubmissionPageProps {
-    bgImage: string
-    name: string
-    activityName: string
-    token: string
-    allowedExtensions: string
+    bgImage: string;
+    name: string;
+    activityName: string;
+    token: string;
+    allowedExtensions: string;
 }
 
 export type Submission = {
-    activityId: number,
-    activityTitle: string,
-    link: ActivityLink,
+    activityId: number;
+    activityTitle: string;
+    link: ActivityLink;
     submissions: Array<{
-        id: number,
-        student_name: string,
-        student_email: string,
-        student_no: string,
-        file_path: string,
-        created_at: string,
-        file_content?: string
-        file_extension?: string
-        language: string
-    }>
-}
+        id: number;
+        student_name: string;
+        student_email: string;
+        student_no: string;
+        file_path: string;
+        created_at: string;
+        file_content?: string;
+        file_extension?: string;
+        language: string;
+    }>;
+};
 export interface DetectionRow {
-    id: string
+    id: string;
     submission_a: {
-        id: number
-        student_name: string
-        student_no: string
-        student_email: string
-    }
+        id: number;
+        student_name: string;
+        student_no: string;
+        student_email: string;
+    };
     submission_b: {
-        id: number
-        student_name: string
-        student_no: string
-        student_email: string
-    }
-    similarity_score: number
-    created_at: string
+        id: number;
+        student_name: string;
+        student_no: string;
+        student_email: string;
+    };
+    similarity_score: number;
+    created_at: string;
 }
 
 export interface DetectionPageProps {
-    activityId: number
-    activityTitle: string
-    activityDate: string
-    link: ActivityLink
+    activityId: number;
+    activityTitle: string;
+    activityDate: string;
+    link: ActivityLink;
     detections: PaginationData & {
-        data: DetectionRow[]
-        path: string
-    }
-    filters: Record<string, string>
+        data: DetectionRow[];
+        path: string;
+    };
+    filters: Record<string, string>;
 }
 
 export interface DetectionShowProps {
     detection: {
-        id: string
-        activity_link_id: string
-        seq_score: number
-        struct_score: number
-        avg_score: number
+        id: string;
+        activity_link_id: string;
+        seq_score: number;
+        struct_score: number;
+        avg_score: number;
         line_matches: Array<{
-            code_a: [number, number]
-            code_b: [number, number]
-        }>
+            code_a: [number, number];
+            code_b: [number, number];
+        }>;
         submission_a: {
-            id: string
-            student_name: string
-            student_no: string
-            file_path: string
-            language: string
-        }
+            id: string;
+            student_name: string;
+            student_no: string;
+            file_path: string;
+            language: string;
+        };
         submission_b: {
-            id: string
-            student_name: string
-            student_no: string
-            student_email: string
-            file_path: string
-            language: string
-        }
-    }
-    fileA: string
-    fileB: string
+            id: string;
+            student_name: string;
+            student_no: string;
+            student_email: string;
+            file_path: string;
+            language: string;
+        };
+    };
+    fileA: string;
+    fileB: string;
+}
+
+export interface ActiveLinksData {
+    total: number;
+    noDeadline: number;
+    withDeadline: number;
+}
+
+export interface DashboardPageProps {
+    activeLinksData: ActiveLinksData;
 }

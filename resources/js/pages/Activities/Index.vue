@@ -6,7 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableRow, } from '@/componen
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Badge } from '@/components/ui/badge';
-import { Disc, FolderOpen } from 'lucide-vue-next';
+import { Circle, FolderOpen } from 'lucide-vue-next';
 import type { ActivityPagination } from '@/types'
 import { computed } from 'vue';
 import PaginationComponent from '@/components/Pagination.vue';
@@ -50,12 +50,14 @@ const handlePageChange = (pageNumber: number) => {
                                     <div class="space-x-4 flex items-baseline md:items-center">
                                         <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                                             <Badge variant="outline" class="inline-flex items-center space-x-1">
-                                                <Disc class="w-3 h-3 text-green-600" />
+                                                <Circle class="w-3 h-3 text-green-500" :stroke="none"
+                                                    :fill="'currentColor'" />
                                                 <span>{{ activity.open_links_count }} Active</span>
                                             </Badge>
 
                                             <Badge variant="outline" class="inline-flex items-center space-x-1">
-                                                <Disc class="w-3 h-3 text-red-600" />
+                                                <Circle class="w-3 h-3 text-red-500" :stroke="none"
+                                                    :fill="'currentColor'" />
                                                 <span>{{ activity.closed_links_count }} Closed</span>
                                             </Badge>
                                             <Badge

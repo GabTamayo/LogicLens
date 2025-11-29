@@ -150,7 +150,7 @@ pre[data-line] {
 pre[data-line] .line-highlight {
     position: absolute;
     width: 100% !important;
-    background: #ff040030 !important;
+    background: #ff040025 !important;
     counter-increment: line-highlight-counter;
 }
 
