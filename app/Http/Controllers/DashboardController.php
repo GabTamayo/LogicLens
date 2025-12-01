@@ -3,28 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLink;
+use App\Services\DashboardService;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(DashboardService $dashboardService)
     {
         $userId = Auth::id();
-        $now = Carbon::now();
 
-        // Scope links to the current user's activities only
-        $userLinksQuery = ActivityLink::whereHas('activity', fn($q) => $q->where('user_id', $userId));
-
-        $activeLinksData = [
-            'total' => (clone $userLinksQuery)->where('is_open', true)->count(),
-            'noDeadline' => (clone $userLinksQuery)->where('is_open', true)->whereNull('expires_at')->count(),
-            'withDeadline' => (clone $userLinksQuery)->where('is_open', true)->whereNotNull('expires_at')->count()
-        ];
+        $activeLinksQuery = ActivityLink::whereHas('activity', fn ($q) => $q->where('user_id', $userId));
 
         return Inertia::render('Dashboard', [
-            'activeLinksData' => $activeLinksData,
+            'totalActivityLinks' => (clone $activeLinksQuery)->count(),
+            'activeLinksData' => $dashboardService->getActiveLinksData($activeLinksQuery),
+            'totalLinksWithoutDetections' => (clone $activeLinksQuery)->doesntHave('detections')->count(),
+            'totalUpcomingThisWeek' => $dashboardService->getUpcomingLinksThisWeek($activeLinksQuery)->count(),
+            'totalFlaggedDetections' => $dashboardService->getFlaggedDetections($userId)->count(),
+            'totalAverageScore' => $dashboardService->getAverageScore($userId),
+            'upcomingThisWeek' => Inertia::defer(fn () => $dashboardService->getUpcomingLinksThisWeek($activeLinksQuery)),
+            'flaggedDetections' => Inertia::defer(fn () => $dashboardService->getFlaggedDetections($userId)),
         ]);
     }
 

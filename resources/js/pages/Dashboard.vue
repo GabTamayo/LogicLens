@@ -31,7 +31,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <div class="flex flex-1 flex-col gap-2">
                     <div class="w-full">
                         <!-- Pass the activeLinksData prop to DashboardCards -->
-                        <DashboardCards :active-links-data="activeLinksData" />
+                        <DashboardCards :total-activity-links="totalActivityLinks"
+                            :total-links-without-detections="totalLinksWithoutDetections"
+                            :total-average-score="totalAverageScore" />
                     </div>
                     <div>
                         <DashboardBarchart />
@@ -40,7 +42,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                 <!-- Right Sidebar (Empty for now) -->
                 <aside class="hidden xl:flex flex-col lg:w-80 xl:w-96 gap-4">
-                    <DashboardSidebar :active-links-data="activeLinksData" />
+                    <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
+                        :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
+                        :total-flagged-detections="totalFlaggedDetections" />
                 </aside>
 
             </div>

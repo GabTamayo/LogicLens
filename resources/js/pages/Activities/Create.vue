@@ -48,7 +48,7 @@ function submit(close: () => void) {
             </FormField>
             <FormField name="language">
                 <Select v-model="form.language">
-                    <SelectTrigger>
+                    <SelectTrigger class="w-full">
                         <SelectValue placeholder="Select Programming Language" />
                     </SelectTrigger>
                     <SelectContent>

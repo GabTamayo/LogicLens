@@ -179,17 +179,7 @@ usePoll(60000, {
                 </p>
                 <Form @submit="submit"
                     class="space-y-6 flex flex-col lg:flex-row lg:items-center lg:justify-center lg:space-x-12 m-6">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger as-child>
-                                <Button type="submit" :disabled="form.processing"
-                                    class="hidden lg:block">Generate</Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Generate a new submission link</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
+                    <Button type="submit" :disabled="form.processing" class="hidden lg:block">Generate</Button>
                     <FormField name="activity">
                         <FormItem class="w-full">
                             <FormLabel>Link Submission Name</FormLabel>

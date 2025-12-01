@@ -35,6 +35,22 @@ class Submission extends Model
         return $this->hasMany(Detection::class);
     }
 
+    public function detectionA(): HasMany
+    {
+        return $this->hasMany(Detection::class, 'submission_a_id');
+    }
+
+    public function detectionB(): HasMany
+    {
+        return $this->hasMany(Detection::class, 'submission_b_id');
+    }
+
+    public function scopeUndetected($query)
+    {
+        return $query->whereDoesntHave('detectionA')->whereDoesntHave('detectionB');
+    }
+
+
     public function scopeSelectedAttributes($query)
     {
         return $query->select('id', 'student_name', 'student_email', 'student_no', 'file_path', 'language', 'created_at');

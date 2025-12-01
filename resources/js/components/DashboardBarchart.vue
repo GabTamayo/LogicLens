@@ -3,24 +3,25 @@ import type { ChartConfig, } from "@/components/ui/chart"
 
 import { VisAxis, VisGroupedBar, VisXYContainer } from "@unovis/vue"
 import { TrendingUp } from "lucide-vue-next"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { ChartContainer, ChartCrosshair, ChartTooltip, ChartTooltipContent, componentToString, } from "@/components/ui/chart"
-const description = "A line chart"
+import SelectSeparator from "./ui/select/SelectSeparator.vue"
 
 const chartData = [
-    { date: new Date("2024-01-01"), desktop: 186 },
-    { date: new Date("2024-02-01"), desktop: 305 },
-    { date: new Date("2024-03-01"), desktop: 237 },
-    { date: new Date("2024-04-01"), desktop: 73 },
-    { date: new Date("2024-05-01"), desktop: 209 },
-    { date: new Date("2024-06-01"), desktop: 214 },
+    { date: new Date("2024-01-01"), desktop: 80.20 },
+    { date: new Date("2024-02-01"), desktop: 74.21 },
+    { date: new Date("2024-03-01"), desktop: 92.30 },
+    { date: new Date("2024-04-01"), desktop: 33.33 },
+    { date: new Date("2024-05-01"), desktop: 40.28 },
+    { date: new Date("2024-06-01"), desktop: 80.20 },
 ]
 
 type Data = typeof chartData[number]
 
 const chartConfig = {
     desktop: {
-        label: "Desktop",
+        label: "Activity",
         color: "var(--chart-1)",
     },
 } satisfies ChartConfig
@@ -30,7 +31,38 @@ const chartConfig = {
     <Card>
         <CardHeader>
             <CardTitle>Bar Chart</CardTitle>
-            <CardDescription>January - June 2024</CardDescription>
+            <CardDescription>Activities Overview</CardDescription>
+            <CardAction>
+                <Select>
+                    <SelectTrigger class="w-[140px]">
+                        <SelectValue placeholder="Filter Activity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>Activities</SelectLabel>
+                            <SelectItem value="all">
+                                All
+                            </SelectItem>
+                            <SelectSeparator />
+                            <SelectItem value="apple">
+                                Apple
+                            </SelectItem>
+                            <SelectItem value="banana">
+                                Banana
+                            </SelectItem>
+                            <SelectItem value="blueberry">
+                                Blueberry
+                            </SelectItem>
+                            <SelectItem value="grapes">
+                                Grapes
+                            </SelectItem>
+                            <SelectItem value="pineapple">
+                                Pineapple
+                            </SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+            </CardAction>
         </CardHeader>
         <CardContent class="h-115">
             <ChartContainer :config="chartConfig">

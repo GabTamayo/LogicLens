@@ -167,6 +167,33 @@ export interface ActiveLinksData {
     withDeadline: number;
 }
 
+export interface UpcomingThisWeek {
+    id: string;
+    activity_id: string;
+    activity: string;
+    language: string;
+    name: string;
+    expires_at: string;
+}
+
+export interface FlaggedDetections {
+    id: string;
+    link_id: string;
+    activity_id: string;
+    link_name: string;
+    activity: string;
+    submitter_a: string;
+    submitter_b: string;
+    avg_score: number;
+}
+
 export interface DashboardPageProps {
+    totalActivityLinks: number;
+    totalLinksWithoutDetections: number;
     activeLinksData: ActiveLinksData;
+    upcomingThisWeek: UpcomingThisWeek[];
+    totalUpcomingThisWeek: number;
+    flaggedDetections: FlaggedDetections[];
+    totalFlaggedDetections: number;
+    totalAverageScore: number;
 }
