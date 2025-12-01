@@ -48,15 +48,6 @@ const activeLinksData = {
                                 {{ activeLinksData.noDeadline }}
                             </div>
                         </div>
-
-                        <Separator orientation="vertical" class="h-8 sm:h-10" />
-
-                        <div class="flex flex-col items-center">
-                            <div class="text-2xs sm:text-xs text-muted-foreground">No Detection</div>
-                            <div class="text-xl sm:text-3xl font-semibold">
-                                {{ activeLinksData.addedThisWeek }}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -64,35 +55,6 @@ const activeLinksData = {
             <Separator />
 
             <div>
-                <div class="flex justify-end mb-2 w-full">
-                    <Select>
-                        <SelectTrigger class="w-[140px]">
-                            <SelectValue placeholder="Filter Due" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectGroup>
-                                <SelectLabel>Due Date</SelectLabel>
-                                <SelectItem value="all">
-                                    All
-                                </SelectItem>
-                                <SelectItem value="this_day">
-                                    This day
-                                </SelectItem>
-                                <SelectItem value="this_week">
-                                    This week
-                                </SelectItem>
-                                <SelectItem value="this_month">
-                                    This month
-                                </SelectItem>
-                                <SelectSeparator />
-                                <SelectItem value="no_deadline">
-                                    No deadline
-                                </SelectItem>
-                            </SelectGroup>
-                        </SelectContent>
-                    </Select>
-                </div>
-
                 <ItemGroup v-if="activeLinksData.dueThisWeek.length > 0">
                     <ScrollArea class="h-58 w-full rounded-md">
                         <div class="p-1">
