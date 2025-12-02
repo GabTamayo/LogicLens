@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { SubmissionPageProps } from '@/types';
 import InputError from '@/components/InputError.vue';
 import { ref } from 'vue';
+import AppLogoIcon from '@/components/AppLogoIcon.vue';
 
 const props = defineProps<SubmissionPageProps>()
 
@@ -41,13 +42,14 @@ const submit = () => {
                 <div class="bg-card border border-border p-6 shadow-sm rounded-xl">
                     <div class="flex flex-col items-center gap-2">
                         <div class="flex flex-col items-center gap-2 font-medium">
-                            <div class="flex h-8 w-8 items-center justify-center rounded-md">
-                                <GalleryVerticalEnd class="size-6" />
+                            <div
+                                class="flex aspect-square size-10 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+                                <AppLogoIcon class="size-10 fill-current text-white dark:text-black" />
                             </div>
-                            <span class="sr-only">Clonewave</span>
+                            <span class="sr-only">Signs</span>
                         </div>
                         <h1 class="text-xl font-bold">
-                            Welcome to Clonewave
+                            Welcome to Signs
                         </h1>
                         <div class="text-center text-sm text-muted-foreground">
                             <p>Submission for {{ activityName }}</p>

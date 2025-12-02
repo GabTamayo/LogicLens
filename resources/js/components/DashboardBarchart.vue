@@ -123,7 +123,7 @@ type Data = {
 const chartConfig = {
     score: {
         label: "Avg. Score",
-        color: "var(--chart-2)",
+        color: "var(--chart-1)",
     },
 } satisfies ChartConfig
 </script>
@@ -176,7 +176,7 @@ const chartConfig = {
                 </Select>
             </CardAction>
         </CardHeader>
-        <CardContent class="h-120">
+        <CardContent class="h-120 px-2 pt-4 sm:px-6 sm:pt-6 pb-4">
             <div v-if="isLoading" class="flex items-center justify-center h-full">
                 <div class="text-sm text-muted-foreground">
                     <Loader class="animate-spin" />

@@ -4,7 +4,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { Circle, FolderOpen, ArrowRight, Code2, Calendar, Loader } from 'lucide-vue-next';
+import { Circle, FolderOpen, ArrowRight, Code2, Calendar, Loader, GalleryVertical, List } from 'lucide-vue-next';
 import type { ActivityPagination } from '@/types'
 import { computed, ref, watch } from 'vue';
 import PaginationComponent from '@/components/Pagination.vue';
@@ -14,26 +14,37 @@ import { Toaster } from '@/components/ui/sonner';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger, } from '@/components/ui/tabs'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import 'vue-sonner/style.css';
 
 dayjs.extend(relativeTime)
 
 const isLoading = ref(false);
-
+const getStoredViewMode = (): string => {
+    if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('activities-view-mode');
+        return stored === 'list' || stored === 'grid' ? stored : 'grid';
+    }
+    return 'grid';
+};
+const viewMode = ref(getStoredViewMode());
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Activities',
         href: '/activities',
     },
 ];
-
 const page = usePage();
 const activities = computed(() => page.props.activities as ActivityPagination);
 const filters = computed(() => page.props.filters as { language: string });
-
 const selectedLanguage = ref(filters.value.language);
 
-// Watch for changes in the selected language and update the URL
+watch(viewMode, (newValue) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('activities-view-mode', newValue);
+    }
+});
 watch(selectedLanguage, (newValue) => {
     isLoading.value = true;
     router.get('/activities',
@@ -90,7 +101,6 @@ const getLanguageLogo = (language: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
-            <!-- Loading State -->
             <template v-if="isLoading">
                 <div class="h-full flex items-center justify-center py-12">
                     <Loader class="h-8 w-8 animate-spin text-muted-foreground" />
@@ -107,6 +117,16 @@ const getLanguageLogo = (language: string) => {
                     </div>
 
                     <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <Tabs v-model="viewMode">
+                            <TabsList class="w-[130px] sm:w-fit">
+                                <TabsTrigger value="grid">
+                                    <GalleryVertical class="size-4" />
+                                </TabsTrigger>
+                                <TabsTrigger value="list">
+                                    <List class="size-4" />
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
                         <Select v-model="selectedLanguage">
                             <SelectTrigger class="w-[130px] sm:w-[150px]">
                                 <SelectValue placeholder="Filter Language" />
@@ -121,15 +141,13 @@ const getLanguageLogo = (language: string) => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-
                         <AddActivityButton />
                     </div>
 
                 </div>
 
-                <!-- Activities Grid or Empty State for Filtered Results -->
                 <template v-if="activities.data.length > 0">
-                    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div v-if="viewMode === 'grid'" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         <Link v-for="activity in activities.data" :key="activity.id"
                             :href="`/activities/${activity.id}`" prefetch="mount" class="block">
                         <Card
@@ -170,7 +188,8 @@ const getLanguageLogo = (language: string) => {
                                         <div class="flex items-center gap-2">
                                             <div class="flex items-center gap-1.5">
                                                 <Circle class="h-3 w-3 text-green-500 fill-current" />
-                                                <span class="text-sm font-medium">{{ activity.open_links_count }}</span>
+                                                <span class="text-sm font-medium">{{ activity.open_links_count
+                                                }}</span>
                                             </div>
                                             <span class="text-xs text-muted-foreground">Active</span>
                                         </div>
@@ -200,13 +219,79 @@ const getLanguageLogo = (language: string) => {
                         </Link>
                     </div>
 
-                    <!-- Pagination -->
+                    <div v-else class="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-[40%]">Activity</TableHead>
+                                    <TableHead>Language</TableHead>
+                                    <TableHead>Active Links</TableHead>
+                                    <TableHead>Closed Links</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead class="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="activity in activities.data" :key="activity.id"
+                                    class="group cursor-pointer hover:bg-muted/50"
+                                    @click="router.visit(`/activities/${activity.id}`)">
+                                    <TableCell class="text-muted-foreground">
+                                        <div class="flex flex-col gap-1">
+                                            <span
+                                                class="font-medium text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
+                                                {{ activity.title }}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div :class="[
+                                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium w-fit',
+                                            getLanguageColor(activity.language_text)
+                                        ]">
+                                            <img v-if="getLanguageLogo(activity.language_text)"
+                                                :src="getLanguageLogo(activity.language_text)"
+                                                :alt="`${activity.language_text} logo`"
+                                                class="h-4 w-4 object-contain" />
+                                            <Code2 v-else class="h-4 w-4" />
+                                            <span>{{ activity.language_text }}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div class="flex items-center gap-1.5">
+                                            <Circle class="h-3 w-3 text-green-500 fill-current" />
+                                            <span class="text-sm font-medium">{{ activity.open_links_count }}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div class="flex items-center gap-1.5">
+                                            <Circle class="h-3 w-3 text-red-500 fill-current" />
+                                            <span class="text-sm font-medium">{{ activity.closed_links_count }}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <Calendar class="h-3.5 w-3.5" />
+                                            <span>{{ dayjs(activity.created_at).fromNow() }}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <Link :href="`/activities/${activity.id}`" prefetch="mount"
+                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary dark:text-white group-hover:underline"
+                                            @click.stop>
+                                        <span>View</span>
+                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                        </Link>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </div>
+
                     <div class="mt-4">
                         <PaginationComponent :pagination="activities" @page-change="handlePageChange" />
                     </div>
                 </template>
 
-                <!-- Empty State for Filtered Results -->
                 <template v-else>
                     <Empty class="py-12">
                         <EmptyHeader>

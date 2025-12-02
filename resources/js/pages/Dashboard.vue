@@ -3,12 +3,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DashboardPageProps } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';
 import DashboardBarchart from '@/components/DashboardBarchart.vue';
 
-// Define props to receive data from the controller
 defineProps<DashboardPageProps>();
 
 const breadcrumbs: BreadcrumbItem[] = [
