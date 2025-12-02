@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
 import { ref } from "vue"
 import { Separator } from '@/components/ui/separator'
@@ -109,7 +108,7 @@ function formatExpiresAt(expires_at: string | null) {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false, // military time
+        hour12: false,
     }).format(date);
 }
 function copy(id: string) {
@@ -150,15 +149,13 @@ const handleSaveDeadline = (payload: { linkId: string, date: Date }) => {
         }
     })
 }
-
 const isInitialLoadDone = ref(false)
 
-usePoll(60000, {
+usePoll(30000, {
     only: ['links'],
     preserveState: true,
     preserveScroll: true,
 })
-
 </script>
 
 <template>
@@ -216,122 +213,125 @@ usePoll(60000, {
                             <Skeleton v-for="i in 8" :key="i" class="h-15 w-full rounded-xl" />
                         </div>
                     </template>
-                    <Table class="mt-4">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Link</TableHead>
-                                <TableHead></TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            <template v-if="links.data.length > 0">
-                                <TableRow v-for="link in links.data" :key="link.id">
-                                    <TableCell class="truncate">{{ link.name }}</TableCell>
-                                    <TableCell>
-                                        <div class="flex">
-                                            <Badge variant="outline" class="h-6 w-18">
-                                                <Circle class="size-4" :class="link.is_open
-                                                    ? 'fill-green-500 text-green-500'
-                                                    : 'fill-red-500 text-red-500'" />
-                                                {{ link.is_open ? 'Open' : 'Closed' }}
-                                            </Badge>
-                                            <Switch class="ml-4" v-model="link.is_open"
-                                                @update:modelValue="updateStatus(link.id, link.name, $event)" />
-                                            <span class="ms-2 text-2xs lg:text-xs text-muted-foreground font-light">
-                                                <div class="hidden 2xl:block">
-                                                    {{ formatExpiresAt(link.expires_at) }} ({{
-                                                        formatRelativeDeadline(link.expires_at) }})
-                                                </div>
-                                                <div class="block 2xl:hidden truncate">
-                                                    {{ formatExpiresAt(link.expires_at) }}
-                                                </div>
-                                            </span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div
-                                            class="flex items-center space-x-2 font-mono max-w-xs md:max-w-full truncate">
-                                            <span class="truncate">{{ appUrl }}/submit{{ link.token }}</span>
-                                            <Button variant="ghost" size="icon"
-                                                @click="copy(`${appUrl}/submit${link.token}`)">
-                                                <Copy class="w-2 h-2" />
-                                            </Button>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell class="text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger as-child>
-                                                <Button variant="ghost" size="icon" class="w-8 h-8 p-0 cursor-pointer">
-                                                    <span class="sr-only">Open menu</span>
-                                                    <MoreHorizontal class="w-4 h-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'>
-                                                <DropdownMenuItem>
-                                                    <Eye class="w-4 h-4 mr-1" />
-                                                    View Submissions
-                                                </DropdownMenuItem>
-                                                </Link>
-                                                <DropdownMenuSeparator />
-                                                <Dialog v-if="isDesktop" v-model:open="isOpen">
-                                                    <DialogTrigger as-child>
-                                                        <DropdownMenuItem
-                                                            @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
-                                                            <CalendarCog class="w-4 h-4 mr-2" />
-                                                            Set Deadline
-                                                        </DropdownMenuItem>
-                                                    </DialogTrigger>
-                                                    <DialogContent class="sm:max-w-[425px]">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Set Deadline</DialogTitle>
-                                                            <DialogDescription>
-                                                                Set the date and time for the deadline.
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <GridForm />
-                                                    </DialogContent>
-                                                </Dialog>
-                                                <Drawer v-else v-model:open="isOpen">
-                                                    <DrawerTrigger as-child>
-                                                        <DropdownMenuItem
-                                                            @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
-                                                            <CalendarCog class="w-4 h-4 mr-2" />
-                                                            Set Deadline
-                                                        </DropdownMenuItem>
-                                                        <DrawerContent>
-                                                            <DrawerHeader>
-                                                                <DrawerTitle>Set Deadline</DrawerTitle>
-                                                                <DrawerDescription>
-                                                                    Set the date and time for the deadline.
-                                                                </DrawerDescription>
-                                                            </DrawerHeader>
-                                                            <GridForm />
-                                                        </DrawerContent>
-                                                    </DrawerTrigger>
-                                                </Drawer>
-                                                <DropdownMenuItem class="text-red-600" :disabled="!link.expires_at"
-                                                    @click="link.expires_at && removeDeadline(link.id)">
-                                                    <Delete class="w-4 h-4 mr-2" />
-                                                    Remove Deadline
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
-                                </TableRow>
-                            </template>
-                            <template v-else>
+                    <div class="mt-4 rounded-md border">
+                        <Table>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colspan="4" class="text-center text-muted-foreground py-6">
-                                        No submission links generated yet.
-                                    </TableCell>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Link</TableHead>
+                                    <TableHead></TableHead>
                                 </TableRow>
-                            </template>
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                <template v-if="links.data.length > 0">
+                                    <TableRow v-for="link in links.data" :key="link.id">
+                                        <TableCell class="truncate">{{ link.name }}</TableCell>
+                                        <TableCell>
+                                            <div class="flex">
+                                                <Badge variant="outline" class="h-6 w-18">
+                                                    <Circle class="size-4" :class="link.is_open
+                                                        ? 'fill-green-500 text-green-500'
+                                                        : 'fill-red-500 text-red-500'" />
+                                                    {{ link.is_open ? 'Open' : 'Closed' }}
+                                                </Badge>
+                                                <Switch class="ml-4" v-model="link.is_open"
+                                                    @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                                <span class="ms-2 text-2xs lg:text-xs text-muted-foreground font-light">
+                                                    <div class="hidden 2xl:block">
+                                                        {{ formatExpiresAt(link.expires_at) }} ({{
+                                                            formatRelativeDeadline(link.expires_at) }})
+                                                    </div>
+                                                    <div class="block 2xl:hidden truncate">
+                                                        {{ formatExpiresAt(link.expires_at) }}
+                                                    </div>
+                                                </span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div
+                                                class="flex items-center space-x-2 font-mono max-w-xs md:max-w-full truncate">
+                                                <span class="truncate">{{ appUrl }}/submit{{ link.token }}</span>
+                                                <Button variant="ghost" size="icon"
+                                                    @click="copy(`${appUrl}/submit${link.token}`)">
+                                                    <Copy class="w-2 h-2" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell class="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger as-child>
+                                                    <Button variant="ghost" size="icon"
+                                                        class="w-8 h-8 p-0 cursor-pointer">
+                                                        <span class="sr-only">Open menu</span>
+                                                        <MoreHorizontal class="w-4 h-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                    <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'>
+                                                    <DropdownMenuItem>
+                                                        <Eye class="w-4 h-4 mr-1" />
+                                                        View Submissions
+                                                    </DropdownMenuItem>
+                                                    </Link>
+                                                    <DropdownMenuSeparator />
+                                                    <Dialog v-if="isDesktop" v-model:open="isOpen">
+                                                        <DialogTrigger as-child>
+                                                            <DropdownMenuItem
+                                                                @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
+                                                                <CalendarCog class="w-4 h-4 mr-2" />
+                                                                Set Deadline
+                                                            </DropdownMenuItem>
+                                                        </DialogTrigger>
+                                                        <DialogContent class="sm:max-w-[425px]">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Set Deadline</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Set the date and time for the deadline.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <GridForm />
+                                                        </DialogContent>
+                                                    </Dialog>
+                                                    <Drawer v-else v-model:open="isOpen">
+                                                        <DrawerTrigger as-child>
+                                                            <DropdownMenuItem
+                                                                @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
+                                                                <CalendarCog class="w-4 h-4 mr-2" />
+                                                                Set Deadline
+                                                            </DropdownMenuItem>
+                                                            <DrawerContent>
+                                                                <DrawerHeader>
+                                                                    <DrawerTitle>Set Deadline</DrawerTitle>
+                                                                    <DrawerDescription>
+                                                                        Set the date and time for the deadline.
+                                                                    </DrawerDescription>
+                                                                </DrawerHeader>
+                                                                <GridForm />
+                                                            </DrawerContent>
+                                                        </DrawerTrigger>
+                                                    </Drawer>
+                                                    <DropdownMenuItem class="text-red-600" :disabled="!link.expires_at"
+                                                        @click="link.expires_at && removeDeadline(link.id)">
+                                                        <Delete class="w-4 h-4 mr-2" />
+                                                        Remove Deadline
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                </template>
+                                <template v-else>
+                                    <TableRow>
+                                        <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                            No submission links generated yet.
+                                        </TableCell>
+                                    </TableRow>
+                                </template>
+                            </TableBody>
+                        </Table>
+                    </div>
                 </Deferred>
             </div>
             <PaginationComponent v-if="links" :pagination="links" @page-change="handlePageChange" />

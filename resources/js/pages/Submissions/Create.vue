@@ -46,10 +46,10 @@ const submit = () => {
                                 class="flex aspect-square size-10 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                                 <AppLogoIcon class="size-10 fill-current text-white dark:text-black" />
                             </div>
-                            <span class="sr-only">Signs</span>
+                            <span class="sr-only">LogicLens</span>
                         </div>
                         <h1 class="text-xl font-bold">
-                            Welcome to Signs
+                            Welcome to LogicLens
                         </h1>
                         <div class="text-center text-sm text-muted-foreground">
                             <p>Submission for {{ activityName }}</p>

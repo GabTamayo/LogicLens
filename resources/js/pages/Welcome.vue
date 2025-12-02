@@ -19,18 +19,15 @@ import { Head, Link } from '@inertiajs/vue3';
 
             <header class="relative z-10 mb-12 flex w-full max-w-7xl mx-auto items-center justify-between text-sm">
                 <div class="flex items-center gap-2">
-                    <!-- SVG Logo -->
-                    <svg viewBox="0 0 200 200" class="h-10 w-10">
-                        <path
-                            d="M 100 45 C 70 45, 55 60, 55 80 C 55 95, 65 105, 80 110 C 95 115, 105 125, 105 140 C 105 150, 100 160, 90 165"
-                            stroke="#3b82f6" stroke-width="12" stroke-linecap="round" fill="none" />
-                        <circle cx="75" cy="65" r="28" fill="none" stroke="#06b6d4" stroke-width="10" />
-                        <circle cx="75" cy="65" r="23" fill="#06b6d4" opacity="0.15" />
-                        <circle cx="85" cy="55" r="8" fill="#e0f2fe" opacity="0.7" />
-                        <circle cx="66" cy="58" r="4" fill="#e0f2fe" opacity="0.5" />
+                    <svg viewBox="0 0 200 200" class="h-20 w-20">
+                        <line x1="120" y1="170" x2="80" y2="110" stroke="#3b82f6" stroke-width="12"
+                            stroke-linecap="round" />
+                        <circle cx="75" cy="65" r="35" fill="none" stroke="#06b6d4" stroke-width="10" />
+                        <circle cx="75" cy="65" r="28" fill="#06b6d4" opacity="0.15" />
+                        <circle cx="85" cy="55" r="10" fill="#e0f2fe" opacity="0.7" />
+                        <circle cx="66" cy="58" r="5" fill="#e0f2fe" opacity="0.5" />
                     </svg>
-                    <!-- App Name -->
-                    <span class="text-white text-2xl tracking-tight font-bold">Signs</span>
+                    <span class="text-white text-2xl tracking-tight font-bold">LogicLens</span>
                 </div>
                 <nav class="flex items-center gap-4">
                     <Link v-if="$page.props.auth.user" :href="dashboard()"
@@ -58,7 +55,7 @@ import { Head, Link } from '@inertiajs/vue3';
                     </h1>
                     <p class="text-lg max-w-xl">
                         Can't manage and analyze student submissions? Analyze quickly and detect similarities using
-                        Signs' advanced logic-based detection system.
+                        LogicLens' advanced logic-based detection system.
                     </p>
                     <Link :href="register()">
                     <Button size="lg" class="gap-2">
@@ -234,7 +231,7 @@ import { Head, Link } from '@inertiajs/vue3';
                                 <DialogHeader>
                                     <DialogTitle>Technical Stack</DialogTitle>
                                     <DialogDescription>
-                                        The technologies powering Signs' code similarity detection system
+                                        The technologies powering LogicLens' code similarity detection system
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div class="grid grid-cols-2 gap-6 py-4 mx-4">
@@ -305,7 +302,7 @@ import { Head, Link } from '@inertiajs/vue3';
         <footer class="border-t border-[#19140010] dark:border-[#3E3E3A20] py-8">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <p class="text-center text-sm text-[#6b6b6b] dark:text-[#a1a1a1]">
-                    © 2025 Signs. All rights reserved.
+                    © 2025 LogicLens. All rights reserved.
                 </p>
             </div>
         </footer>

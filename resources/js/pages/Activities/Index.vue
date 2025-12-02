@@ -235,10 +235,10 @@ const getLanguageLogo = (language: string) => {
                                 <TableRow v-for="activity in activities.data" :key="activity.id"
                                     class="group cursor-pointer hover:bg-muted/50"
                                     @click="router.visit(`/activities/${activity.id}`)">
-                                    <TableCell class="text-muted-foreground">
+                                    <TableCell>
                                         <div class="flex flex-col gap-1">
                                             <span
-                                                class="font-medium text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
+                                                class="text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
                                                 {{ activity.title }}
                                             </span>
                                         </div>
