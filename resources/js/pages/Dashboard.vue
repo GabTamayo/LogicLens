@@ -36,7 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :total-average-score="totalAverageScore" />
                     </div>
                     <div>
-                        <DashboardBarchart />
+                        <DashboardBarchart :average-score-per-activity="averageScorePerActivity"/>
                     </div>
                 </div>
 

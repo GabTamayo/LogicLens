@@ -1,89 +1,201 @@
 <script setup lang="ts">
-import { Modal } from '@inertiaui/modal-vue';
-import { Separator } from '@/components/ui/separator';
-import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
-import { Item, ItemContent, ItemDescription, ItemFooter, ItemHeader, ItemMedia, ItemTitle, ItemGroup, ItemSeparator, ItemActions } from '@/components/ui/item'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger, } from '@/components/ui/tabs'
-import { Circle } from 'lucide-vue-next';
-import SelectSeparator from '@/components/ui/select/SelectSeparator.vue';
+import { computed } from 'vue';
+import { Deferred, Modal } from '@inertiaui/modal-vue';
+import { Circle, Loader } from 'lucide-vue-next';
+import Separator from '@/components/ui/separator/Separator.vue';
+import { Link } from '@inertiajs/vue3';
+import { Calendar, CalendarOff, Clock } from 'lucide-vue-next';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Item, ItemContent, ItemDescription, ItemTitle, ItemGroup, ItemSeparator, ItemActions } from '@/components/ui/item';
+import { Badge } from '@/components/ui/badge';
+import Button from '@/components/ui/button/Button.vue';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatDistanceToNow, parseISO, differenceInDays  } from 'date-fns';
+import type { ActiveLink } from '@/types';
 
-const activeLinksData = {
-    total: 14,
-    noDeadline: 8,
-    addedThisWeek: 6,
-    dueThisWeek: [
-        { id: 1, course: 'BSIT-1', activity: 'Activity 1', deadline: '2024-11-28' },
-        { id: 2, course: 'BSIT-2', activity: 'Midterm Exam', deadline: '2024-11-29' },
-        { id: 3, course: 'BSIT-3', activity: 'Project Proposal', deadline: '2024-11-30' },
-        { id: 4, course: 'BSIT-4', activity: 'Lab Exercise 4', deadline: '2024-12-01' },
-        { id: 5, course: 'BSIT-1', activity: 'Quiz 3', deadline: '2024-12-02' },
-        { id: 6, course: 'BSIT-2', activity: 'Essay 2', deadline: '2024-12-03' },
-    ]
-};
+interface Props {
+    activeLinks: ActiveLink[];
+}
+
+const props = defineProps<Props>();
+
+const linksWithDeadline = computed(() =>
+    props.activeLinks.filter(link => link.has_deadline)
+);
+
+const linksWithoutDeadline = computed(() =>
+    props.activeLinks.filter(link => !link.has_deadline)
+);
+
+function formatRelativeDeadline(expires_at: string | null) {
+    if (!expires_at) return 'No deadline';
+    const date = parseISO(expires_at);
+    return formatDistanceToNow(date, { addSuffix: true });
+}
+
+function formatDate(dateString: string | null) {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString();
+}
+
+function getDeadlineUrgency(expires_at: string | null) {
+    if (!expires_at) return 'none';
+    const days = differenceInDays(parseISO(expires_at), new Date());
+    if (days < 0) return 'overdue';
+    if (days <= 2) return 'urgent';
+    if (days <= 7) return 'soon';
+    return 'normal';
+}
+
+function getUrgencyColor(urgency: string) {
+    switch (urgency) {
+        case 'overdue': return 'text-red-600 dark:text-red-400';
+        case 'urgent': return 'text-orange-600 dark:text-orange-400';
+        case 'soon': return 'text-yellow-600 dark:text-yellow-400';
+        default: return 'text-muted-foreground';
+    }
+}
 </script>
 
 <template>
-    <Modal position="top" panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(222.2_84%_4.9%)] w-full max-w-xl">
+    <Modal v-slot="{ close }" position="top" max-width="3xl"
+        panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(222.2_84%_4.9%)]">
         <div class="tracking-tight space-y-6">
 
             <!-- Header -->
-            <div class="inline-flex items-center space-x-2">
+            <div class="inline-flex items-baseline space-x-2">
                 <Circle class="size-3 text-green-600" :stroke="'none'" :fill="'currentColor'" />
-                <h1 class="text-sm sm:text-md font-bold text-muted-foreground">Active Links</h1>
+                <div>
+                    <h1 class="text-sm sm:text-lg font-bold">Active Links</h1>
+                    <span class="text-xs sm:text-sm text-muted-foreground">All your currently active activity links</span>
+                </div>
             </div>
 
-            <div class="flex justify-between">
-                <!-- Total -->
-                <div class="text-4xl sm:text-6xl font-semibold tabular-nums">
-                    {{ activeLinksData.total }}
-                </div>
-
-                <!-- Stats Section -->
-                <div class="flex flex-col items-end text-center">
-                    <div class="flex items-center gap-2">
-                        <div class="flex flex-col items-center">
-                            <div class="text-2xs sm:text-xs text-muted-foreground">No Deadline</div>
-                            <div class="text-xl sm:text-3xl font-semibold">
-                                {{ activeLinksData.noDeadline }}
-                            </div>
+            <Deferred data="activeLinks">
+                <template #fallback>
+                    <div class="flex items-center justify-center py-12">
+                        <div class="flex flex-col items-center gap-2">
+                            <Loader class="animate-spin" />
+                            <p class="text-sm text-muted-foreground">Loading active links...</p>
                         </div>
                     </div>
+                </template>
+
+                <div class="grid grid-cols-3 gap-4 rounded-lg p-4">
+                    <div class="text-center  bg-muted p-1 rounded-xl">
+                        <div class="text-2xl font-bold">{{ activeLinks.length }}</div>
+                        <div class="text-xs text-muted-foreground">Total Active</div>
+                    </div>
+                    <div class="text-center bg-muted p-1 rounded-xl">
+                        <div class="text-2xl font-bold">{{ linksWithDeadline.length }}</div>
+                        <div class="text-xs text-muted-foreground">With Deadline</div>
+                    </div>
+                    <div class="text-center bg-muted p-1 rounded-xl">
+                        <div class="text-2xl font-bold">{{ linksWithoutDeadline.length }}</div>
+                        <div class="text-xs text-muted-foreground">No Deadline</div>
+                    </div>
                 </div>
-            </div>
 
-            <Separator />
-
-            <div>
-                <ItemGroup v-if="activeLinksData.dueThisWeek.length > 0">
-                    <ScrollArea class="h-58 w-full rounded-md">
-                        <div class="p-1">
-                            <template v-for="(item, index) in activeLinksData.dueThisWeek" :key="item.id">
-                                <Item role="listitem" as-child>
-                                    <a href="#">
-                                        <ItemContent>
-                                            <ItemTitle class="text-sm font-medium">
-                                                {{ item.course }}
-                                            </ItemTitle>
-                                            <ItemDescription class="text-xs">
-                                                {{ item.activity }}
-                                            </ItemDescription>
-                                        </ItemContent>
-                                        <ItemContent>
-                                            <ItemDescription>11/21/2025</ItemDescription>
-                                        </ItemContent>
-                                    </a>
-                                </Item>
-                                <ItemSeparator v-if="index < activeLinksData.dueThisWeek.length - 1" />
-                            </template>
+                <!-- Links List -->
+                <div class="flex-1 min-h-0 space-y-4">
+                    <!-- With Deadline Section -->
+                    <div v-if="linksWithDeadline.length > 0">
+                        <div class="flex items-center gap-2 mb-3">
+                            <Calendar class="size-4 text-primary" />
+                            <h3 class="font-semibold text-sm">With Deadline</h3>
+                            <Badge variant="secondary" class="ml-auto">
+                                {{ linksWithDeadline.length }}
+                            </Badge>
                         </div>
-                    </ScrollArea>
-                </ItemGroup>
+                        <ScrollArea class="h-[180px] rounded-md">
+                            <ItemGroup>
+                                <div class="p-2">
+                                    <template v-for="(link, index) in linksWithDeadline" :key="link.id">
+                                        <Item as-child @click="close">
+                                            <Link :href="`/activities/${link.activity_id}`">
+                                            <ItemContent>
+                                                <ItemTitle class="text-sm font-bold">
+                                                    {{ link.name }}
+                                                </ItemTitle>
+                                                <ItemDescription class="text-xs font-semibold">
+                                                    {{ link.activity }}
+                                                    <span class="font-extralight capitalize">
+                                                        - {{ link.language }}
+                                                    </span>
+                                                </ItemDescription>
+                                            </ItemContent>
+                                            <ItemContent class="relative">
+                                                <div class="text-end space-y-1">
+                                                    <div class="flex items-center gap-1.5 justify-end">
+                                                        <Clock
+                                                            :class="`size-3 ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`" />
+                                                        <ItemDescription class="text-xs font-medium">
+                                                            {{ formatDate(link.expires_at) }}
+                                                        </ItemDescription>
+                                                    </div>
+                                                    <ItemDescription
+                                                        :class="`text-xs font-medium ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`">
+                                                        {{ formatRelativeDeadline(link.expires_at) }}
+                                                    </ItemDescription>
+                                                </div>
+                                            </ItemContent>
+                                            </Link>
+                                        </Item>
+                                        <ItemSeparator v-if="index < linksWithDeadline.length - 1" />
+                                    </template>
+                                </div>
+                            </ItemGroup>
+                        </ScrollArea>
+                    </div>
 
-                <div v-else class="text-center py-8 text-muted-foreground text-sm">
-                    No items due this week
+                    <Separator v-if="linksWithoutDeadline.length && linksWithDeadline.length > 0" class="my-4" />
+
+                    <div v-if="linksWithoutDeadline.length > 0">
+                        <div class="flex items-center gap-2 mb-3">
+                            <CalendarOff class="size-4 text-destructive" />
+                            <h3 class="font-semibold text-sm">No Deadline</h3>
+                            <Badge variant="secondary" class="ml-auto">
+                                {{ linksWithoutDeadline.length }}
+                            </Badge>
+                        </div>
+                        <ScrollArea class="h-[180px] rounded-md">
+                            <ItemGroup>
+                                <div class="p-2">
+                                    <template v-for="(link, index) in linksWithoutDeadline" :key="link.id">
+                                        <Item as-child @click="close">
+                                            <Link :href="`/activities/${link.activity_id}`">
+                                            <ItemContent>
+                                                <ItemTitle class="text-sm font-bold">
+                                                    {{ link.name }}
+                                                </ItemTitle>
+                                                <ItemDescription class="text-xs font-semibold">
+                                                    {{ link.activity }}
+                                                    <span class="font-extralight capitalize">
+                                                        - {{ link.language }}
+                                                    </span>
+                                                </ItemDescription>
+                                            </ItemContent>
+                                            <ItemContent>
+                                                <Badge variant="outline" class="text-xs">
+                                                    No deadline
+                                                </Badge>
+                                            </ItemContent>
+                                            </Link>
+                                        </Item>
+                                        <ItemSeparator v-if="index < linksWithoutDeadline.length - 1" />
+                                    </template>
+                                </div>
+                            </ItemGroup>
+                        </ScrollArea>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div v-if="activeLinks.length === 0"
+                        class="flex items-center justify-center h-full text-muted-foreground text-sm">
+                        No active links found
+                    </div>
                 </div>
-            </div>
+            </Deferred>
 
         </div>
     </Modal>

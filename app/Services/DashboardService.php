@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\ActivityLink;
 use App\Models\Detection;
 use Carbon\Carbon;
 
@@ -27,6 +28,7 @@ class DashboardService
             ->whereNotNull('expires_at')
             ->whereBetween('expires_at', [$startOfWeek->clone()->utc(), $endOfWeek->clone()->utc()])
             ->with('activity:id,title,language')
+            ->orderBy('expires_at')
             ->get()
             ->map(fn($link) => [
                 'id' => $link->id,
@@ -67,5 +69,58 @@ class DashboardService
             ->avg('avg_score');
 
         return $avg !== null ? round($avg, 2) : null;
+    }
+
+    public function getAverageScorePerActivity(int|string $userId): array
+    {
+        $averages = Detection::query()
+            ->whereHas('activityLink.activity', fn($q) => $q->where('user_id', $userId))
+            ->with('activityLink.activity:id,title')
+            ->get()
+            ->groupBy(fn($detection) => $detection->activityLink->activity->id)
+            ->map(fn($detections, $activityId) => [
+                'activity_id' => $activityId,
+                'activity_title' => $detections->first()->activityLink->activity->title,
+                'average_score' => round($detections->avg('avg_score'), 2),
+            ])
+            ->values()
+            ->toArray();
+
+        return $averages;
+    }
+
+    public function getAverageScorePerActivityLink(int|string $userId, string $activityId): array
+    {
+        $averages = Detection::query()
+            ->whereHas('activityLink.activity', fn($q) => $q->where('user_id', $userId)->where('id', $activityId))
+            ->with('activityLink:id,name,activity_id')
+            ->get()
+            ->groupBy(fn($detection) => $detection->activityLink->id)
+            ->map(fn($detections, $linkId) => [
+                'link_id' => $linkId,
+                'link_name' => $detections->first()->activityLink->name,
+                'average_score' => round($detections->avg('avg_score'), 2),
+            ])
+            ->values()
+            ->toArray();
+
+        return $averages;
+    }
+
+    public function getActiveLinks(int|string $userId)
+    {
+        return ActivityLink::with('activity:id,title,language')
+            ->whereHas('activity', fn($q) => $q->where('user_id', $userId))
+            ->where('is_open', true)
+            ->get()
+            ->map(fn($link) => [
+                'id' => $link->id,
+                'activity_id' => $link->activity->id,
+                'activity' => $link->activity->title,
+                'language' => $link->activity->language,
+                'name' => $link->name,
+                'expires_at' => $link->expires_at?->toDateTimeString(),
+                'has_deadline' => $link->expires_at !== null,
+            ]);
     }
 }

@@ -187,6 +187,18 @@ export interface FlaggedDetections {
     avg_score: number;
 }
 
+export interface AverageScorePerActivity {
+    activity_id: string;
+    activity_title: string;
+    average_score: number;
+}
+
+export interface AverageScorePerActivityLink {
+    link_id: string;
+    link_name: string;
+    average_score: number;
+}
+
 export interface DashboardPageProps {
     totalActivityLinks: number;
     totalLinksWithoutDetections: number;
@@ -196,4 +208,19 @@ export interface DashboardPageProps {
     flaggedDetections: FlaggedDetections[];
     totalFlaggedDetections: number;
     totalAverageScore: number;
+    averageScorePerActivity: AverageScorePerActivity[];
+}
+
+export interface ActiveLink {
+    id: string;
+    activity_id: string;
+    activity: string;
+    language: string;
+    name: string;
+    expires_at: string | null;
+    has_deadline: boolean;
+}
+
+export interface ActiveLinksModalProps {
+    activeLinks: ActiveLink[];
 }

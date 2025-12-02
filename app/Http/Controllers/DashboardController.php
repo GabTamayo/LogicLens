@@ -13,22 +13,35 @@ class DashboardController extends Controller
     {
         $userId = Auth::id();
 
-        $activeLinksQuery = ActivityLink::whereHas('activity', fn ($q) => $q->where('user_id', $userId));
+        $activeLinksQuery = ActivityLink::whereHas('activity', fn($q) => $q->where('user_id', $userId));
 
         return Inertia::render('Dashboard', [
             'totalActivityLinks' => (clone $activeLinksQuery)->count(),
-            'activeLinksData' => $dashboardService->getActiveLinksData($activeLinksQuery),
-            'totalLinksWithoutDetections' => (clone $activeLinksQuery)->doesntHave('detections')->count(),
-            'totalUpcomingThisWeek' => $dashboardService->getUpcomingLinksThisWeek($activeLinksQuery)->count(),
+            'activeLinksData' => $dashboardService->getActiveLinksData(clone $activeLinksQuery),
+            'totalLinksWithoutDetections' => (clone $activeLinksQuery)->where('is_open', false)->doesntHave('detections')->count(),
+            'totalUpcomingThisWeek' => $dashboardService->getUpcomingLinksThisWeek(clone $activeLinksQuery)->count(),
             'totalFlaggedDetections' => $dashboardService->getFlaggedDetections($userId)->count(),
             'totalAverageScore' => $dashboardService->getAverageScore($userId),
-            'upcomingThisWeek' => Inertia::defer(fn () => $dashboardService->getUpcomingLinksThisWeek($activeLinksQuery)),
-            'flaggedDetections' => Inertia::defer(fn () => $dashboardService->getFlaggedDetections($userId)),
+            'averageScorePerActivity' => $dashboardService->getAverageScorePerActivity($userId),
+            'upcomingThisWeek' => Inertia::defer(fn() => $dashboardService->getUpcomingLinksThisWeek(clone $activeLinksQuery)),
+            'flaggedDetections' => Inertia::defer(fn() => $dashboardService->getFlaggedDetections($userId)),
         ]);
     }
 
-    public function activeLinks()
+    public function activeLinks(DashboardService $dashboardService)
     {
-        return Inertia::render('Dashboard/ActiveLinks');
+        return Inertia::modal('Dashboard/ActiveLinks', [
+            'activeLinks' => Inertia::defer(fn() => $dashboardService->getActiveLinks(Auth::id())),
+        ]);
+    }
+
+
+    public function getAverageScorePerActivityLink(DashboardService $dashboardService, string $activityId)
+    {
+        $userId = Auth::id();
+
+        return response()->json([
+            'data' => $dashboardService->getAverageScorePerActivityLink($userId, $activityId),
+        ]);
     }
 }

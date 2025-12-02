@@ -15,7 +15,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger, } from '@/components/ui/
 import Badge from './ui/badge/Badge.vue';
 import { ModalLink } from '@inertiaui/modal-vue'
 import { ActiveLinksData, FlaggedDetections, UpcomingThisWeek } from '@/types';
-import { formatDistanceToNow, parseISO } from 'date-fns';
+import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import { router, Link, Deferred } from '@inertiajs/vue3';
 
 const props = defineProps<{
@@ -63,6 +63,45 @@ function formatScore(score: number): string {
 function formatScoreList(score: number): string {
     return (score * 100).toFixed(0);
 }
+function getSimilarityBadge(score: number) {
+    if (score >= 0.90) {
+        return { variant: 'destructive' as const, label: 'Very High', class: 'bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800' }
+    }
+    if (score >= 0.85) {
+        return { variant: 'customOrange' as const, label: 'High', class: 'bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-800' }
+    }
+    if (score >= 0.75) {
+        return { variant: 'customYellow' as const, label: 'Moderate', class: 'bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800' }
+    }
+    return { variant: 'outline' as const, label: 'Low', class: 'bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800' }
+}
+
+function getDeadlineUrgency(expires_at: string | null) {
+    if (!expires_at) return 'none';
+    const days = differenceInDays(parseISO(expires_at), new Date());
+    if (days < 0) return 'overdue';
+    if (days <= 2) return 'urgent';
+    if (days <= 7) return 'soon';
+    return 'normal';
+}
+function getUrgencyColor(urgency: string) {
+    switch (urgency) {
+        case 'overdue': return 'text-red-600 dark:text-red-400';
+        case 'urgent': return 'text-orange-600 dark:text-orange-400';
+        case 'soon': return 'text-yellow-600 dark:text-yellow-400';
+        default: return 'text-muted-foreground';
+    }
+}
+const getLanguageLogo = (language: string) => {
+    switch (language) {
+        case 'java':
+            return '/images/java-logo-png.png';
+        case 'python':
+            return '/images/python-logo-png.png';
+        default:
+            return null;
+    }
+};
 </script>
 
 <template>
@@ -93,7 +132,7 @@ function formatScoreList(score: number): string {
                 <div class="p-1.5 rounded-md bg-primary/10">
                     <Calendar class="size-4 text-primary" />
                 </div>
-                <h3 class="font-semibold text-sm">Upcoming This Week</h3>
+                <h3 class="font-semibold text-sm">Due This Week</h3>
             </div>
             <Badge variant="secondary" class="text-xs font-medium px-2 py-0.5">
                 {{ props.totalUpcomingThisWeek }}
@@ -117,19 +156,28 @@ function formatScoreList(score: number): string {
                                         <ItemTitle class="text-sm font-bold">
                                             {{ item.name }}
                                         </ItemTitle>
-                                        <ItemDescription class="text-xs font-semibold">
+                                        <ItemDescription class="text-xs font-semibold flex items-center gap-1">
+                                            <img v-if="getLanguageLogo(item.language)"
+                                                :src="getLanguageLogo(item.language)" :alt="`${item.language} logo`"
+                                                class="h-5 w-5 object-contain" />
+                                            <Code2 v-else class="h-5 w-5" />
                                             {{ item.activity }}
                                             <span class="font-extralight capitalize">
                                                 - {{ item.language }}
                                             </span>
                                         </ItemDescription>
                                     </ItemContent>
-                                    <ItemContent>
-                                        <div class="text-end">
-                                            <ItemDescription class="text-xs">
-                                                {{ new Date(item.expires_at).toLocaleDateString() }}
-                                            </ItemDescription>
-                                            <ItemDescription class="text-xs">
+                                    <ItemContent class="relative">
+                                        <div class="text-end space-y-1">
+                                            <div class="flex items-center gap-1.5 justify-end">
+                                                <Clock
+                                                    :class="`size-3 ${getUrgencyColor(getDeadlineUrgency(item.expires_at))}`" />
+                                                <ItemDescription class="text-xs font-medium">
+                                                    {{ new Date(item.expires_at).toLocaleDateString() }}
+                                                </ItemDescription>
+                                            </div>
+                                            <ItemDescription
+                                                :class="`text-xs font-medium ${getUrgencyColor(getDeadlineUrgency(item.expires_at))}`">
                                                 {{ (formatRelativeDeadline(item.expires_at)) }}
                                             </ItemDescription>
                                         </div>
@@ -143,7 +191,7 @@ function formatScoreList(score: number): string {
                 </ItemGroup>
 
                 <div v-else class="flex items-center justify-center h-full text-muted-foreground text-sm">
-                    No upcoming items this week
+                    No due items this week
                 </div>
             </div>
         </Deferred>
@@ -186,9 +234,11 @@ function formatScoreList(score: number): string {
                                                             class="font-extralight capitalize text-xs text-muted-foreground hover:underline">
                                                             - {{ getInitials(item.submitter_a) }} & {{
                                                                 getInitials(item.submitter_b) }}
-                                                            <Badge variant="secondary"
-                                                                class="ml-2 h-5 rounded-full font-mono tabular-nums">{{
-                                                                    formatScoreList(item.avg_score) }}%</Badge>
+                                                            <Badge :variant="getSimilarityBadge(item.avg_score).variant"
+                                                                :class="getSimilarityBadge(item.avg_score).class"
+                                                                class="h-5 px-2 ml-1 rounded-full font-mono text-xs font-semibold tabular-nums border">
+                                                                {{ formatScoreList(item.avg_score) }}%
+                                                            </Badge>
                                                         </span>
                                                     </div>
                                                 </HoverCardTrigger>
@@ -210,15 +260,16 @@ function formatScoreList(score: number): string {
                                                                     {{ item.submitter_a }} & {{ item.submitter_b }}
                                                                 </div>
                                                             </div>
-                                                            <Badge variant="outline"
-                                                                class="text-lg px-3 py-1 font-semibold">
-                                                                {{ formatScore(item.avg_score) }} %
+                                                            <Badge :variant="getSimilarityBadge(item.avg_score).variant"
+                                                                :class="getSimilarityBadge(item.avg_score).class"
+                                                                class="text-md font-semibold">
+                                                                {{ formatScore(item.avg_score) }}%
                                                             </Badge>
                                                         </div>
 
                                                         <div class="flex items-center gap-2 pt-2">
                                                             <div
-                                                                class="relative flex-1 h-2 rounded-full overflow-hidden">
+                                                                class="relative flex-1 h-1.5 rounded-full overflow-hidden">
                                                                 <div
                                                                     class="absolute inset-0 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500">
                                                                 </div>
@@ -226,7 +277,8 @@ function formatScoreList(score: number): string {
                                                                     :style="{ marginLeft: `${item.avg_score * 100}%` }">
                                                                 </div>
                                                             </div>
-                                                            <span class="text-xs text-muted-foreground">Score</span>
+                                                            <span class="text-xs text-muted-foreground">Similarity
+                                                                Score</span>
                                                         </div>
                                                     </div>
                                                 </HoverCardContent>
@@ -255,8 +307,8 @@ function formatScoreList(score: number): string {
                                                                 Are you absolutely sure?
                                                             </AlertDialogTitle>
                                                             <AlertDialogDescription>
-                                                                Are you sure you want to remove the flag? This action
-                                                                cannot be undone.
+                                                                Are you sure you want to remove this flag? The detection
+                                                                will no longer appear in the flagged list.
                                                             </AlertDialogDescription>
                                                         </AlertDialogHeader>
                                                         <AlertDialogFooter>
