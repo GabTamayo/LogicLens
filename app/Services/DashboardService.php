@@ -107,6 +107,30 @@ class DashboardService
         return $averages;
     }
 
+    public function getAverageScorePerActivityGroupedByLanguage(int|string $userId): array
+    {
+        $averages = Detection::query()
+            ->whereHas('activityLink.activity', fn($q) => $q->where('user_id', $userId))
+            ->with('activityLink.activity:id,title,language')
+            ->get()
+            ->groupBy(fn($detection) => $detection->activityLink->activity->language ?? 'unknown')
+            ->map(fn($detectionsByLanguage, $language) => [
+                'language' => $language,
+                'activities' => $detectionsByLanguage
+                    ->groupBy(fn($detection) => $detection->activityLink->activity->id)
+                    ->map(fn($detections, $activityId) => [
+                        'activity_id' => $activityId,
+                        'activity_title' => $detections->first()->activityLink->activity->title,
+                        'average_score' => round($detections->avg('avg_score'), 2),
+                    ])
+                    ->values()
+                    ->toArray()
+            ])
+            ->toArray();
+
+        return $averages;
+    }
+
     public function getActiveLinks(int|string $userId)
     {
         return ActivityLink::with('activity:id,title,language')
@@ -121,6 +145,22 @@ class DashboardService
                 'name' => $link->name,
                 'expires_at' => $link->expires_at?->toDateTimeString(),
                 'has_deadline' => $link->expires_at !== null,
+            ]);
+    }
+
+    public function getPendingDetections(int|string $userId)
+    {
+        return ActivityLink::with('activity:id,title,language')
+            ->whereHas('activity', fn($q) => $q->where('user_id', $userId))
+            ->where('is_open', false)
+            ->doesntHave('detections')
+            ->get()
+            ->map(fn($link) => [
+                'id' => $link->id,
+                'activity_id' => $link->activity->id,
+                'activity' => $link->activity->title,
+                'language' => $link->activity->language,
+                'name' => $link->name,
             ]);
     }
 }

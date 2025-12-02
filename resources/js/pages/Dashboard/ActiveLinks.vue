@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Deferred, Modal } from '@inertiaui/modal-vue';
-import { Circle, Loader } from 'lucide-vue-next';
+import { Circle, Ellipsis, Loader } from 'lucide-vue-next';
 import Separator from '@/components/ui/separator/Separator.vue';
 import { Link } from '@inertiajs/vue3';
 import { Calendar, CalendarOff, Clock } from 'lucide-vue-next';
@@ -10,7 +10,7 @@ import { Item, ItemContent, ItemDescription, ItemTitle, ItemGroup, ItemSeparator
 import { Badge } from '@/components/ui/badge';
 import Button from '@/components/ui/button/Button.vue';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatDistanceToNow, parseISO, differenceInDays  } from 'date-fns';
+import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import type { ActiveLink } from '@/types';
 
 interface Props {
@@ -67,7 +67,8 @@ function getUrgencyColor(urgency: string) {
                 <Circle class="size-3 text-green-600" :stroke="'none'" :fill="'currentColor'" />
                 <div>
                     <h1 class="text-sm sm:text-lg font-bold">Active Links</h1>
-                    <span class="text-xs sm:text-sm text-muted-foreground">All your currently active activity links</span>
+                    <span class="text-xs sm:text-sm text-muted-foreground">All your currently active activity
+                        links</span>
                 </div>
             </div>
 
@@ -86,12 +87,14 @@ function getUrgencyColor(urgency: string) {
                         <div class="text-2xl font-bold">{{ activeLinks.length }}</div>
                         <div class="text-xs text-muted-foreground">Total Active</div>
                     </div>
-                    <div class="text-center bg-muted p-1 rounded-xl">
-                        <div class="text-2xl font-bold">{{ linksWithDeadline.length }}</div>
+                    <div class="text-center bg-blue-50 dark:bg-blue-950/30 p-1 rounded-xl">
+                        <div class="text-2xl text-blue-600 dark:text-blue-400 font-bold">{{ linksWithDeadline.length }}
+                        </div>
                         <div class="text-xs text-muted-foreground">With Deadline</div>
                     </div>
-                    <div class="text-center bg-muted p-1 rounded-xl">
-                        <div class="text-2xl font-bold">{{ linksWithoutDeadline.length }}</div>
+                    <div class="text-center bg-red-50 dark:bg-red-950/30 p-1 rounded-xl">
+                        <div class="text-2xl text-red-600 dark:text-red-400 font-bold">{{ linksWithoutDeadline.length }}
+                        </div>
                         <div class="text-xs text-muted-foreground">No Deadline</div>
                     </div>
                 </div>
@@ -190,9 +193,11 @@ function getUrgencyColor(urgency: string) {
                     </div>
 
                     <!-- Empty State -->
-                    <div v-if="activeLinks.length === 0"
-                        class="flex items-center justify-center h-full text-muted-foreground text-sm">
-                        No active links found
+                    <div v-else
+                        class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                        <Ellipsis class="size-12 mb-4 opacity-20 animate-pulse" />
+                        <p class="text-sm font-medium">No active links</p>
+                        <p class="text-xs mt-1">All activity links are currently closed</p>
                     </div>
                 </div>
             </Deferred>

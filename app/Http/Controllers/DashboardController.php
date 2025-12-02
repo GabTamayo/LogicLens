@@ -23,6 +23,7 @@ class DashboardController extends Controller
             'totalFlaggedDetections' => $dashboardService->getFlaggedDetections($userId)->count(),
             'totalAverageScore' => $dashboardService->getAverageScore($userId),
             'averageScorePerActivity' => $dashboardService->getAverageScorePerActivity($userId),
+            'averageScorePerActivityGroupedByLanguage' => $dashboardService->getAverageScorePerActivityGroupedByLanguage($userId),
             'upcomingThisWeek' => Inertia::defer(fn() => $dashboardService->getUpcomingLinksThisWeek(clone $activeLinksQuery)),
             'flaggedDetections' => Inertia::defer(fn() => $dashboardService->getFlaggedDetections($userId)),
         ]);
@@ -35,6 +36,12 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function pendingDetections(DashboardService $dashboardService)
+    {
+        return Inertia::modal('Dashboard/PendingDetections', [
+            'pendingDetections' => Inertia::defer(fn() => $dashboardService->getPendingDetections(Auth::id())),
+        ]);
+    }
 
     public function getAverageScorePerActivityLink(DashboardService $dashboardService, string $activityId)
     {

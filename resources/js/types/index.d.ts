@@ -199,6 +199,11 @@ export interface AverageScorePerActivityLink {
     average_score: number;
 }
 
+export type AverageScorePerActivityGroupedByLanguage = {
+    language: string;
+    activities: AverageScorePerActivity[];
+};
+
 export interface DashboardPageProps {
     totalActivityLinks: number;
     totalLinksWithoutDetections: number;
@@ -209,6 +214,7 @@ export interface DashboardPageProps {
     totalFlaggedDetections: number;
     totalAverageScore: number;
     averageScorePerActivity: AverageScorePerActivity[];
+    averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>;
 }
 
 export interface ActiveLink {
