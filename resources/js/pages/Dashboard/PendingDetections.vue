@@ -23,7 +23,7 @@ defineProps<Props>();
 
 <template>
     <Modal v-slot="{ close }" position="top" max-width="3xl"
-        panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(222.2_84%_4.9%)]">
+        panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <div class="tracking-tight space-y-6">
 
             <!-- Header -->

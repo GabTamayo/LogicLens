@@ -29,7 +29,7 @@ function submit(close: () => void) {
 
 <template>
     <Modal max-width="md" position="top" v-slot="{ close }"
-        panel-classes="bg-white rounded dark:bg-[hsl(222.2_84%_4.9%)]">
+        panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <Form class="space-y-6" @submit="submit(close)">
             <FormField name="title">
                 <FormItem>
