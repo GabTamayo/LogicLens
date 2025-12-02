@@ -18,7 +18,7 @@ class ActivityService
                     'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false),
                 ])
                 ->latest()
-                ->paginate(8)
+                ->paginate(9)
                 ->withQueryString(),
         ];
     }

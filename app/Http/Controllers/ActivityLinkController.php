@@ -6,7 +6,6 @@ use App\Actions\GenerateActivityLink;
 use App\Http\Requests\ActivityLinkRequest;
 use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
-use App\Models\ActivityLink;
 use App\Models\Detection;
 use App\Services\ActivityLinkService;
 use App\Services\DetectionService;
@@ -19,6 +18,7 @@ class ActivityLinkController extends Controller
     {
         $data = $request->validated();
         $generateActivityLink->execute($activity, $data['name'], $data['expires_at'] ?? null);
+
         return redirect()->route('activities.show', $activity);
     }
 
@@ -26,6 +26,7 @@ class ActivityLinkController extends Controller
     {
         $link = $activity->activityLinks()->findOrFail($linkId);
         $link->update($request->validated());
+
         return redirect()->route('activities.show', $activity);
     }
 
@@ -43,8 +44,8 @@ class ActivityLinkController extends Controller
         ];
 
         $tabData = $activeTab === 'detection'
-            ? ['detections' => Inertia::defer(fn() => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b']))), 'submissions' => null]
-            : ['submissions' => Inertia::defer(fn() => $activityLinkService->querySubmissions($link, $request)), 'detections' => null];
+            ? ['detections' => Inertia::defer(fn () => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b']))), 'submissions' => null]
+            : ['submissions' => Inertia::defer(fn () => $activityLinkService->querySubmissions($link, $request)), 'detections' => null];
 
         return Inertia::render('Submissions/Index', [
             ...$baseData,
@@ -58,6 +59,7 @@ class ActivityLinkController extends Controller
         $link = $activity->activityLinks()->findOrFail($linkId);
         $link->delete();
         inertia()->clearHistory();
+
         return redirect()->route('activities.show', $activity);
     }
 
@@ -65,6 +67,7 @@ class ActivityLinkController extends Controller
     {
         $link = $activity->activityLinks()->findOrFail($linkId);
         $link->update(['expires_at' => null]);
+
         return redirect()->route('activities.show', $activity);
     }
 }

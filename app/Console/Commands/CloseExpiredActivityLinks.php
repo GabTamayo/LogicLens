@@ -27,7 +27,7 @@ class CloseExpiredActivityLinks extends Command
     public function handle()
     {
         $count = ActivityLink::whereNotNull('expires_at')
-            ->where('expires_at', '<=', now())
+            ->where('expires_at', '<', now())
             ->where('is_open', true)
             ->update(['is_open' => false]);
 

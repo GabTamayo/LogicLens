@@ -6,6 +6,7 @@ import { Head } from '@inertiajs/vue3';
 import PlaceholderPattern from '../components/PlaceholderPattern.vue';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';
+import DashboardBarchart from '@/components/DashboardBarchart.vue';
 
 // Define props to receive data from the controller
 defineProps<DashboardPageProps>();
@@ -30,17 +31,20 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <div class="flex flex-1 flex-col gap-2">
                     <div class="w-full">
                         <!-- Pass the activeLinksData prop to DashboardCards -->
-                        <DashboardCards :active-links-data="activeLinksData" />
+                        <DashboardCards :total-activity-links="totalActivityLinks"
+                            :total-links-without-detections="totalLinksWithoutDetections"
+                            :total-average-score="totalAverageScore" />
                     </div>
-                    <div
-                        class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                        <PlaceholderPattern />
+                    <div>
+                        <DashboardBarchart :average-score-per-activity="averageScorePerActivity"/>
                     </div>
                 </div>
 
                 <!-- Right Sidebar (Empty for now) -->
                 <aside class="hidden xl:flex flex-col lg:w-80 xl:w-96 gap-4">
-                    <DashboardSidebar />
+                    <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
+                        :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
+                        :total-flagged-detections="totalFlaggedDetections" />
                 </aside>
 
             </div>
