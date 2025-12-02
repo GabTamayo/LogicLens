@@ -2,16 +2,20 @@
 
 namespace App\Services;
 
+use App\Enums\ProgrammingLanguage;
 use App\Models\Activity;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ActivityService
 {
-    public function getActivitiesList(): array
+    public function getActivitiesList(?string $language = null): array
     {
         return [
             'activities' => fn() => Activity::where('user_id', Auth::id())
+                ->when($language && $language !== 'all', function ($query) use ($language) {
+                    $query->where('language', ProgrammingLanguage::request(ProgrammingLanguage::response($language)));
+                })
                 ->selectedAttributes()
                 ->withCount([
                     'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
@@ -20,6 +24,9 @@ class ActivityService
                 ->latest()
                 ->paginate(9)
                 ->withQueryString(),
+            'filters' => [
+                'language' => $language ?? 'all',
+            ],
         ];
     }
 

@@ -2,23 +2,43 @@
 import { VisAxis, VisGroupedBar, VisXYContainer } from "@unovis/vue"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
-import { ChartContainer, ChartCrosshair, ChartTooltip, ChartTooltipContent, componentToString, ChartConfig, ChartLegendContent } from "@/components/ui/chart"
-import { Loader } from "lucide-vue-next"
+import { ChartContainer, ChartCrosshair, ChartTooltip, ChartTooltipContent, componentToString, ChartConfig } from "@/components/ui/chart"
+import { Loader, FileQuestion } from "lucide-vue-next"
 import SelectSeparator from "./ui/select/SelectSeparator.vue"
 import { computed, ref, watch } from 'vue'
-import type { AverageScorePerActivity, AverageScorePerActivityLink } from '@/types'
+import type { AverageScorePerActivity, AverageScorePerActivityLink, AverageScorePerActivityGroupedByLanguage } from '@/types'
 
 const props = defineProps<{
     averageScorePerActivity: AverageScorePerActivity[]
+    averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>
 }>()
 
-const selectedActivityId = ref<string>('all')
+const selectedFilter = ref<string>('all')
 const activityLinksData = ref<AverageScorePerActivityLink[]>([])
 const isLoading = ref(false)
-const isFiltered = computed(() => selectedActivityId.value !== 'all')
+
+const filterType = computed(() => {
+    if (selectedFilter.value === 'all') return 'all'
+    if (selectedFilter.value === 'java' || selectedFilter.value === 'python') return 'language'
+    return 'activity'
+})
+
+const isFiltered = computed(() => selectedFilter.value !== 'all')
+
+// Get activities grouped by language
+const groupedActivities = computed(() => {
+    const groups: Record<string, AverageScorePerActivity[]> = {}
+
+    Object.values(props.averageScorePerActivityGroupedByLanguage).forEach(group => {
+        groups[group.language] = group.activities
+    })
+
+    return groups
+})
 
 const chartData = computed(() => {
-    if (isFiltered.value && activityLinksData.value.length > 0) {
+    // Activity link view (drilled down into a specific activity)
+    if (filterType.value === 'activity' && activityLinksData.value.length > 0) {
         return activityLinksData.value.map(item => ({
             activity: item.link_name,
             activityId: item.link_id,
@@ -26,6 +46,18 @@ const chartData = computed(() => {
         }))
     }
 
+    // Language filter view
+    if (filterType.value === 'language') {
+        const language = selectedFilter.value
+        const activities = groupedActivities.value[language] || []
+        return activities.map(item => ({
+            activity: item.activity_title,
+            activityId: item.activity_id,
+            score: item.average_score * 100
+        }))
+    }
+
+    // Default view (all activities)
     return props.averageScorePerActivity.map(item => ({
         activity: item.activity_title,
         activityId: item.activity_id,
@@ -34,19 +66,21 @@ const chartData = computed(() => {
 })
 
 const chartTitle = computed(() => {
-    return isFiltered.value ? 'Average Score by Activity Link' : 'Average Score by Activity'
+    if (filterType.value === 'activity') return 'Average Score by Activity Link'
+    if (filterType.value === 'language') {
+        const languageName = selectedFilter.value === 'java' ? 'Java' : 'Python'
+        return `Average Score by ${languageName} Activity`
+    }
+    return 'Average Score by Activity'
 })
 
 const chartDescription = computed(() => {
-    return isFiltered.value ? 'Overall Average by Submission Link' : 'Overall Average by Activity'
+    if (filterType.value === 'activity') return 'Overall Average by Submission Link'
+    if (filterType.value === 'language') return `Activities filtered by ${selectedFilter.value}`
+    return 'Overall Average by Activity'
 })
 
 const fetchActivityLinksData = async (activityId: string) => {
-    if (activityId === 'all') {
-        activityLinksData.value = []
-        return
-    }
-
     isLoading.value = true
     try {
         const response = await fetch(`/dashboard/average-score-per-activity-link/${activityId}`, {
@@ -70,8 +104,14 @@ const fetchActivityLinksData = async (activityId: string) => {
     }
 }
 
-watch(selectedActivityId, (newValue) => {
-    fetchActivityLinksData(newValue)
+watch(selectedFilter, (newValue) => {
+    // Clear activity links data when switching filters
+    activityLinksData.value = []
+
+    // Only fetch if it's an activity ID (not 'all', 'java', or 'python')
+    if (filterType.value === 'activity') {
+        fetchActivityLinksData(newValue)
+    }
 })
 
 type Data = {
@@ -94,18 +134,40 @@ const chartConfig = {
             <CardTitle>{{ chartTitle }}</CardTitle>
             <CardDescription>{{ chartDescription }}</CardDescription>
             <CardAction>
-                <Select v-model="selectedActivityId">
-                    <SelectTrigger class="w-[140px]">
+                <Select v-model="selectedFilter">
+                    <SelectTrigger class="w-[180px]">
                         <SelectValue placeholder="Filter Activity" />
                     </SelectTrigger>
                     <SelectContent>
+                        <!-- All Activities -->
                         <SelectGroup>
                             <SelectLabel>Activities</SelectLabel>
                             <SelectItem value="all">
                                 All
                             </SelectItem>
                             <SelectSeparator />
-                            <SelectItem v-for="item in averageScorePerActivity" :key="item.activity_id"
+                        </SelectGroup>
+
+                        <!-- Java Activities -->
+                        <SelectGroup v-if="groupedActivities['java']?.length > 0">
+                            <SelectLabel>Java</SelectLabel>
+                            <SelectItem value="java">
+                                All <span class="text-xs text-muted-foreground">(Java)</span>
+                            </SelectItem>
+                            <SelectItem v-for="item in groupedActivities['java']" :key="item.activity_id"
+                                :value="item.activity_id">
+                                {{ item.activity_title }}
+                            </SelectItem>
+                            <SelectSeparator />
+                        </SelectGroup>
+
+                        <!-- Python Activities -->
+                        <SelectGroup v-if="groupedActivities['python']?.length > 0">
+                            <SelectLabel>Python</SelectLabel>
+                            <SelectItem value="python">
+                                All <span class="text-xs text-muted-foreground">(Python)</span>
+                            </SelectItem>
+                            <SelectItem v-for="item in groupedActivities['python']" :key="item.activity_id"
                                 :value="item.activity_id">
                                 {{ item.activity_title }}
                             </SelectItem>
@@ -119,10 +181,6 @@ const chartConfig = {
                 <div class="text-sm text-muted-foreground">
                     <Loader class="animate-spin" />
                 </div>
-            </div>
-            <div v-else-if="isFiltered && activityLinksData.length === 0"
-                class="flex items-center justify-center h-full">
-                <div class="text-sm text-muted-foreground">No data available for this activity</div>
             </div>
             <ChartContainer v-else :config="chartConfig">
                 <VisXYContainer :data="chartData" :margin="{ left: 0 }" :y-domain="[0, 100]">

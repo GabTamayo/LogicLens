@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle2, TrendingUp, } from "lucide-vue-next"
+import { AlertTriangle, CheckCircle2, LoaderCircle, TrendingUp, } from "lucide-vue-next"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardAction, CardDescription, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ModalLink } from "@inertiaui/modal-vue";
 import { computed } from "vue";
 
 const { totalActivityLinks, totalLinksWithoutDetections, totalAverageScore } = defineProps<{
@@ -66,7 +67,7 @@ const detectionProgress = computed(() => {
             <CardHeader class="relative">
                 <div class="flex items-start justify-between">
                     <CardDescription class="font-semibold text-muted-foreground">
-                        Average Similarity Score
+                        Overall Similarity Score
                     </CardDescription>
                     <component :is="scoreStatus.icon" :class="[scoreStatus.color, 'h-5 w-5']" />
                 </div>
@@ -86,40 +87,47 @@ const detectionProgress = computed(() => {
             </CardHeader>
         </Card>
 
-        <Card class="@container/card h-full relative overflow-hidden transition-all hover:shadow-md">
-            <CardHeader>
-                <div class="flex items-start justify-between">
-                    <CardDescription class="font-semibold text-muted-foreground">
-                        Pending Detections
-                    </CardDescription>
-                    <AlertTriangle :class="[
-                        totalLinksWithoutDetections > 0
-                            ? 'text-amber-600 dark:text-amber-400'
-                            : 'text-muted-foreground/30'
-                    ]" class="h-5 w-5" />
-                </div>
-
-                <div class="flex items-baseline gap-2">
-                    <CardTitle class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight">
-                        {{ totalLinksWithoutDetections }}
-                    </CardTitle>
-                    <span class="text-lg text-muted-foreground font-medium">
-                        / {{ totalActivityLinks }}
-                    </span>
-                </div>
-
-                <div class="pt-2 space-y-1.5">
-                    <div class="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Detection Progress</span>
-                        <span class="font-medium">{{ detectionProgress }}%</span>
+        <ModalLink href="dashboard/pending-detections" #default="{ loading }">
+            <Card class="@container/card h-full relative overflow-hidden transition-all hover:shadow-md">
+                <CardHeader>
+                    <div class="flex items-start justify-between">
+                        <CardDescription class="font-semibold text-muted-foreground">
+                            Pending Detections
+                        </CardDescription>
+                        <template v-if="loading">
+                            <LoaderCircle class="animate-spin h-5 w-5 text-muted-foreground" />
+                        </template>
+                        <template v-else>
+                            <AlertTriangle :class="[
+                                totalLinksWithoutDetections > 0
+                                    ? 'text-amber-600 dark:text-amber-400'
+                                    : 'text-muted-foreground/30'
+                            ]" class="h-5 w-5" />
+                        </template>
                     </div>
-                    <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
-                        <div class="bg-primary h-full transition-all duration-500 ease-out rounded-full"
-                            :style="{ width: `${detectionProgress}%` }" />
+
+                    <div class="flex items-baseline gap-2">
+                        <CardTitle class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight">
+                            {{ totalLinksWithoutDetections }}
+                        </CardTitle>
+                        <span class="text-lg text-muted-foreground font-medium">
+                            / {{ totalActivityLinks }}
+                        </span>
                     </div>
-                </div>
-            </CardHeader>
-        </Card>
+
+                    <div class="pt-2 space-y-1.5">
+                        <div class="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Detection Progress</span>
+                            <span class="font-medium">{{ detectionProgress }}%</span>
+                        </div>
+                        <div class="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-primary h-full transition-all duration-500 ease-out rounded-full"
+                                :style="{ width: `${detectionProgress}%` }" />
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+        </ModalLink>
 
         <Card class="@container/card h-full relative overflow-hidden transition-all hover:shadow-md">
             <CardHeader>

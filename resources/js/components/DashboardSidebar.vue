@@ -105,8 +105,7 @@ const getLanguageLogo = (language: string) => {
 </script>
 
 <template>
-    <ModalLink href="dashboard/active-links" #default="{ loading }"
-        class="focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
+    <ModalLink href="dashboard/active-links" #default="{ loading }">
         <ChartContainer :config="activeLinksChartConfig" class="mx-auto aspect-square max-h-[170px]" :style="{
             '--vis-donut-central-label-font-size': 'var(--text-3xl)',
             '--vis-donut-central-label-font-weight': 'var(--font-weight-bold)',

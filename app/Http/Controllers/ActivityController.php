@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 class ActivityController extends Controller
 {
-    public function index(ActivityService $activityService)
+    public function index(Request $request, ActivityService $activityService)
     {
-        $data = $activityService->getActivitiesList();
+        $data = $activityService->getActivitiesList($request->input('language'));
         return Inertia::render('Activities/Index', $data);
     }
 
