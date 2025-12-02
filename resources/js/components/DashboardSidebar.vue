@@ -79,9 +79,9 @@ function getSimilarityBadge(score: number) {
 function getDeadlineUrgency(expires_at: string | null) {
     if (!expires_at) return 'none';
     const days = differenceInDays(parseISO(expires_at), new Date());
-    if (days < 0) return 'overdue';
+    if (days < 1) return 'overdue';
     if (days <= 2) return 'urgent';
-    if (days <= 7) return 'soon';
+    if (days <= 5) return 'soon';
     return 'normal';
 }
 function getUrgencyColor(urgency: string) {

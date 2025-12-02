@@ -61,7 +61,7 @@ const getLanguageLogo = (language: string) => {
                     <div>
                         <h1 class="text-2xl font-bold tracking-tight">Activities</h1>
                         <p class="text-sm text-muted-foreground mt-1">
-                            Manage and track your programming activities
+                            Manage and group your submission links into activities.
                         </p>
                     </div>
                     <AddActivityButton />

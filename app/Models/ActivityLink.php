@@ -70,7 +70,7 @@ class ActivityLink extends Model
     public function setExpiresAtAttribute($value)
     {
         $this->attributes['expires_at'] = $value
-            ? Carbon::parse($value)->timezone('Asia/Manila')
+            ? Carbon::parse($value)->startOfMinute()->timezone('Asia/Manila')
             : null;
     }
 
