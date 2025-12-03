@@ -114,20 +114,27 @@ class DashboardService
 
     public function getAverageScorePerActivity(int|string $userId): array
     {
-        $averages = Detection::query()
-            ->whereHas('activityLink.activity', fn ($q) => $q->where('user_id', $userId))
-            ->with('activityLink.activity:id,title')
+        return Detection::query()
+            ->join('activity_links', 'detections.activity_link_id', '=', 'activity_links.id')
+            ->join('activities', 'activity_links.activity_id', '=', 'activities.id')
+            ->where('activities.user_id', $userId)
+            ->selectRaw('
+                activities.id as activity_id,
+                activities.title as activity_title,
+                COALESCE(activities.language, \'unknown\') as language,
+                ROUND(AVG(detections.avg_score), 2) as average_score
+            ')
+            ->groupBy('activities.id', 'activities.title', 'activities.language')
+            ->orderBy('activities.title')
             ->get()
-            ->groupBy(fn ($detection) => $detection->activityLink->activity->id)
-            ->map(fn ($detections, $activityId) => [
-                'activity_id' => $activityId,
-                'activity_title' => $detections->first()->activityLink->activity->title,
-                'average_score' => round($detections->avg('avg_score'), 2),
+            ->map(fn ($item) => [
+                'activity_id' => $item->activity_id,
+                'activity_title' => $item->activity_title,
+                'language' => $item->language,
+                'average_score' => (float) $item->average_score,
             ])
             ->values()
             ->toArray();
-
-        return $averages;
     }
 
     public function getAverageScorePerActivityLink(int|string $userId, string $activityId): array
@@ -143,30 +150,6 @@ class DashboardService
                 'average_score' => round($detections->avg('avg_score'), 2),
             ])
             ->values()
-            ->toArray();
-
-        return $averages;
-    }
-
-    public function getAverageScorePerActivityGroupedByLanguage(int|string $userId): array
-    {
-        $averages = Detection::query()
-            ->whereHas('activityLink.activity', fn ($q) => $q->where('user_id', $userId))
-            ->with('activityLink.activity:id,title,language')
-            ->get()
-            ->groupBy(fn ($detection) => $detection->activityLink->activity->language ?? 'unknown')
-            ->map(fn ($detectionsByLanguage, $language) => [
-                'language' => $language,
-                'activities' => $detectionsByLanguage
-                    ->groupBy(fn ($detection) => $detection->activityLink->activity->id)
-                    ->map(fn ($detections, $activityId) => [
-                        'activity_id' => $activityId,
-                        'activity_title' => $detections->first()->activityLink->activity->title,
-                        'average_score' => round($detections->avg('avg_score'), 2),
-                    ])
-                    ->values()
-                    ->toArray(),
-            ])
             ->toArray();
 
         return $averages;

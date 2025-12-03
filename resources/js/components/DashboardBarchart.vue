@@ -6,7 +6,7 @@ import { ChartContainer, ChartCrosshair, ChartTooltip, ChartTooltipContent, comp
 import { Loader, FileQuestion } from "lucide-vue-next"
 import SelectSeparator from "./ui/select/SelectSeparator.vue"
 import { computed, ref, watch } from 'vue'
-import type { AverageScorePerActivity, AverageScorePerActivityLink, AverageScorePerActivityGroupedByLanguage } from '@/types'
+import type { AverageScorePerActivity, AverageScorePerActivityLink } from '@/types'
 
 const emit = defineEmits<{
     filterChanged: [filter: string]
@@ -14,7 +14,6 @@ const emit = defineEmits<{
 
 const props = defineProps<{
     averageScorePerActivity: AverageScorePerActivity[]
-    averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>
 }>()
 
 const selectedFilter = ref<string>('all')
@@ -37,8 +36,12 @@ const isFiltered = computed(() => selectedFilter.value !== 'all')
 const groupedActivities = computed(() => {
     const groups: Record<string, AverageScorePerActivity[]> = {}
 
-    Object.values(props.averageScorePerActivityGroupedByLanguage).forEach(group => {
-        groups[group.language] = group.activities
+    props.averageScorePerActivity.forEach(activity => {
+        const language = activity.language || 'unknown'
+        if (!groups[language]) {
+            groups[language] = []
+        }
+        groups[language].push(activity)
     })
 
     return groups

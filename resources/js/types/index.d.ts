@@ -198,6 +198,7 @@ export interface FlaggedDetectionsPagination extends PaginationData {
 export interface AverageScorePerActivity {
     activity_id: string;
     activity_title: string;
+    language: string;
     average_score: number;
 }
 
@@ -206,11 +207,6 @@ export interface AverageScorePerActivityLink {
     link_name: string;
     average_score: number;
 }
-
-export type AverageScorePerActivityGroupedByLanguage = {
-    language: string;
-    activities: AverageScorePerActivity[];
-};
 
 export interface DashboardPageProps {
     totalActivityLinks: number;
@@ -222,7 +218,6 @@ export interface DashboardPageProps {
     totalFlaggedDetections: number;
     totalAverageScore: number;
     averageScorePerActivity: AverageScorePerActivity[];
-    averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>;
 }
 
 export interface ActiveLink {

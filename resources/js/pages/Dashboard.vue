@@ -3,23 +3,34 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DashboardPageProps } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from '@/components/ui/drawer'
+import Button from '@/components/ui/button/Button.vue';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';
 import DashboardBarchart from '@/components/DashboardBarchart.vue';
-import { ref } from 'vue';
+import { onUnmounted, ref } from 'vue';
+import { ChevronUp } from 'lucide-vue-next';
 
 const props = defineProps<DashboardPageProps>();
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
         href: dashboard().url,
     },
 ];
-
 const dynamicAverageScore = ref<number>(props.totalAverageScore);
 const isLoadingScore = ref(false);
+const isDrawerOpen = ref(false);
+const handleResize = () => {
+    if (window.innerWidth >= 1280) {
+        isDrawerOpen.value = false;
+    }
+};
 
+window.addEventListener('resize', handleResize);
+onUnmounted(() => {
+    window.removeEventListener('resize', handleResize);
+});
 const fetchAverageScore = async (filter: string) => {
     isLoadingScore.value = true;
     try {
@@ -52,24 +63,51 @@ const handleFilterChanged = (filter: string) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-4 lg:p-6 flex flex-1 flex-col">
-            <div class="@container/main flex flex-1 gap-4 lg:gap-6">
+            <div class="@container/main flex flex-1 gap-4 lg:gap-6 min-w-0">
 
-                <!-- Left/Main Content Area -->
-                <div class="flex flex-1 flex-col gap-2">
+                <div class="flex flex-1 flex-col gap-2 min-w-0">
+                    <div class="xl:hidden">
+                        <Drawer v-model:open="isDrawerOpen">
+                            <DrawerTrigger as-child>
+                                <Button variant="outline" size="sm" class="w-full">
+                                    <ChevronUp class="fill-current stroke-none text-muted-foreground" />
+                                    <div class="text-muted-foreground">View Activity Details</div>
+                                </Button>
+                            </DrawerTrigger>
+                            <DrawerContent class="h-[96vh] max-h-[96vh]">
+                                <div class="w-full h-full flex flex-col">
+                                    <DrawerHeader class="flex-shrink-0">
+                                        <DrawerTitle>Activity Details</DrawerTitle>
+                                        <DrawerDescription>View your active links, upcoming activities, and flagged
+                                            detections.</DrawerDescription>
+                                    </DrawerHeader>
+                                    <div class="flex-1 overflow-y-auto px-4 pb-4">
+                                        <div class="space-y-6 pt-4">
+                                            <DashboardSidebar :active-links-data="activeLinksData"
+                                                :upcoming-this-week="upcomingThisWeek"
+                                                :total-upcoming-this-week="totalUpcomingThisWeek"
+                                                :flagged-detections="flaggedDetections"
+                                                :total-flagged-detections="totalFlaggedDetections"
+                                                :close-drawer="() => isDrawerOpen = false" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </DrawerContent>
+                        </Drawer>
+                    </div>
+
                     <div class="w-full">
-                        <!-- Pass the activeLinksData prop to DashboardCards -->
                         <DashboardCards :total-activity-links="totalActivityLinks"
                             :total-links-without-detections="totalLinksWithoutDetections"
                             :total-average-score="dynamicAverageScore" />
                     </div>
                     <div>
-                        <DashboardBarchart @filter-changed="handleFilterChanged" :average-score-per-activity="averageScorePerActivity"
-                            :average-score-per-activity-grouped-by-language="averageScorePerActivityGroupedByLanguage" />
+                        <DashboardBarchart @filter-changed="handleFilterChanged"
+                            :average-score-per-activity="averageScorePerActivity" />
                     </div>
                 </div>
 
-                <!-- Right Sidebar (Empty for now) -->
-                <aside class="hidden xl:flex flex-col lg:w-80 xl:w-96 gap-4">
+                <aside class="hidden xl:flex flex-col w-80 xl:w-96 min-w-80 shrink-0 gap-4">
                     <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
                         :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
                         :total-flagged-detections="totalFlaggedDetections" />

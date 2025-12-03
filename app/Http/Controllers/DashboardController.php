@@ -13,20 +13,17 @@ class DashboardController extends Controller
     {
         $userId = Auth::id();
 
-        $activeLinksQuery = ActivityLink::whereHas('activity', fn ($q) => $q->where('user_id', $userId));
-
-        $upcomingThisWeekQuery = clone $activeLinksQuery;
+        $baseQuery = ActivityLink::whereHas('activity', fn ($q) => $q->where('user_id', $userId));
 
         return Inertia::render('Dashboard', [
-            'totalActivityLinks' => (clone $activeLinksQuery)->count(),
-            'activeLinksData' => $dashboardService->getActiveLinksData(clone $activeLinksQuery),
-            'totalLinksWithoutDetections' => (clone $activeLinksQuery)->where('is_open', false)->doesntHave('detections')->count(),
-            'totalUpcomingThisWeek' => $dashboardService->getUpcomingLinksThisWeekCount($upcomingThisWeekQuery),
+            'totalActivityLinks' => (clone $baseQuery)->count(),
+            'activeLinksData' => $dashboardService->getActiveLinksData(clone $baseQuery),
+            'totalLinksWithoutDetections' => (clone $baseQuery)->where('is_open', false)->doesntHave('detections')->count(),
+            'totalUpcomingThisWeek' => $dashboardService->getUpcomingLinksThisWeekCount(clone $baseQuery),
             'totalFlaggedDetections' => $dashboardService->getFlaggedDetectionsCount($userId),
             'totalAverageScore' => $dashboardService->getAverageScore($userId),
             'averageScorePerActivity' => $dashboardService->getAverageScorePerActivity($userId),
-            'averageScorePerActivityGroupedByLanguage' => $dashboardService->getAverageScorePerActivityGroupedByLanguage($userId),
-            'upcomingThisWeek' => Inertia::scroll(fn () => $dashboardService->getUpcomingLinksThisWeek($upcomingThisWeekQuery)),
+            'upcomingThisWeek' => Inertia::scroll(fn () => $dashboardService->getUpcomingLinksThisWeek(clone $baseQuery)),
             'flaggedDetections' => Inertia::scroll(fn () => $dashboardService->getFlaggedDetections($userId)),
         ]);
     }

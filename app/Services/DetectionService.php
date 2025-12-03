@@ -19,22 +19,25 @@ class DetectionService
     {
         $link = ActivityLink::with('submissions')->findOrFail($linkId);
 
+        if ($link->is_open) {
+            return [false, 'The link must be closed before running detection.', null];
+        }
+
         $submissions = $link->submissions->filter(
-            fn($s) =>
-            $s->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($s->file_path)
+            fn ($s) => $s->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($s->file_path)
         );
 
         if ($submissions->count() < 2) {
-            return [false, "At least 2 submissions are required for detection.", null];
+            return [false, 'At least 2 submissions are required for detection.', null];
         }
 
-        if (! $submissions->every(fn($s) => $s->language === $activity->language)) {
+        if (! $submissions->every(fn ($s) => $s->language === $activity->language)) {
             return [false, "One or more submissions use a different programming language than {$activity->language}.", null];
         }
 
         $payload = [
             'submissions' => $submissions
-                ->map(fn($s) => ['id' => $s->id, 'file_path' => $s->file_path, 'language' => $s->language])
+                ->map(fn ($s) => ['id' => $s->id, 'file_path' => $s->file_path, 'language' => $s->language])
                 ->values()
                 ->toArray(),
             'language' => $activity->language,
@@ -52,7 +55,7 @@ class DetectionService
             'activityTitle' => $activity->title,
             'link' => $link,
             'filters' => $filters,
-            'detections' => Inertia::defer(fn() => $this->queryDetections($link, $filters)),
+            'detections' => Inertia::defer(fn () => $this->queryDetections($link, $filters)),
         ];
     }
 
@@ -65,7 +68,7 @@ class DetectionService
             ->orderByDesc('flagged')
             ->orderByDesc('avg_score')
             ->paginate(10)
-            ->through(fn($detection) => $this->transformDetectionSummary($detection))
+            ->through(fn ($detection) => $this->transformDetectionSummary($detection))
             ->withQueryString();
     }
 
@@ -101,7 +104,9 @@ class DetectionService
 
     private function transformSubmission($submission): ?array
     {
-        if (!$submission) return null;
+        if (! $submission) {
+            return null;
+        }
 
         return [
             'id' => $submission->id,
@@ -122,7 +127,7 @@ class DetectionService
         ];
     }
 
-    private function loadFile(string $path = null): ?string
+    private function loadFile(?string $path = null): ?string
     {
         return ($path && Storage::disk(env('FILESYSTEM_DISK'))->exists($path))
             ? Storage::disk(env('FILESYSTEM_DISK'))->get($path)
@@ -142,6 +147,7 @@ class DetectionService
 
         if (empty($submissions)) {
             Log::warning("No valid submissions for {$activityLinkId}");
+
             return;
         }
 
@@ -161,7 +167,7 @@ class DetectionService
     private function loadSubmissions(array $submissionsData): array
     {
         return collect($submissionsData)
-            ->map(fn($s) => $this->loadContent($s))
+            ->map(fn ($s) => $this->loadContent($s))
             ->filter()
             ->values()
             ->toArray();
@@ -169,11 +175,14 @@ class DetectionService
 
     private function loadContent(array $submission): ?array
     {
-        if (!Storage::disk(env('FILESYSTEM_DISK'))->exists($submission['file_path'])) return null;
+        if (! Storage::disk(env('FILESYSTEM_DISK'))->exists($submission['file_path'])) {
+            return null;
+        }
 
         $size = Storage::disk(env('FILESYSTEM_DISK'))->size($submission['file_path']);
         if ($size > 10 * 1024 * 1024) { // 10MB limit
             Log::warning("File too large, skipping: {$submission['id']}");
+
             return null;
         }
 
@@ -185,12 +194,14 @@ class DetectionService
 
     private function storeDetections(string $activityLinkId, array $results): void
     {
-        if (empty($results)) return;
+        if (empty($results)) {
+            return;
+        }
 
         DB::transaction(function () use ($activityLinkId, $results) {
             Detection::where('activity_link_id', $activityLinkId)->delete();
 
-            $data = collect($results)->map(fn($r) => [
+            $data = collect($results)->map(fn ($r) => [
                 'id' => (string) Str::uuid(),
                 'activity_link_id' => $activityLinkId,
                 'submission_a_id' => $r['submission_a_id'],

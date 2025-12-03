@@ -47,17 +47,11 @@ defineProps<Props>();
                     </div>
                 </template>
 
-                <div class="grid grid-cols-2 gap-4 rounded-lg p-4">
-                    <div class="text-center bg-muted p-2 rounded-xl">
-                        <div class="text-2xl font-bold">{{ pendingDetections.length }}</div>
-                        <div class="text-xs text-muted-foreground">Total Pending</div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                        {{ pendingDetections.length }}
                     </div>
-                    <div class="text-center bg-amber-50 dark:bg-amber-950/30 p-2 rounded-xl">
-                        <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                            {{ pendingDetections.length }}
-                        </div>
-                        <div class="text-xs text-muted-foreground">Needs Processing</div>
-                    </div>
+                    <div class="text-xs text-muted-foreground">Needs Processing</div>
                 </div>
 
                 <!-- Pending List -->

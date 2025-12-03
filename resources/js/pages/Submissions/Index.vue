@@ -6,11 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { type BreadcrumbItem, Submission, DetectionPageProps } from '@/types'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
+import Badge from '@/components/ui/badge/Badge.vue'
 import DataTable from '@/components/DataTable.vue'
 import { columns as submissionColumns } from '@/components/submissions/columns'
 import { columns as detectionColumns } from '@/components/detections/columns'
 import { useDebounceFn } from '@vueuse/core'
-import { LoaderCircle } from 'lucide-vue-next'
+import { LoaderCircle, Circle } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
@@ -36,28 +37,21 @@ interface TabbedPageProps {
 const props = defineProps<TabbedPageProps>()
 const isDetecting = ref(false)
 const activeTab = ref(props.activeTab || 'submission')
-
-// Track pagination state per tab
 const submissionPage = ref(1)
 const detectionPage = ref(1)
-
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
     { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
 ]
-
 const submissionFilters = useRemember({
     student_name: props.filters?.student_name || '',
     student_no: props.filters?.student_no || '',
 }, 'submissions-filters')
-
 const detectionFilters = useRemember({
     student_name_a: props.filters?.student_name_a || '',
     student_name_b: props.filters?.student_name_b || '',
 }, 'detection-filters')
-
-// Watch for tab changes and fetch data accordingly
 watch(activeTab, (newTab) => {
     const page = newTab === 'detection' ? detectionPage.value : submissionPage.value
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
@@ -67,7 +61,6 @@ watch(activeTab, (newTab) => {
         only: newTab === 'detection' ? ['detections', 'activeTab'] : ['submissions', 'activeTab'],
     })
 })
-
 const handleDetectSubmission = () => {
     if (isDetecting.value) return
 
@@ -94,7 +87,6 @@ const handleDetectSubmission = () => {
         },
     })
 }
-
 const handleSubmissionPageChange = (page: number) => {
     submissionPage.value = page
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
@@ -104,7 +96,6 @@ const handleSubmissionPageChange = (page: number) => {
         only: ['submissions'],
     })
 }
-
 const handleDetectionPageChange = (page: number) => {
     detectionPage.value = page
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
@@ -114,7 +105,6 @@ const handleDetectionPageChange = (page: number) => {
         only: ['detections'],
     })
 }
-
 const handleSubmissionFilterChange = useDebounceFn(() => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
         data: { ...submissionFilters.value, tab: 'submission' },
@@ -123,7 +113,6 @@ const handleSubmissionFilterChange = useDebounceFn(() => {
         only: ['submissions'],
     })
 }, 300)
-
 const handleDetectionFilterChange = useDebounceFn(() => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
         data: { ...detectionFilters.value, tab: 'detection' },
@@ -132,17 +121,14 @@ const handleDetectionFilterChange = useDebounceFn(() => {
         only: ['detections'],
     })
 }, 300)
-
 const updateSubmissionFilter = (column: string, value: string) => {
     submissionFilters.value[column] = value
     handleSubmissionFilterChange()
 }
-
 const updateDetectionFilter = (column: string, value: string) => {
     detectionFilters.value[column] = value
     handleDetectionFilterChange()
 }
-
 const isInitialLoadDone = ref(false)
 </script>
 
@@ -158,19 +144,27 @@ const isInitialLoadDone = ref(false)
 
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
-                    {{ props.link.name }}
-                </h2>
+                <div class="inline-flex items-center gap-2">
+                    <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight">
+                        {{ props.link.name }}
+                    </h2>
+                    <Badge variant="outline" class="h-6">
+                        <Circle class="size-4" :class="link.is_open
+                            ? 'fill-green-500 text-green-500'
+                            : 'fill-red-500 text-red-500'" />
+                        {{ link.is_open ? 'Open' : 'Closed' }}
+                    </Badge>
+                </div>
                 <div class="flex items-center gap-2">
                     <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
 
-                    <Separator orientation="vertical" class="h-4"/>
+                    <Separator orientation="vertical" class="h-4" />
 
                     <p class="text-xs text-muted-foreground">
                         {{ new Date(props.link.created_at).toLocaleDateString('en-US', {
                             year: 'numeric',
                             month: 'long',
-                        day: 'numeric'
+                            day: 'numeric'
                         }) }}
                     </p>
                 </div>

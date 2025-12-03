@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, inject } from 'vue';
 import { TrendingDown, TrendingUp, Circle, FileScan, Flag, SquareArrowOutUpRight, Eye, FlagOff, Calendar, ChevronRight, LoaderCircle, Code2, Clock } from "lucide-vue-next"
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator';
@@ -24,6 +24,7 @@ const props = defineProps<{
     totalUpcomingThisWeek: number;
     flaggedDetections: FlaggedDetectionsPagination;
     totalFlaggedDetections: number;
+    closeDrawer?: () => void;
 }>()
 
 const activeLinksChartData = computed(() => [
@@ -102,10 +103,16 @@ const getLanguageLogo = (language: string) => {
             return null;
     }
 };
+
+function handleModalLinkClick() {
+    if (props.closeDrawer) {
+        props.closeDrawer();
+    }
+}
 </script>
 
 <template>
-    <ModalLink href="dashboard/active-links" #default="{ loading }">
+    <ModalLink href="dashboard/active-links" #default="{ loading }" @click="handleModalLinkClick">
         <ChartContainer :config="activeLinksChartConfig" class="mx-auto aspect-square max-h-[170px]" :style="{
             '--vis-donut-central-label-font-size': 'var(--text-3xl)',
             '--vis-donut-central-label-font-weight': 'var(--font-weight-bold)',
@@ -145,7 +152,7 @@ const getLanguageLogo = (language: string) => {
                         <InfiniteScroll data="upcomingThisWeek">
                             <template v-for="(item, index) in upcomingThisWeek.data" :key="item.id">
                                 <Item role="listitem" as-child>
-                                    <Link :href="`/activities/${item.activity_id}`">
+                                    <Link :href="`/activities/${item.activity_id}`" @click="handleModalLinkClick">
                                     <ItemContent>
                                         <ItemTitle class="text-sm font-bold">
                                             {{ item.name }}
@@ -182,7 +189,7 @@ const getLanguageLogo = (language: string) => {
                             </template>
 
                             <template #loading>
-                                <div class="flex justify-center items-center text-muted-foreground gap-1">
+                                <div class="my-2 flex justify-center items-center text-muted-foreground gap-1">
                                     <LoaderCircle class="animate-spin size-3" />
                                     <div class="text-xs">Loading items</div>
                                 </div>
@@ -239,7 +246,6 @@ const getLanguageLogo = (language: string) => {
                                                 </HoverCardTrigger>
                                                 <HoverCardContent class="w-80">
                                                     <div class="space-y-3">
-                                                        <!-- Header with gradient -->
                                                         <div class="flex items-center justify-between pb-3 border-b">
                                                             <div>
                                                                 <div class="inline-flex items-baseline gap-1">
@@ -322,7 +328,7 @@ const getLanguageLogo = (language: string) => {
                                             </Tooltip>
                                         </TooltipProvider>
                                         <ModalLink :href="`/detections/${item.id}`" position="top"
-                                            #default="{ loading }">
+                                            #default="{ loading }" @click="handleModalLinkClick">
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger as-child>
@@ -342,7 +348,8 @@ const getLanguageLogo = (language: string) => {
                                                 </Tooltip>
                                             </TooltipProvider>
                                         </ModalLink>
-                                        <Link :href="`/activities/${item.activity_id}/links/${item.link_id}`">
+                                        <Link :href="`/activities/${item.activity_id}/links/${item.link_id}`"
+                                            @click="handleModalLinkClick">
                                         <TooltipProvider>
                                             <Tooltip>
                                                 <TooltipTrigger as-child>
@@ -362,7 +369,7 @@ const getLanguageLogo = (language: string) => {
                             </template>
 
                             <template #loading>
-                                <div class="flex justify-center items-center text-muted-foreground gap-1">
+                                <div class="my-2 flex justify-center items-center text-muted-foreground gap-1">
                                     <LoaderCircle class="animate-spin size-3" />
                                     <div class="text-xs">Loading items</div>
                                 </div>

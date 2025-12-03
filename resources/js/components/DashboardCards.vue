@@ -13,14 +13,7 @@ const { totalActivityLinks, totalLinksWithoutDetections, totalAverageScore } = d
 
 const animatedScore = ref(totalAverageScore ? Math.round(totalAverageScore * 100) : 0);
 
-const totalAverageScorePercentage = computed(() => {
-    return totalAverageScore
-        ? Math.round(totalAverageScore * 100)
-        : 0;
-});
-
-// Animate score changes
-watch(() => totalAverageScore, (newScore, oldScore) => {
+watch(() => totalAverageScore, (newScore) => {
     const targetScore = newScore ? Math.round(newScore * 100) : 0;
     const startScore = animatedScore.value;
     const duration = 800; // milliseconds
