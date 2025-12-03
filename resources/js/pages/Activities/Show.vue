@@ -220,6 +220,7 @@ usePoll(30000, {
                                     <TableHead>Name</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Link</TableHead>
+                                    <TableHead>Submission</TableHead>
                                     <TableHead></TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -257,6 +258,13 @@ usePoll(30000, {
                                                     <Copy class="w-2 h-2" />
                                                 </Button>
                                             </div>
+                                        </TableCell>
+                                        <TableCell class="text-center">
+                                            <Badge class="rounded-full w-[30px] h-[25px] overflow-hidden text-ellipsis">
+                                                <span class="font-mono font-semibold">
+                                                    {{ link.submissions_count }}
+                                                </span>
+                                            </Badge>
                                         </TableCell>
                                         <TableCell class="text-right">
                                             <DropdownMenu>

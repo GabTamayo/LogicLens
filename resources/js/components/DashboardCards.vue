@@ -3,17 +3,46 @@ import { AlertTriangle, CheckCircle2, LoaderCircle, TrendingUp, } from "lucide-v
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ModalLink } from "@inertiaui/modal-vue";
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 
 const { totalActivityLinks, totalLinksWithoutDetections, totalAverageScore } = defineProps<{
     totalActivityLinks: number;
     totalLinksWithoutDetections: number;
-    totalAverageScore: number;
+    totalAverageScore: number | null;
 }>();
 
-const totalAverageScorePercentage = totalAverageScore
-    ? Math.round(totalAverageScore * 100)
-    : 0;
+const animatedScore = ref(totalAverageScore ? Math.round(totalAverageScore * 100) : 0);
+
+const totalAverageScorePercentage = computed(() => {
+    return totalAverageScore
+        ? Math.round(totalAverageScore * 100)
+        : 0;
+});
+
+// Animate score changes
+watch(() => totalAverageScore, (newScore, oldScore) => {
+    const targetScore = newScore ? Math.round(newScore * 100) : 0;
+    const startScore = animatedScore.value;
+    const duration = 800; // milliseconds
+    const startTime = Date.now();
+
+    const animate = () => {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Easing function for smooth animation
+        const easeOutQuad = (t: number) => t * (2 - t);
+        const easedProgress = easeOutQuad(progress);
+
+        animatedScore.value = Math.round(startScore + (targetScore - startScore) * easedProgress);
+
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        }
+    };
+
+    animate();
+}, { immediate: false });
 
 const scoreStatus = computed(() => {
     const score = totalAverageScore;
@@ -73,10 +102,11 @@ const detectionProgress = computed(() => {
                 </div>
 
                 <div class="flex items-baseline gap-2">
-                    <CardTitle class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight">
-                        {{ totalAverageScorePercentage }}
+                    <CardTitle
+                        class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight transition-all duration-300">
+                        {{ animatedScore }}
                     </CardTitle>
-                    <span :class="[scoreStatus.color, 'text-2xl font-semibold']">%</span>
+                    <span :class="[scoreStatus.color, 'text-2xl font-semibold transition-colors duration-300']">%</span>
                 </div>
 
                 <div class="pt-2">

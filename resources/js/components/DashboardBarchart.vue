@@ -8,6 +8,10 @@ import SelectSeparator from "./ui/select/SelectSeparator.vue"
 import { computed, ref, watch } from 'vue'
 import type { AverageScorePerActivity, AverageScorePerActivityLink, AverageScorePerActivityGroupedByLanguage } from '@/types'
 
+const emit = defineEmits<{
+    filterChanged: [filter: string]
+}>()
+
 const props = defineProps<{
     averageScorePerActivity: AverageScorePerActivity[]
     averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>
@@ -16,6 +20,10 @@ const props = defineProps<{
 const selectedFilter = ref<string>('all')
 const activityLinksData = ref<AverageScorePerActivityLink[]>([])
 const isLoading = ref(false)
+
+defineExpose({
+    selectedFilter
+})
 
 const filterType = computed(() => {
     if (selectedFilter.value === 'all') return 'all'
@@ -105,6 +113,9 @@ const fetchActivityLinksData = async (activityId: string) => {
 }
 
 watch(selectedFilter, (newValue) => {
+    // Emit the filter change to parent
+    emit('filterChanged', newValue)
+
     // Clear activity links data when switching filters
     activityLinksData.value = []
 
@@ -112,7 +123,7 @@ watch(selectedFilter, (newValue) => {
     if (filterType.value === 'activity') {
         fetchActivityLinksData(newValue)
     }
-})
+}, { immediate: true })
 
 type Data = {
     activity: string

@@ -6,8 +6,9 @@ import { Head } from '@inertiajs/vue3';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';
 import DashboardBarchart from '@/components/DashboardBarchart.vue';
+import { ref } from 'vue';
 
-defineProps<DashboardPageProps>();
+const props = defineProps<DashboardPageProps>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,6 +16,34 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
 ];
+
+const dynamicAverageScore = ref<number>(props.totalAverageScore);
+const isLoadingScore = ref(false);
+
+const fetchAverageScore = async (filter: string) => {
+    isLoadingScore.value = true;
+    try {
+        const response = await fetch(`/dashboard/average-score?filter=${encodeURIComponent(filter)}`, {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            dynamicAverageScore.value = result.averageScore ?? props.totalAverageScore ?? 0;
+        }
+    } catch (error) {
+        console.error('Error fetching average score:', error);
+    } finally {
+        isLoadingScore.value = false;
+    }
+};
+
+const handleFilterChanged = (filter: string) => {
+    fetchAverageScore(filter);
+};
 </script>
 
 <template>
@@ -31,10 +60,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <!-- Pass the activeLinksData prop to DashboardCards -->
                         <DashboardCards :total-activity-links="totalActivityLinks"
                             :total-links-without-detections="totalLinksWithoutDetections"
-                            :total-average-score="totalAverageScore" />
+                            :total-average-score="dynamicAverageScore" />
                     </div>
                     <div>
-                        <DashboardBarchart :average-score-per-activity="averageScorePerActivity"
+                        <DashboardBarchart @filter-changed="handleFilterChanged" :average-score-per-activity="averageScorePerActivity"
                             :average-score-per-activity-grouped-by-language="averageScorePerActivityGroupedByLanguage" />
                     </div>
                 </div>

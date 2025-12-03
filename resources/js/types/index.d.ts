@@ -176,6 +176,10 @@ export interface UpcomingThisWeek {
     expires_at: string;
 }
 
+export interface UpcomingThisWeekPagination extends PaginationData {
+    data: UpcomingThisWeek[];
+}
+
 export interface FlaggedDetections {
     id: string;
     link_id: string;
@@ -185,6 +189,10 @@ export interface FlaggedDetections {
     submitter_a: string;
     submitter_b: string;
     avg_score: number;
+}
+
+export interface FlaggedDetectionsPagination extends PaginationData {
+    data: FlaggedDetections[];
 }
 
 export interface AverageScorePerActivity {
@@ -208,9 +216,9 @@ export interface DashboardPageProps {
     totalActivityLinks: number;
     totalLinksWithoutDetections: number;
     activeLinksData: ActiveLinksData;
-    upcomingThisWeek: UpcomingThisWeek[];
+    upcomingThisWeek: UpcomingThisWeekPagination;
     totalUpcomingThisWeek: number;
-    flaggedDetections: FlaggedDetections[];
+    flaggedDetections: FlaggedDetectionsPagination;
     totalFlaggedDetections: number;
     totalAverageScore: number;
     averageScorePerActivity: AverageScorePerActivity[];
