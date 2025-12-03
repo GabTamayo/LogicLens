@@ -70,8 +70,7 @@ import { Head, Link } from '@inertiajs/vue3';
                     preserveAspectRatio="none">
                     <path d="M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z" fill="white"
                         class="dark:fill-[#0a0a0a]">
-                        <animate attributeName="d" dur="12s" repeatCount="indefinite"
-                            values="M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z;
+                        <animate attributeName="d" dur="12s" repeatCount="indefinite" values="M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z;
                                     M0,64 C320,80 640,30 960,60 C1180,90 1380,70 1440,68 L1440,120 L0,120 Z;
                                     M0,72 C280,110 640,50 960,80 C1180,100 1380,60 1440,76 L1440,120 L0,120 Z;
                                     M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z" />
@@ -228,8 +227,7 @@ import { Head, Link } from '@inertiajs/vue3';
                         </h2>
                         <p class="text-lg text-[#6b6b6b] dark:text-[#a1a1a1] leading-relaxed">
                             The system integrates a Laravel-Inertia and Vue.js interface with a logic-based similarity
-                            detection
-                            service, powered by FastAPI microservices for efficient and scalable code analysis.
+                            detection service, powered by FastAPI for efficient and scalable code analysis.
                         </p>
                         <Dialog>
                             <DialogTrigger as-child>
