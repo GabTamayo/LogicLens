@@ -144,7 +144,7 @@ const isInitialLoadDone = ref(false)
 
         <div class="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <div class="inline-flex items-center gap-2">
+                <div class="inline-flex items-center gap-2 cursor-default">
                     <h2 class="scroll-m-20 text-3xl font-semibold tracking-tight">
                         {{ props.link.name }}
                     </h2>
@@ -155,7 +155,7 @@ const isInitialLoadDone = ref(false)
                         {{ link.is_open ? 'Open' : 'Closed' }}
                     </Badge>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 cursor-default">
                     <p class="text-sm text-muted-foreground">{{ props.activityTitle }}</p>
 
                     <Separator orientation="vertical" class="h-4" />

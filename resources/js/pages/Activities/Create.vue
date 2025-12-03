@@ -34,7 +34,7 @@ function submit(close: () => void) {
             <FormField name="title">
                 <FormItem>
                     <div class="mb-4">
-                        <h1 class="font-bold text-lg">Add Activity</h1>
+                        <h1 class="font-bold text-lg cursor-default">Add Activity</h1>
                         <FormDescription>
                             Add an activity to generate submission links. Click Save once you're done.
                         </FormDescription>

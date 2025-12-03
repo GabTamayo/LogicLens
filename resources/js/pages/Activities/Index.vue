@@ -110,7 +110,7 @@ const getLanguageLogo = (language: string) => {
             <template v-else-if="activities.data.length > 0 || selectedLanguage !== 'all'">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-lg sm:text-2xl font-bold tracking-tight">Activities</h1>
+                        <h1 class="text-lg sm:text-2xl font-bold tracking-tight cursor-default">Activities</h1>
                         <p class="text-xs sm:text-sm text-muted-foreground mt-1">
                             Manage and group your submission links into activities.
                         </p>

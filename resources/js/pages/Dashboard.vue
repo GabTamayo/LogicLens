@@ -10,6 +10,8 @@ import DashboardSidebar from '@/components/DashboardSidebar.vue';
 import DashboardBarchart from '@/components/DashboardBarchart.vue';
 import { onUnmounted, ref } from 'vue';
 import { ChevronUp } from 'lucide-vue-next';
+import { Toaster } from '@/components/ui/sonner';
+import 'vue-sonner/style.css';
 
 const props = defineProps<DashboardPageProps>();
 const breadcrumbs: BreadcrumbItem[] = [
@@ -116,4 +118,5 @@ const handleFilterChanged = (filter: string) => {
             </div>
         </div>
     </AppLayout>
+    <Toaster rich-colors />
 </template>

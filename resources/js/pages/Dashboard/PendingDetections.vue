@@ -69,7 +69,7 @@ defineProps<Props>();
                                 <div class="p-2">
                                     <template v-for="(link, index) in pendingDetections" :key="link.id">
                                         <Item as-child @click="close">
-                                            <Link :href="`/activities/${link.activity_id}`">
+                                            <Link :href="`/activities/${link.activity_id}/links/${link.id}`">
                                             <ItemContent>
                                                 <ItemTitle class="text-sm font-bold">
                                                     {{ link.name }}
