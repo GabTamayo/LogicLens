@@ -12,7 +12,7 @@ import { Head, Link } from '@inertiajs/vue3';
 
     <Head title="Welcome" />
     <div class="flex min-h-screen flex-col items-center bg-[#FDFDFC] lg:justify-center dark:bg-[#0a0a0a]">
-        <section class="relative w-full px-6 py-16 lg:px-8 lg:py-24 overflow-hidden rounded-br-4xl"
+        <section class="relative w-full px-6 py-16 lg:px-8 lg:py-24 overflow-hidden"
             style="background-image: url('/images/clonewave-bg.jpg'); background-size: cover; background-position: center;">
 
             <div class="absolute inset-0 bg-black/20 dark:bg-black/50"></div>
@@ -47,7 +47,6 @@ import { Head, Link } from '@inertiajs/vue3';
                 </nav>
             </header>
 
-            <!-- Hero content -->
             <div class="relative z-10 grid gap-12 lg:grid-cols-2 lg:gap-16 items-center max-w-7xl mx-auto">
                 <div class="space-y-6 text-white">
                     <h1 class="text-5xl font-bold tracking-tight lg:text-6xl">
@@ -64,6 +63,20 @@ import { Head, Link } from '@inertiajs/vue3';
                     </Button>
                     </Link>
                 </div>
+            </div>
+
+            <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-none">
+                <svg class="relative block w-full h-20 md:h-28 lg:h-36" viewBox="0 0 1440 120"
+                    preserveAspectRatio="none">
+                    <path d="M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z" fill="white"
+                        class="dark:fill-[#0a0a0a]">
+                        <animate attributeName="d" dur="12s" repeatCount="indefinite"
+                            values="M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z;
+                                    M0,64 C320,80 640,30 960,60 C1180,90 1380,70 1440,68 L1440,120 L0,120 Z;
+                                    M0,72 C280,110 640,50 960,80 C1180,100 1380,60 1440,76 L1440,120 L0,120 Z;
+                                    M0,68 C300,100 600,40 900,70 C1150,90 1350,60 1440,80 L1440,120 L0,120 Z" />
+                    </path>
+                </svg>
             </div>
         </section>
 
@@ -147,7 +160,6 @@ import { Head, Link } from '@inertiajs/vue3';
             </div>
         </section>
 
-        <!-- How it Works Section -->
         <section class="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
             <div class="text-center mb-12">
                 <h2 class="text-4xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC] mb-4">
@@ -200,7 +212,6 @@ import { Head, Link } from '@inertiajs/vue3';
             </div>
         </section>
 
-        <!-- Architecture Section -->
         <section class="py-16 lg:py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
