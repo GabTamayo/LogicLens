@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
-import { TrendingDown, TrendingUp, Circle, FileScan, Flag, SquareArrowOutUpRight, Eye, FlagOff, Calendar, ChevronRight, LoaderCircle } from "lucide-vue-next"
+import { computed, onMounted, ref, inject } from 'vue';
+import { TrendingDown, TrendingUp, Circle, FileScan, Flag, SquareArrowOutUpRight, Eye, FlagOff, Calendar, ChevronRight, LoaderCircle, Code2, Clock } from "lucide-vue-next"
 import { Skeleton } from '@/components/ui/skeleton'
 import { Separator } from '@/components/ui/separator';
 import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
@@ -14,16 +14,17 @@ import Button from "./ui/button/Button.vue"
 import { HoverCard, HoverCardContent, HoverCardTrigger, } from '@/components/ui/hover-card'
 import Badge from './ui/badge/Badge.vue';
 import { ModalLink } from '@inertiaui/modal-vue'
-import { ActiveLinksData, FlaggedDetections, UpcomingThisWeek } from '@/types';
+import { ActiveLinksData, FlaggedDetectionsPagination, UpcomingThisWeekPagination } from '@/types';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
-import { router, Link, Deferred } from '@inertiajs/vue3';
+import { router, Link, InfiniteScroll } from '@inertiajs/vue3';
 
 const props = defineProps<{
     activeLinksData: ActiveLinksData;
-    upcomingThisWeek: UpcomingThisWeek[];
+    upcomingThisWeek: UpcomingThisWeekPagination;
     totalUpcomingThisWeek: number;
-    flaggedDetections: FlaggedDetections[];
+    flaggedDetections: FlaggedDetectionsPagination;
     totalFlaggedDetections: number;
+    closeDrawer?: () => void;
 }>()
 
 const activeLinksChartData = computed(() => [
@@ -102,10 +103,16 @@ const getLanguageLogo = (language: string) => {
             return null;
     }
 };
+
+function handleModalLinkClick() {
+    if (props.closeDrawer) {
+        props.closeDrawer();
+    }
+}
 </script>
 
 <template>
-    <ModalLink href="dashboard/active-links" #default="{ loading }">
+    <ModalLink href="dashboard/active-links" #default="{ loading }" @click="handleModalLinkClick">
         <ChartContainer :config="activeLinksChartConfig" class="mx-auto aspect-square max-h-[170px]" :style="{
             '--vis-donut-central-label-font-size': 'var(--text-3xl)',
             '--vis-donut-central-label-font-weight': 'var(--font-weight-bold)',
@@ -137,20 +144,15 @@ const getLanguageLogo = (language: string) => {
                 {{ props.totalUpcomingThisWeek }}
             </Badge>
         </div>
-        <Deferred data="upcomingThisWeek">
-            <template #fallback>
-                <div class="h-[205px] flex flex-col gap-2">
-                    <Skeleton v-for="i in 3" :key="i" class="h-15 w-full" />
-                </div>
-            </template>
 
-            <div class="h-[205px]">
-                <ItemGroup v-if="upcomingThisWeek.length > 0">
-                    <ScrollArea class="h-55 w-full rounded-md">
-                        <div class="p-1">
-                            <template v-for="(item, index) in upcomingThisWeek" :key="item.id">
+        <div class="h-[205px]">
+            <ItemGroup v-if="upcomingThisWeek.data && upcomingThisWeek.data.length > 0">
+                <ScrollArea class="h-55 w-full rounded-md">
+                    <div class="p-1">
+                        <InfiniteScroll data="upcomingThisWeek">
+                            <template v-for="(item, index) in upcomingThisWeek.data" :key="item.id">
                                 <Item role="listitem" as-child>
-                                    <Link :href="`/activities/${item.activity_id}`">
+                                    <Link :href="`/activities/${item.activity_id}`" @click="handleModalLinkClick">
                                     <ItemContent>
                                         <ItemTitle class="text-sm font-bold">
                                             {{ item.name }}
@@ -183,17 +185,24 @@ const getLanguageLogo = (language: string) => {
                                     </ItemContent>
                                     </Link>
                                 </Item>
-                                <ItemSeparator v-if="index < upcomingThisWeek.length - 1" />
+                                <ItemSeparator v-if="index < upcomingThisWeek.data.length - 1" />
                             </template>
-                        </div>
-                    </ScrollArea>
-                </ItemGroup>
 
-                <div v-else class="flex items-center justify-center h-full text-muted-foreground text-sm">
-                    No due items this week
-                </div>
+                            <template #loading>
+                                <div class="my-2 flex justify-center items-center text-muted-foreground gap-1">
+                                    <LoaderCircle class="animate-spin size-3" />
+                                    <div class="text-xs">Loading items</div>
+                                </div>
+                            </template>
+                        </InfiniteScroll>
+                    </div>
+                </ScrollArea>
+            </ItemGroup>
+
+            <div v-else class="flex items-center justify-center h-full text-muted-foreground text-sm">
+                No due items this week
             </div>
-        </Deferred>
+        </div>
     </div>
 
     <Separator />
@@ -210,18 +219,12 @@ const getLanguageLogo = (language: string) => {
                 {{ props.totalFlaggedDetections }}
             </Badge>
         </div>
-        <Deferred data="flaggedDetections">
-            <template #fallback>
-                <div class="h-[205px] flex flex-col gap-2">
-                    <Skeleton v-for="i in 3" :key="i" class="h-15 w-full" />
-                </div>
-            </template>
-
-            <div class="h-[205px]">
-                <ItemGroup v-if="flaggedDetections.length > 0">
-                    <ScrollArea class="h-55 w-full">
-                        <div class="p-1">
-                            <template v-for="(item, index) in flaggedDetections" :key="item.id">
+        <div class="h-[205px]">
+            <ItemGroup v-if="flaggedDetections.data && flaggedDetections.data.length > 0">
+                <ScrollArea class="h-55 w-full">
+                    <div class="p-1">
+                        <InfiniteScroll data="flaggedDetections">
+                            <template v-for="(item, index) in flaggedDetections.data" :key="item.id">
                                 <Item>
                                     <ItemContent>
                                         <ItemTitle class="font-bold">
@@ -243,7 +246,6 @@ const getLanguageLogo = (language: string) => {
                                                 </HoverCardTrigger>
                                                 <HoverCardContent class="w-80">
                                                     <div class="space-y-3">
-                                                        <!-- Header with gradient -->
                                                         <div class="flex items-center justify-between pb-3 border-b">
                                                             <div>
                                                                 <div class="inline-flex items-baseline gap-1">
@@ -326,7 +328,7 @@ const getLanguageLogo = (language: string) => {
                                             </Tooltip>
                                         </TooltipProvider>
                                         <ModalLink :href="`/detections/${item.id}`" position="top"
-                                            #default="{ loading }">
+                                            #default="{ loading }" @click="handleModalLinkClick">
                                             <TooltipProvider>
                                                 <Tooltip>
                                                     <TooltipTrigger as-child>
@@ -346,7 +348,8 @@ const getLanguageLogo = (language: string) => {
                                                 </Tooltip>
                                             </TooltipProvider>
                                         </ModalLink>
-                                        <Link :href="`/activities/${item.activity_id}/links/${item.link_id}`">
+                                        <Link :href="`/activities/${item.activity_id}/links/${item.link_id}`"
+                                            @click="handleModalLinkClick">
                                         <TooltipProvider>
                                             <Tooltip>
                                                 <TooltipTrigger as-child>
@@ -362,17 +365,24 @@ const getLanguageLogo = (language: string) => {
                                         </Link>
                                     </ItemActions>
                                 </Item>
-                                <ItemSeparator v-if="index < flaggedDetections.length - 1" />
+                                <ItemSeparator v-if="index < flaggedDetections.data.length - 1" />
                             </template>
-                        </div>
-                    </ScrollArea>
-                </ItemGroup>
 
-                <div v-else class="flex items-center justify-center h-full text-muted-foreground text-sm">
-                    No flagged detections
-                </div>
+                            <template #loading>
+                                <div class="my-2 flex justify-center items-center text-muted-foreground gap-1">
+                                    <LoaderCircle class="animate-spin size-3" />
+                                    <div class="text-xs">Loading items</div>
+                                </div>
+                            </template>
+                        </InfiniteScroll>
+                    </div>
+                </ScrollArea>
+            </ItemGroup>
+
+            <div v-else class="flex items-center justify-center h-full text-muted-foreground text-sm">
+                No flagged detections
             </div>
-        </Deferred>
+        </div>
     </div>
     <Separator />
 </template>

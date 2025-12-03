@@ -176,6 +176,10 @@ export interface UpcomingThisWeek {
     expires_at: string;
 }
 
+export interface UpcomingThisWeekPagination extends PaginationData {
+    data: UpcomingThisWeek[];
+}
+
 export interface FlaggedDetections {
     id: string;
     link_id: string;
@@ -187,9 +191,14 @@ export interface FlaggedDetections {
     avg_score: number;
 }
 
+export interface FlaggedDetectionsPagination extends PaginationData {
+    data: FlaggedDetections[];
+}
+
 export interface AverageScorePerActivity {
     activity_id: string;
     activity_title: string;
+    language: string;
     average_score: number;
 }
 
@@ -199,22 +208,16 @@ export interface AverageScorePerActivityLink {
     average_score: number;
 }
 
-export type AverageScorePerActivityGroupedByLanguage = {
-    language: string;
-    activities: AverageScorePerActivity[];
-};
-
 export interface DashboardPageProps {
     totalActivityLinks: number;
     totalLinksWithoutDetections: number;
     activeLinksData: ActiveLinksData;
-    upcomingThisWeek: UpcomingThisWeek[];
+    upcomingThisWeek: UpcomingThisWeekPagination;
     totalUpcomingThisWeek: number;
-    flaggedDetections: FlaggedDetections[];
+    flaggedDetections: FlaggedDetectionsPagination;
     totalFlaggedDetections: number;
     totalAverageScore: number;
     averageScorePerActivity: AverageScorePerActivity[];
-    averageScorePerActivityGroupedByLanguage: Record<string, AverageScorePerActivityGroupedByLanguage>;
 }
 
 export interface ActiveLink {

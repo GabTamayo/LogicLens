@@ -238,14 +238,14 @@ const getLanguageLogo = (language: string) => {
                                     <TableCell>
                                         <div class="flex flex-col gap-1">
                                             <span
-                                                class="text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
+                                                class="text-2xs lg:text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
                                                 {{ activity.title }}
                                             </span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div :class="[
-                                            'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium w-fit',
+                                            'inline-flex items-center gap-0.5 px-2 py-1 rounded-md border text-2xs lg:text-xs font-medium w-fit',
                                             getLanguageColor(activity.language_text)
                                         ]">
                                             <img v-if="getLanguageLogo(activity.language_text)"
@@ -258,19 +258,19 @@ const getLanguageLogo = (language: string) => {
                                     </TableCell>
                                     <TableCell>
                                         <div class="flex items-center gap-1.5">
-                                            <Circle class="h-3 w-3 text-green-500 fill-current" />
+                                            <Circle class="h-2 w-2 text-green-500 fill-current" />
                                             <span class="text-sm font-medium">{{ activity.open_links_count }}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div class="flex items-center gap-1.5">
-                                            <Circle class="h-3 w-3 text-red-500 fill-current" />
+                                            <Circle class="h-2 w-2 text-red-500 fill-current" />
                                             <span class="text-sm font-medium">{{ activity.closed_links_count }}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
-                                            <Calendar class="h-3.5 w-3.5" />
+                                            <Calendar class="h-3.5 w-3.5 hidden xl:block" />
                                             <span>{{ dayjs(activity.created_at).fromNow() }}</span>
                                         </div>
                                     </TableCell>
