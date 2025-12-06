@@ -169,6 +169,7 @@ class DashboardService
                 'name' => $link->name,
                 'expires_at' => $link->expires_at?->toDateTimeString(),
                 'has_deadline' => $link->expires_at !== null,
+                'created_at' => $link->created_at?->toDateTimeString(),
             ]);
     }
 
@@ -178,6 +179,7 @@ class DashboardService
             ->whereHas('activity', fn ($q) => $q->where('user_id', $userId))
             ->where('is_open', false)
             ->doesntHave('detections')
+            ->orderBy('created_at')
             ->get()
             ->map(fn ($link) => [
                 'id' => $link->id,
@@ -185,6 +187,7 @@ class DashboardService
                 'activity' => $link->activity->title,
                 'language' => $link->activity->language,
                 'name' => $link->name,
+                'created_at' => $link->created_at?->toDateTimeString(),
             ]);
     }
 }

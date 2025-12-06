@@ -4,7 +4,7 @@ import Button from '@/components/ui/button/Button.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from '@/components/ui/dialog'
 import Badge from '@/components/ui/badge/Badge.vue';
-import { ChevronRight, SearchCode, ShieldCheck } from 'lucide-vue-next';
+import { ChevronRight, SearchCode, ShieldCheck, Upload, Code2, BarChart3, ArrowRight } from 'lucide-vue-next';
 import { Head, Link } from '@inertiajs/vue3';
 </script>
 
@@ -82,11 +82,10 @@ import { Head, Link } from '@inertiajs/vue3';
 
         <section class="py-16 lg:py-24">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
-                <div class="text-center mb-16">
-                    <div
-                        class="inline-flex items-center justify-center px-4 py-2 mb-4 text-sm font-medium rounded-full bg-primary/10 text-primary">
+                <div class="text-center mb-16 space-y-8">
+                    <Badge variant="outline" class="text-lg">
                         Why Choose Us
-                    </div>
+                    </Badge>
                     <h2 class="text-4xl lg:text-5xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC] mb-4">
                         Powerful Detection Features
                     </h2>
@@ -160,7 +159,7 @@ import { Head, Link } from '@inertiajs/vue3';
         </section>
 
         <section class="mx-auto max-w-7xl px-6 py-16 lg:px-8 lg:py-24">
-            <div class="text-center mb-12">
+            <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC] mb-4">
                     How It Works
                 </h2>
@@ -169,44 +168,84 @@ import { Head, Link } from '@inertiajs/vue3';
                 </p>
             </div>
 
-            <div class="grid gap-8 md:grid-cols-3">
-                <div class="text-center space-y-4">
-                    <div
-                        class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary text-3xl font-bold text-white mb-2">
-                        1
-                    </div>
-                    <h3 class="text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                        Submit Code
-                    </h3>
-                    <p class="text-[#6b6b6b] dark:text-[#a1a1a1]">
-                        Students upload Java or Python source code using secure instructor-generated submission links
-                    </p>
-                </div>
+            <div class="relative">
+                <!-- Connecting line for desktop -->
+                <div class="hidden md:block absolute top-24 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/20 via-primary/40 to-primary/20 dark:from-primary/30 dark:via-primary/50 dark:to-primary/30"></div>
 
-                <div class="text-center space-y-4">
-                    <div
-                        class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary text-3xl font-bold text-white mb-2">
-                        2
+                <div class="grid gap-12 md:grid-cols-3 relative">
+                    <!-- Step 1 -->
+                    <div class="relative group">
+                        <div class="flex flex-col items-center space-y-6">
+                            <div
+                                class="relative inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 transition-all duration-300">
+                                <Upload class="h-10 w-10" />
+                                <div
+                                    class="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary text-sm font-bold shadow-md">
+                                    1
+                                </div>
+                            </div>
+                            <div class="text-center space-y-3">
+                                <h3 class="text-2xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+                                    Submit Code
+                                </h3>
+                                <p class="text-base leading-relaxed text-[#6b6b6b] dark:text-[#a1a1a1] max-w-xs mx-auto">
+                                    Students upload Java or Python source code using secure instructor-generated submission links
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Arrow for desktop -->
+                        <div class="hidden md:block absolute top-12 right-0 translate-x-1/2 text-primary/40 dark:text-primary/50">
+                            <ArrowRight class="h-6 w-6" />
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                        Logic Extraction
-                    </h3>
-                    <p class="text-[#6b6b6b] dark:text-[#a1a1a1]">
-                        The system parses the code, extracting control flows, logic structures, and method patterns
-                    </p>
-                </div>
 
-                <div class="text-center space-y-4">
-                    <div
-                        class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-primary text-3xl font-bold text-white mb-2">
-                        3
+                    <!-- Step 2 -->
+                    <div class="relative group">
+                        <div class="flex flex-col items-center space-y-6">
+                            <div
+                                class="relative inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 transition-all duration-300">
+                                <Code2 class="h-10 w-10" />
+                                <div
+                                    class="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary text-sm font-bold shadow-md">
+                                    2
+                                </div>
+                            </div>
+                            <div class="text-center space-y-3">
+                                <h3 class="text-2xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+                                    Logic Extraction
+                                </h3>
+                                <p class="text-base leading-relaxed text-[#6b6b6b] dark:text-[#a1a1a1] max-w-xs mx-auto">
+                                    The system parses the code, extracting control flows, logic structures, and method patterns
+                                </p>
+                            </div>
+                        </div>
+                        <!-- Arrow for desktop -->
+                        <div class="hidden md:block absolute top-12 right-0 translate-x-1/2 text-primary/40 dark:text-primary/50">
+                            <ArrowRight class="h-6 w-6" />
+                        </div>
                     </div>
-                    <h3 class="text-xl font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">
-                        Similarity Analysis
-                    </h3>
-                    <p class="text-[#6b6b6b] dark:text-[#a1a1a1]">
-                        Compare logical structures between submissions and generate detailed similarity reports
-                    </p>
+
+                    <!-- Step 3 -->
+                    <div class="relative group">
+                        <div class="flex flex-col items-center space-y-6">
+                            <div
+                                class="relative inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-white shadow-lg shadow-primary/25 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-primary/40 transition-all duration-300">
+                                <BarChart3 class="h-10 w-10" />
+                                <div
+                                    class="absolute -top-2 -right-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-primary text-sm font-bold shadow-md">
+                                    3
+                                </div>
+                            </div>
+                            <div class="text-center space-y-3">
+                                <h3 class="text-2xl font-bold text-[#1b1b18] dark:text-[#EDEDEC]">
+                                    Similarity Analysis
+                                </h3>
+                                <p class="text-base leading-relaxed text-[#6b6b6b] dark:text-[#a1a1a1] max-w-xs mx-auto">
+                                    Compare logical structures between submissions and generate detailed similarity reports
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

@@ -228,6 +228,7 @@ export interface ActiveLink {
     name: string;
     expires_at: string | null;
     has_deadline: boolean;
+    created_at: string | null;
 }
 
 export interface ActiveLinksModalProps {

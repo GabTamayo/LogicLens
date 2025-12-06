@@ -38,6 +38,12 @@ function formatDate(dateString: string | null) {
     return new Date(dateString).toLocaleDateString();
 }
 
+function formatRelativeDate(dateString: string | null): string {
+    if (!dateString) return '';
+    const date = parseISO(dateString);
+    return formatDistanceToNow(date, { addSuffix: true });
+}
+
 function getDeadlineUrgency(expires_at: string | null) {
     if (!expires_at) return 'none';
     const days = differenceInDays(parseISO(expires_at), new Date());
@@ -82,18 +88,23 @@ function getUrgencyColor(urgency: string) {
                     </div>
                 </template>
 
-                <div class="grid grid-cols-3 gap-4 rounded-lg p-4">
-                    <div class="text-center  bg-muted p-1 rounded-xl">
-                        <div class="text-2xl font-bold">{{ activeLinks.length }}</div>
+                <!-- Summary Stats -->
+                <div class="grid grid-cols-3 gap-4 rounded-lg p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                            {{ activeLinks.length }}
+                        </div>
                         <div class="text-xs text-muted-foreground">Total Active</div>
                     </div>
-                    <div class="text-center bg-blue-50 dark:bg-blue-950/30 p-1 rounded-xl">
-                        <div class="text-2xl text-blue-600 dark:text-blue-400 font-bold">{{ linksWithDeadline.length }}
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                            {{ linksWithDeadline.length }}
                         </div>
                         <div class="text-xs text-muted-foreground">With Deadline</div>
                     </div>
-                    <div class="text-center bg-red-50 dark:bg-red-950/30 p-1 rounded-xl">
-                        <div class="text-2xl text-red-600 dark:text-red-400 font-bold">{{ linksWithoutDeadline.length }}
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-400">
+                            {{ linksWithoutDeadline.length }}
                         </div>
                         <div class="text-xs text-muted-foreground">No Deadline</div>
                     </div>
@@ -125,6 +136,9 @@ function getUrgencyColor(urgency: string) {
                                                     <span class="font-extralight capitalize">
                                                         - {{ link.language }}
                                                     </span>
+                                                </ItemDescription>
+                                                <ItemDescription v-if="link.created_at" class="text-xs text-muted-foreground mt-1">
+                                                    {{ formatRelativeDate(link.created_at) }}
                                                 </ItemDescription>
                                             </ItemContent>
                                             <ItemContent class="relative">
@@ -176,6 +190,9 @@ function getUrgencyColor(urgency: string) {
                                                     <span class="font-extralight capitalize">
                                                         - {{ link.language }}
                                                     </span>
+                                                </ItemDescription>
+                                                <ItemDescription v-if="link.created_at" class="text-xs text-muted-foreground mt-1">
+                                                    {{ formatRelativeDate(link.created_at) }}
                                                 </ItemDescription>
                                             </ItemContent>
                                             <ItemContent>
