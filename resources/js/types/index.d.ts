@@ -84,7 +84,7 @@ export interface SubmissionPageProps {
     activityName: string;
     token: string;
     allowedExtensions: string[];
-    instructions: string;
+    content: string;
 }
 
 export type Submission = {

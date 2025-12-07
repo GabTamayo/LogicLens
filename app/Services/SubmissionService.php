@@ -20,7 +20,7 @@ class SubmissionService
             'activityName' => $activityLink->activity->title,
             'token' => $token,
             'allowedExtensions' => ProgrammingLanguage::fileExtensions($language),
-            'instructions' => $activityLink->activity->instructions,
+            'content' => $activityLink->activity->content,
         ];
     }
 

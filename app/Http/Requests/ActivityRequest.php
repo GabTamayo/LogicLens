@@ -27,7 +27,7 @@ class ActivityRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:100'],
             'language' => ['required', new EnumValue(ProgrammingLanguage::class)],
-            'instructions' => ['required', 'string'],
+            'content' => ['required', 'string'],
         ];
     }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, useForm } from '@inertiajs/vue3';
-import { GalleryVerticalEnd, File, LoaderCircle, CheckCircle2 } from 'lucide-vue-next';
+import { File, LoaderCircle, CheckCircle2 } from 'lucide-vue-next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,7 +58,7 @@ const submit = () => {
 
                     <div class="bg-muted/50 border border-border rounded-lg p-4 mb-6">
                         <h2 class="text-sm font-semibold mb-2">{{ props.activityName }}</h2>
-                        <div class="text-sm text-muted-foreground whitespace-pre-wrap">{{ props.instructions }}</div>
+                        <div class="prose dark:prose-invert max-w-none text-muted-foreground" v-html="props.content"></div>
                     </div>
 
                     <div v-if="submitted" class="flex flex-col items-center gap-4 bg-card p-10">
