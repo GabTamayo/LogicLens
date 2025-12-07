@@ -20,6 +20,7 @@ class SubmissionService
             'activityName' => $activityLink->activity->title,
             'token' => $token,
             'allowedExtensions' => ProgrammingLanguage::fileExtensions($language),
+            'content' => $activityLink->activity->content,
         ];
     }
 
@@ -33,7 +34,7 @@ class SubmissionService
 
         do {
             $random = bin2hex(random_bytes(8));
-            $filename = "{$baseName}_{$activityTitle}_" . now()->timestamp . "{$random}.{$extension}";
+            $filename = "{$baseName}_{$activityTitle}_".now()->timestamp."{$random}.{$extension}";
             $path = "submissions/{$filename}";
         } while (Storage::disk(env('FILESYSTEM_DISK'))->exists($path));
 
@@ -44,7 +45,7 @@ class SubmissionService
         return $activityLink->submissions()->create([
             ...$validatedData,
             'file_path' => $path,
-            'language'  => $language,
+            'language' => $language,
         ]);
     }
 }

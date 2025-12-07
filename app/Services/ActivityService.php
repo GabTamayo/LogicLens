@@ -35,6 +35,7 @@ class ActivityService
         return [
             'id' => $activity->id,
             'title' => $activity->title,
+            'language_text' => $activity->language_text,
             'appUrl' => config('app.url'),
             'links' => Inertia::defer(
                 fn () => $activity->activityLinks()

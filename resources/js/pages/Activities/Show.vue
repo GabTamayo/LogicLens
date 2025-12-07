@@ -15,7 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
-import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog } from 'lucide-vue-next';
+import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2 } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toaster } from '@/components/ui/sonner';
@@ -39,11 +39,10 @@ const submit = () => {
         return date.toISOString(); // '2025-11-12T12:00:00.000Z'
     };
 
-    form.post(`/activities/${props.id}/links`, {
-        data: {
-            name: form.name,
-            expires_at: form.expires_at ? formatToServerDateTime(form.expires_at as Date) : null
-        },
+    form.transform((data) => ({
+        name: data.name,
+        expires_at: data.expires_at ? formatToServerDateTime(data.expires_at as Date) : null
+    })).post(`/activities/${props.id}/links`, {
         onSuccess: () => {
             form.reset('name', 'expires_at');
             toast.success('Submission link generated', {
@@ -57,7 +56,7 @@ const submit = () => {
         },
     })
 }
-const updateStatus = (id: string, name: string, value: boolean) => {
+const updateStatus = (id: number, name: string, value: boolean) => {
     const linkStatusForm = useForm({ is_open: value });
     linkStatusForm.patch(`/activities/${props.id}/links/${id}`, {
         onError: () => {
@@ -68,7 +67,7 @@ const updateStatus = (id: string, name: string, value: boolean) => {
         }
     })
 }
-const removeDeadline = (linkId: string) => {
+const removeDeadline = (linkId: number) => {
     router.delete(`/activities/${props.id}/links/${linkId}/deadline`, {
         preserveScroll: true,
         onSuccess: () => {
@@ -118,9 +117,9 @@ function copy(id: string) {
 const [UseTemplate, GridForm] = createReusableTemplate()
 const isDesktop = useMediaQuery("(min-width: 768px)")
 const isOpen = ref(false)
-const selectedLinkId = ref<string | null>(null)
+const selectedLinkId = ref<number | null>(null)
 const deadlineDate = ref<Date | null>(null)
-const openDeadlineDialog = (linkId: string, currentDeadline: string | null) => {
+const openDeadlineDialog = (linkId: number, currentDeadline: string | null) => {
     selectedLinkId.value = linkId
     deadlineDate.value = currentDeadline ? new Date(currentDeadline) : null
     isOpen.value = true
@@ -153,24 +152,59 @@ const isInitialLoadDone = ref(false)
 
 usePoll(30000, {
     only: ['links'],
-    preserveState: true,
-    preserveScroll: true,
 })
+
+const getLanguageColor = (language: string) => {
+    switch (language) {
+        case 'Java':
+            return 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400 border-red-200 dark:border-red-800';
+        case 'Python':
+            return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800';
+        default:
+            return 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border-blue-200 dark:border-blue-800';
+    }
+};
+
+const getLanguageLogo = (language: string) => {
+    switch (language) {
+        case 'Java':
+            return '/images/java-logo-png.png';
+        case 'Python':
+            return '/images/python-logo-png.png';
+        default:
+            return null;
+    }
+};
 </script>
 
 <template>
 
-    <Head :title="`${title}`" />
+    <Head :title="`${props.title}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${id}`" type="activity" buttonText="Delete Activity"
-                :itemName="title" />
+            <AlertDialogDelete :endpoint="`/activities/${props.id}`" type="activity" buttonText="Delete Activity"
+                :itemName="props.title" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission</h4>
+                <div class="flex items-center gap-3 mb-2">
+                    <h4 class="cursor-default scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission</h4>
+                    <div :class="[
+                        'px-2.5 py-1 rounded-md border text-xs font-medium',
+                        getLanguageColor(props.language_text)
+                    ]">
+                        <div class="flex items-center gap-1.5">
+                            <img v-if="getLanguageLogo(props.language_text)"
+                                :src="getLanguageLogo(props.language_text)!"
+                                :alt="`${props.language_text} logo`"
+                                class="h-5 w-5 object-contain" />
+                            <Code2 v-else class="h-5 w-5" />
+                            <span>{{ props.language_text }}</span>
+                        </div>
+                    </div>
+                </div>
                 <p class="text-sm text-muted-foreground">
                     A submission link allows you to store student submissions for later detection.
                 </p>
@@ -225,8 +259,8 @@ usePoll(30000, {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <template v-if="links.data.length > 0">
-                                    <TableRow v-for="link in links.data" :key="link.id">
+                                <template v-if="props.links.data.length > 0">
+                                    <TableRow v-for="link in props.links.data" :key="link.id">
                                         <TableCell class="truncate">{{ link.name }}</TableCell>
                                         <TableCell>
                                             <div class="flex">
@@ -252,9 +286,9 @@ usePoll(30000, {
                                         <TableCell>
                                             <div
                                                 class="flex items-center space-x-2 font-mono max-w-xs md:max-w-full truncate">
-                                                <span class="truncate">{{ appUrl }}/submit{{ link.token }}</span>
+                                                <span class="truncate">{{ props.appUrl }}/submit{{ link.token }}</span>
                                                 <Button variant="ghost" size="icon"
-                                                    @click="copy(`${appUrl}/submit${link.token}`)">
+                                                    @click="copy(`${props.appUrl}/submit${link.token}`)">
                                                     <Copy class="w-2 h-2" />
                                                 </Button>
                                             </div>
@@ -277,7 +311,7 @@ usePoll(30000, {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <Link :href="`/activities/${id}/links/${link.id}`" prefetch='mount'>
+                                                    <Link :href="`/activities/${props.id}/links/${link.id}`" prefetch='mount'>
                                                     <DropdownMenuItem>
                                                         <Eye class="w-4 h-4 mr-1" />
                                                         View Submissions
@@ -342,12 +376,12 @@ usePoll(30000, {
                     </div>
                 </Deferred>
             </div>
-            <PaginationComponent v-if="links" :pagination="links" @page-change="handlePageChange" />
+            <PaginationComponent v-if="props.links" :pagination="props.links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
     <Toaster rich-colors />
 
     <UseTemplate>
-        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId || ''" @save="handleSaveDeadline" />
+        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId ? selectedLinkId.toString() : ''" @save="handleSaveDeadline" />
     </UseTemplate>
 </template>

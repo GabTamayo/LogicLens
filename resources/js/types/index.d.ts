@@ -62,6 +62,7 @@ export interface ActivityPagination extends PaginationData {
 export interface ActivityDetail {
     id: number;
     title: string;
+    language_text: string;
     appUrl: string;
     links: {
         data: ActivityLink[];
@@ -74,6 +75,7 @@ export interface ActivityLink {
     token: string;
     is_open: boolean;
     expires_at: string | null;
+    submissions_count: number;
 }
 
 export interface SubmissionPageProps {
@@ -81,7 +83,8 @@ export interface SubmissionPageProps {
     name: string;
     activityName: string;
     token: string;
-    allowedExtensions: string;
+    allowedExtensions: string[];
+    content: string;
 }
 
 export type Submission = {
@@ -228,6 +231,7 @@ export interface ActiveLink {
     name: string;
     expires_at: string | null;
     has_deadline: boolean;
+    created_at: string | null;
 }
 
 export interface ActiveLinksModalProps {

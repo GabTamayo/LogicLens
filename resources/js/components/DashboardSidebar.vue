@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, inject } from 'vue';
 import { TrendingDown, TrendingUp, Circle, FileScan, Flag, SquareArrowOutUpRight, Eye, FlagOff, Calendar, ChevronRight, LoaderCircle, Code2, Clock } from "lucide-vue-next"
-import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'vue-sonner';
 import { Separator } from '@/components/ui/separator';
 import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 import { Item, ItemContent, ItemDescription, ItemFooter, ItemHeader, ItemMedia, ItemTitle, ItemGroup, ItemSeparator, ItemActions } from '@/components/ui/item'
@@ -14,7 +14,7 @@ import Button from "./ui/button/Button.vue"
 import { HoverCard, HoverCardContent, HoverCardTrigger, } from '@/components/ui/hover-card'
 import Badge from './ui/badge/Badge.vue';
 import { ModalLink } from '@inertiaui/modal-vue'
-import { ActiveLinksData, FlaggedDetectionsPagination, UpcomingThisWeekPagination } from '@/types';
+import { ActiveLinksData, FlaggedDetections, FlaggedDetectionsPagination, UpcomingThisWeekPagination } from '@/types';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import { router, Link, InfiniteScroll } from '@inertiajs/vue3';
 
@@ -47,7 +47,13 @@ function flagDetection(detection: FlaggedDetections): void {
     router.patch(`/detections/${detection.id}/flag`, {}, {
         preserveScroll: true,
         onSuccess: () => {
-            router.reload({ only: ['flaggedDetections', 'totalFlaggedDetections'] });
+            router.reload({
+                only: ['flaggedDetections', 'totalFlaggedDetections'],
+                reset: ['flaggedDetections'],
+            });
+            toast(`Unflagged ${detection.link_name}`, {
+                description: `detection from (${detection.submitter_a} & ${detection.submitter_b})`
+            });
         },
     });
 }
@@ -152,7 +158,8 @@ function handleModalLinkClick() {
                         <InfiniteScroll data="upcomingThisWeek">
                             <template v-for="(item, index) in upcomingThisWeek.data" :key="item.id">
                                 <Item role="listitem" as-child>
-                                    <Link :href="`/activities/${item.activity_id}`" @click="handleModalLinkClick">
+                                    <Link :href="`/activities/${item.activity_id}/links/${item.id}`"
+                                        @click="handleModalLinkClick">
                                     <ItemContent>
                                         <ItemTitle class="text-sm font-bold">
                                             {{ item.name }}

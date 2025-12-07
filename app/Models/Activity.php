@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Stevebauman\Purify\Casts\PurifyHtmlOnSet;
 
 class Activity extends Model
 {
@@ -15,11 +16,19 @@ class Activity extends Model
     use HasFactory, HasUuid;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
+
     protected $fillable = [
         'title',
         'language',
+        'content',
     ];
+
+    protected $casts = [
+        'content' => PurifyHtmlOnSet::class,
+    ];
+
     protected $appends = ['language_text'];
 
     public function user(): BelongsTo

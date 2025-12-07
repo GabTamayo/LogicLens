@@ -20,7 +20,7 @@ const handlePageChange = (page: number) => {
         @update:page="handlePageChange">
 
         <!-- Results text - hidden on mobile, shown on tablet+ -->
-        <div class="hidden sm:block text-xs sm:text-sm text-muted-foreground order-1">
+        <div class="hidden sm:block text-xs sm:text-sm text-muted-foreground order-1 cursor-default">
             Showing {{ pagination.from }}–{{ pagination.to }} of {{ pagination.total }} results
         </div>
 

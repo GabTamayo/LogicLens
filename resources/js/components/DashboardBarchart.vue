@@ -8,21 +8,13 @@ import SelectSeparator from "./ui/select/SelectSeparator.vue"
 import { computed, ref, watch } from 'vue'
 import type { AverageScorePerActivity, AverageScorePerActivityLink } from '@/types'
 
-const emit = defineEmits<{
-    filterChanged: [filter: string]
-}>()
-
-const props = defineProps<{
-    averageScorePerActivity: AverageScorePerActivity[]
-}>()
-
+const emit = defineEmits<{ filterChanged: [filter: string] }>()
+const props = defineProps<{ averageScorePerActivity: AverageScorePerActivity[] }>()
 const selectedFilter = ref<string>('all')
 const activityLinksData = ref<AverageScorePerActivityLink[]>([])
 const isLoading = ref(false)
 
-defineExpose({
-    selectedFilter
-})
+defineExpose({ selectedFilter })
 
 const filterType = computed(() => {
     if (selectedFilter.value === 'all') return 'all'
@@ -30,9 +22,6 @@ const filterType = computed(() => {
     return 'activity'
 })
 
-const isFiltered = computed(() => selectedFilter.value !== 'all')
-
-// Get activities grouped by language
 const groupedActivities = computed(() => {
     const groups: Record<string, AverageScorePerActivity[]> = {}
 
@@ -48,7 +37,6 @@ const groupedActivities = computed(() => {
 })
 
 const chartData = computed(() => {
-    // Activity link view (drilled down into a specific activity)
     if (filterType.value === 'activity' && activityLinksData.value.length > 0) {
         return activityLinksData.value.map(item => ({
             activity: item.link_name,
@@ -57,7 +45,6 @@ const chartData = computed(() => {
         }))
     }
 
-    // Language filter view
     if (filterType.value === 'language') {
         const language = selectedFilter.value
         const activities = groupedActivities.value[language] || []
@@ -68,7 +55,6 @@ const chartData = computed(() => {
         }))
     }
 
-    // Default view (all activities)
     return props.averageScorePerActivity.map(item => ({
         activity: item.activity_title,
         activityId: item.activity_id,
@@ -104,25 +90,25 @@ const fetchActivityLinksData = async (activityId: string) => {
         if (response.ok) {
             const result = await response.json()
             activityLinksData.value = result.data || []
-        } else {
+        }
+        else {
             activityLinksData.value = []
         }
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching activity links data:', error)
         activityLinksData.value = []
-    } finally {
+    }
+    finally {
         isLoading.value = false
     }
 }
 
 watch(selectedFilter, (newValue) => {
-    // Emit the filter change to parent
     emit('filterChanged', newValue)
 
-    // Clear activity links data when switching filters
     activityLinksData.value = []
 
-    // Only fetch if it's an activity ID (not 'all', 'java', or 'python')
     if (filterType.value === 'activity') {
         fetchActivityLinksData(newValue)
     }
@@ -145,7 +131,7 @@ const chartConfig = {
 <template>
     <Card>
         <CardHeader>
-            <CardTitle>{{ chartTitle }}</CardTitle>
+            <CardTitle class="cursor-default">{{ chartTitle }}</CardTitle>
             <CardDescription>{{ chartDescription }}</CardDescription>
             <CardAction>
                 <Select v-model="selectedFilter">
@@ -153,7 +139,6 @@ const chartConfig = {
                         <SelectValue placeholder="Filter Activity" />
                     </SelectTrigger>
                     <SelectContent>
-                        <!-- All Activities -->
                         <SelectGroup>
                             <SelectLabel>Activities</SelectLabel>
                             <SelectItem value="all">
@@ -162,7 +147,6 @@ const chartConfig = {
                             <SelectSeparator />
                         </SelectGroup>
 
-                        <!-- Java Activities -->
                         <SelectGroup v-if="groupedActivities['java']?.length > 0">
                             <SelectLabel>Java</SelectLabel>
                             <SelectItem value="java">
