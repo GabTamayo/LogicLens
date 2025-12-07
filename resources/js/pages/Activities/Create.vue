@@ -4,6 +4,7 @@ import { useForm } from '@inertiajs/vue3';
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import InputError from '@/components/InputError.vue';
 import { toast } from 'vue-sonner';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
@@ -12,6 +13,7 @@ defineProps<{ languages: Record<string, string> }>();
 const form = useForm({
     title: '',
     language: '',
+    instructions: '',
 });
 
 function submit(close: () => void) {
@@ -28,7 +30,7 @@ function submit(close: () => void) {
 </script>
 
 <template>
-    <Modal max-width="md" position="top" v-slot="{ close }"
+    <Modal max-width="7xl" position="top" v-slot="{ close }"
         panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <Form class="space-y-6" @submit="submit(close)">
             <FormField name="title">
@@ -47,20 +49,34 @@ function submit(close: () => void) {
                 </FormItem>
             </FormField>
             <FormField name="language">
-                <Select v-model="form.language">
-                    <SelectTrigger class="w-full">
-                        <SelectValue placeholder="Select Programming Language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>Programming Language</SelectLabel>
-                            <SelectItem v-for="(label, value) in languages" :key="value" :value="value">
-                                {{ label }}
-                            </SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
+                <FormItem>
+                    <FormLabel>Programming Language</FormLabel>
+                    <FormControl>
+                        <Select v-model="form.language">
+                            <SelectTrigger class="w-full">
+                                <SelectValue placeholder="Select Programming Language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectLabel>Programming Language</SelectLabel>
+                                    <SelectItem v-for="(label, value) in languages" :key="value" :value="value">
+                                        {{ label }}
+                                    </SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </FormControl>
                     <InputError :message="form.errors.language" />
-                </Select>
+                </FormItem>
+            </FormField>
+            <FormField name="instructions">
+                <FormItem>
+                    <FormLabel>Instructions</FormLabel>
+                    <FormControl>
+                        <Textarea v-model="form.instructions" placeholder="Enter activity instructions..." class="min-h-[120px]" />
+                    </FormControl>
+                    <InputError :message="form.errors.instructions" />
+                </FormItem>
             </FormField>
 
             <Button type="submit" :disabled="form.processing" class="cursor-pointer">

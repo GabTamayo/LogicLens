@@ -27,19 +27,19 @@ const props = defineProps<Props>();
 function formatDateHeader(dateString: string | null): string {
     if (!dateString) return 'Unknown Date';
     const date = parseISO(dateString);
-    
+
     if (isToday(date)) return 'Today';
     if (isYesterday(date)) return 'Yesterday';
-    if (isThisWeek(date)) return format(date, 'EEEE'); // Day name
-    if (isThisMonth(date)) return format(date, 'MMMM d'); // Month and day
-    return format(date, 'MMMM d, yyyy'); // Full date
+    if (isThisWeek(date)) return format(date, 'EEEE');
+    if (isThisMonth(date)) return format(date, 'MMMM d');
+    return format(date, 'MMMM d, yyyy');
 }
 
 function formatRelativeDate(dateString: string | null): string {
     if (!dateString) return '';
     const date = parseISO(dateString);
     const days = differenceInDays(new Date(), date);
-    
+
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
@@ -49,7 +49,7 @@ function formatRelativeDate(dateString: string | null): string {
 
 const groupedByDate = computed(() => {
     const groups: Record<string, PendingDetection[]> = {};
-    
+
     props.pendingDetections.forEach((detection) => {
         if (!detection.created_at) {
             const key = 'Unknown Date';
@@ -57,17 +57,16 @@ const groupedByDate = computed(() => {
             groups[key].push(detection);
             return;
         }
-        
+
         const date = parseISO(detection.created_at);
         const dateKey = format(date, 'yyyy-MM-dd');
-        
+
         if (!groups[dateKey]) {
             groups[dateKey] = [];
         }
         groups[dateKey].push(detection);
     });
-    
-    // Sort date keys in descending order (newest first)
+
     return Object.keys(groups)
         .sort((a, b) => {
             if (a === 'Unknown Date') return 1;
@@ -87,7 +86,6 @@ const groupedByDate = computed(() => {
         panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <div class="tracking-tight space-y-6">
 
-            <!-- Header -->
             <div class="inline-flex items-baseline space-x-2">
                 <AlertTriangle class="size-4 text-amber-600 dark:text-amber-400" />
                 <div>
@@ -108,7 +106,6 @@ const groupedByDate = computed(() => {
                     </div>
                 </template>
 
-                <!-- Summary Stats -->
                 <div class="grid grid-cols-2 gap-4 rounded-lg p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50">
                     <div class="text-center">
                         <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
@@ -124,14 +121,12 @@ const groupedByDate = computed(() => {
                     </div>
                 </div>
 
-                <!-- Pending List -->
                 <div class="flex-1 min-h-0 space-y-4">
                     <div v-if="pendingDetections.length > 0">
                         <ScrollArea class="h-[450px] rounded-md">
                             <div class="space-y-6">
                                 <template v-for="(group, groupIndex) in groupedByDate" :key="group.date">
                                     <div class="space-y-3">
-                                        <!-- Date Header -->
                                         <div class="flex items-center gap-2 px-2">
                                             <Calendar class="size-4 text-muted-foreground" />
                                             <h3 class="font-semibold text-sm text-foreground">
@@ -142,7 +137,6 @@ const groupedByDate = computed(() => {
                                             </Badge>
                                         </div>
 
-                                        <!-- Items for this date -->
                                         <ItemGroup>
                                             <div class="p-2">
                                                 <template v-for="(link, index) in group.items" :key="link.id">
@@ -175,7 +169,6 @@ const groupedByDate = computed(() => {
                                             </div>
                                         </ItemGroup>
 
-                                        <!-- Separator between date groups -->
                                         <Separator v-if="groupIndex < groupedByDate.length - 1" class="my-2" />
                                     </div>
                                 </template>
@@ -183,7 +176,6 @@ const groupedByDate = computed(() => {
                         </ScrollArea>
                     </div>
 
-                    <!-- Empty State -->
                     <div v-else
                         class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                         <CircleCheck class="size-12 mb-4 opacity-75 text-green-600 dark:text-green-400" />

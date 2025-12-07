@@ -33,10 +33,10 @@ const submit = () => {
 
 <template>
 
-    <Head :title="name" />
+    <Head :title="props.name" />
 
     <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10 bg-cover bg-center"
-        :style="{ backgroundImage: `url(${bgImage})` }">
+        :style="{ backgroundImage: `url(${props.bgImage})` }">
         <div class="w-full max-w-lg">
             <div class="flex flex-col gap-6">
                 <div class="bg-card border border-border p-6 shadow-sm rounded-xl">
@@ -52,8 +52,13 @@ const submit = () => {
                             Welcome to LogicLens
                         </h1>
                         <div class="text-center text-sm text-muted-foreground">
-                            <p>Submission for {{ activityName }}</p>
+                            <p>Submission for {{ props.name }}</p>
                         </div>
+                    </div>
+
+                    <div class="bg-muted/50 border border-border rounded-lg p-4 mb-6">
+                        <h2 class="text-sm font-semibold mb-2">{{ props.activityName }}</h2>
+                        <div class="text-sm text-muted-foreground whitespace-pre-wrap">{{ props.instructions }}</div>
                     </div>
 
                     <div v-if="submitted" class="flex flex-col items-center gap-4 bg-card p-10">
@@ -88,7 +93,7 @@ const submit = () => {
                                 <Label for="code_file">Code File</Label>
                                 <div class="relative">
                                     <Input id="code_file" type="file"
-                                        :accept="allowedExtensions.map(ext => `.${ext}`).join(',')" @change="(e: Event) => {
+                                        :accept="props.allowedExtensions.map(ext => `.${ext}`).join(',')" @change="(e: Event) => {
                                             const target = e.target as HTMLInputElement
                                             form.code_file = target.files?.[0] ?? null
                                         }" class="pl-10" />

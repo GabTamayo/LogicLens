@@ -15,11 +15,15 @@ class Activity extends Model
     use HasFactory, HasUuid;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
+
     protected $fillable = [
         'title',
         'language',
+        'instructions',
     ];
+
     protected $appends = ['language_text'];
 
     public function user(): BelongsTo
