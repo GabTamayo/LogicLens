@@ -150,72 +150,72 @@ const getLanguageLogo = (language: string) => {
                     <div v-if="viewMode === 'grid'" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         <Link v-for="activity in activities.data" :key="activity.id"
                             :href="`/activities/${activity.id}`" prefetch="mount" class="block">
-                        <Card
-                            class="group relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/50 h-full">
-                            <CardHeader class="pb-3">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex-1 min-w-0">
-                                        <CardTitle
-                                            class="text-lg font-semibold line-clamp-2 group-hover:text-primary dark:text-white transition-colors">
-                                            {{ activity.title }}
-                                        </CardTitle>
-                                        <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
-                                            <Calendar class="h-3.5 w-3.5" />
-                                            <span>Created {{ dayjs(activity.created_at).fromNow() }}</span>
-                                        </CardDescription>
-                                    </div>
-                                    <div class="flex-shrink-0">
-                                        <div :class="[
-                                            'px-2.5 py-1 rounded-md border text-xs font-medium',
-                                            getLanguageColor(activity.language_text)
-                                        ]">
-                                            <div class="flex items-center gap-1.5">
-                                                <img v-if="getLanguageLogo(activity.language_text)"
-                                                    :src="getLanguageLogo(activity.language_text)"
-                                                    :alt="`${activity.language_text} logo`"
-                                                    class="h-5 w-5 object-contain" />
-                                                <Code2 v-else class="h-5 w-5" />
-                                                <span>{{ activity.language_text }}</span>
+                            <Card
+                                class="group relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/50 h-full">
+                                <CardHeader class="pb-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <CardTitle
+                                                class="text-lg font-semibold line-clamp-2 group-hover:text-primary dark:text-white transition-colors">
+                                                {{ activity.title }}
+                                            </CardTitle>
+                                            <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
+                                                <Calendar class="h-3.5 w-3.5" />
+                                                <span>Created {{ dayjs(activity.created_at).fromNow() }}</span>
+                                            </CardDescription>
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <div :class="[
+                                                'px-2.5 py-1 rounded-md border text-xs font-medium',
+                                                getLanguageColor(activity.language_text)
+                                            ]">
+                                                <div class="flex items-center gap-1.5">
+                                                    <img v-if="getLanguageLogo(activity.language_text)"
+                                                        :src="getLanguageLogo(activity.language_text)"
+                                                        :alt="`${activity.language_text} logo`"
+                                                        class="h-5 w-5 object-contain" />
+                                                    <Code2 v-else class="h-5 w-5" />
+                                                    <span>{{ activity.language_text }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </CardHeader>
+                                </CardHeader>
 
-                            <CardContent class="pt-0 pb-4">
-                                <div class="flex items-center gap-4">
-                                    <Badge variant="outline">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex items-center gap-1.5">
-                                                <Circle class="h-3 w-3 text-green-500 fill-current" />
-                                                <span class="text-sm font-medium">{{ activity.open_links_count
-                                                }}</span>
+                                <CardContent class="pt-0 pb-4">
+                                    <div class="flex items-center gap-4">
+                                        <Badge variant="outline">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex items-center gap-1.5">
+                                                    <Circle class="h-3 w-3 text-green-500 fill-current" />
+                                                    <span class="text-sm font-medium">{{ activity.open_links_count
+                                                        }}</span>
+                                                </div>
+                                                <span class="text-xs text-muted-foreground">Active</span>
                                             </div>
-                                            <span class="text-xs text-muted-foreground">Active</span>
-                                        </div>
-                                    </Badge>
+                                        </Badge>
 
-                                    <Badge variant="outline">
-                                        <div class="flex items-center gap-2">
-                                            <div class="flex items-center gap-1.5">
-                                                <Circle class="h-3 w-3 text-red-500 fill-current" />
-                                                <span class="text-sm font-medium">{{ activity.closed_links_count
-                                                }}</span>
+                                        <Badge variant="outline">
+                                            <div class="flex items-center gap-2">
+                                                <div class="flex items-center gap-1.5">
+                                                    <Circle class="h-3 w-3 text-red-500 fill-current" />
+                                                    <span class="text-sm font-medium">{{ activity.closed_links_count
+                                                        }}</span>
+                                                </div>
+                                                <span class="text-xs text-muted-foreground">Closed</span>
                                             </div>
-                                            <span class="text-xs text-muted-foreground">Closed</span>
-                                        </div>
-                                    </Badge>
-                                </div>
-                            </CardContent>
+                                        </Badge>
+                                    </div>
+                                </CardContent>
 
-                            <CardFooter class="pt-0 pb-4">
-                                <div
-                                    class="flex items-center gap-2 text-sm font-medium text-primary dark:text-white group-hover:underline w-full">
-                                    <span>View Details</span>
-                                    <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                <CardFooter class="pt-0 pb-4">
+                                    <div
+                                        class="flex items-center gap-2 text-sm font-medium text-primary dark:text-white group-hover:underline w-full">
+                                        <span>View Details</span>
+                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                    </div>
+                                </CardFooter>
+                            </Card>
                         </Link>
                     </div>
 
@@ -278,8 +278,9 @@ const getLanguageLogo = (language: string) => {
                                         <Link :href="`/activities/${activity.id}`" prefetch="mount"
                                             class="inline-flex items-center gap-1 text-sm font-medium text-primary dark:text-white group-hover:underline"
                                             @click.stop>
-                                        <span>View</span>
-                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                            <span>View</span>
+                                            <ArrowRight
+                                                class="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                         </Link>
                                     </TableCell>
                                 </TableRow>

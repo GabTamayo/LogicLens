@@ -12,7 +12,7 @@ import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
 import { ref } from "vue"
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, Deferred, usePoll, WhenVisible } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
 import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2 } from 'lucide-vue-next';
@@ -190,15 +190,15 @@ const getLanguageLogo = (language: string) => {
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
                 <div class="flex items-center gap-3 mb-2">
-                    <h4 class="cursor-default scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission</h4>
+                    <h4 class="cursor-default scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission
+                    </h4>
                     <div :class="[
                         'px-2.5 py-1 rounded-md border text-xs font-medium',
                         getLanguageColor(props.language_text)
                     ]">
                         <div class="flex items-center gap-1.5">
                             <img v-if="getLanguageLogo(props.language_text)"
-                                :src="getLanguageLogo(props.language_text)!"
-                                :alt="`${props.language_text} logo`"
+                                :src="getLanguageLogo(props.language_text)!" :alt="`${props.language_text} logo`"
                                 class="h-5 w-5 object-contain" />
                             <Code2 v-else class="h-5 w-5" />
                             <span>{{ props.language_text }}</span>
@@ -235,6 +235,9 @@ const getLanguageLogo = (language: string) => {
                     </FormField>
                     <Button type="submit" :disabled="form.processing" class="block lg:hidden">Generate</Button>
                 </Form>
+                <div v-if="props.content" class="my-2 bg-muted/50 border border-border rounded-lg p-4">
+                    <div class="prose dark:prose-invert max-w-none" v-html="props.content"></div>
+                </div>
             </div>
 
             <Separator />
@@ -311,11 +314,12 @@ const getLanguageLogo = (language: string) => {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <Link :href="`/activities/${props.id}/links/${link.id}`" prefetch='mount'>
-                                                    <DropdownMenuItem>
-                                                        <Eye class="w-4 h-4 mr-1" />
-                                                        View Submissions
-                                                    </DropdownMenuItem>
+                                                    <Link :href="`/activities/${props.id}/links/${link.id}`"
+                                                        prefetch='mount'>
+                                                        <DropdownMenuItem>
+                                                            <Eye class="w-4 h-4 mr-1" />
+                                                            View Submissions
+                                                        </DropdownMenuItem>
                                                     </Link>
                                                     <DropdownMenuSeparator />
                                                     <Dialog v-if="isDesktop" v-model:open="isOpen">
@@ -382,6 +386,7 @@ const getLanguageLogo = (language: string) => {
     <Toaster rich-colors />
 
     <UseTemplate>
-        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId ? selectedLinkId.toString() : ''" @save="handleSaveDeadline" />
+        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId ? selectedLinkId.toString() : ''"
+            @save="handleSaveDeadline" />
     </UseTemplate>
 </template>
