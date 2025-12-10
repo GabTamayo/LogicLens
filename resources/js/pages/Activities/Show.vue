@@ -9,13 +9,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
 import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link, router, Deferred, usePoll, WhenVisible } from '@inertiajs/vue3';
+import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
-import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2 } from 'lucide-vue-next';
+import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2, Loader, Pencil, Save, X, FileText } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import { Skeleton } from "@/components/ui/skeleton"
 import { Toaster } from '@/components/ui/sonner';
@@ -24,19 +24,60 @@ import 'vue-sonner/style.css';
 import DateTimePicker from '@/components/DateTimePicker.vue';
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import DateTimePickerDialog from '@/components/DateTimePickerDialog.vue';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog'
+import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 
 const props = defineProps<ActivityDetail>()
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.title, href: `/activities/${props.id}` },
 ];
+
+// Check if content is empty
+const isContentEmpty = computed(() => {
+    if (!props.content) return true;
+    const trimmed = props.content.trim();
+    return trimmed === '' || trimmed === '<p></p>';
+});
+
+// Edit state for content
+const isEditing = ref(false);
+const editForm = useForm({
+    content: props.content,
+});
+
+const toggleEdit = () => {
+    if (isEditing.value) {
+        editForm.content = props.content;
+    }
+    isEditing.value = !isEditing.value;
+};
+
+const saveContent = () => {
+    editForm.patch(`/activities/${props.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditing.value = false;
+            toast.success('Content updated', {
+                description: 'The activity content has been saved successfully.',
+            });
+        },
+        onError: () => {
+            toast.error('Failed to update content', {
+                description: editForm.errors.content || 'An error occurred while saving.',
+            });
+        },
+    });
+};
+
 const form = useForm({
     name: '',
     expires_at: null,
 });
 const submit = () => {
     const formatToServerDateTime = (date: Date): string => {
-        return date.toISOString(); // '2025-11-12T12:00:00.000Z'
+        return date.toISOString();
     };
 
     form.transform((data) => ({
@@ -115,7 +156,7 @@ function copy(id: string) {
     toast('Link copied to clipboard')
 }
 const [UseTemplate, GridForm] = createReusableTemplate()
-const isDesktop = useMediaQuery("(min-width: 768px)")
+const isDesktop = useMediaQuery("(min-width: 420px)")
 const isOpen = ref(false)
 const selectedLinkId = ref<number | null>(null)
 const deadlineDate = ref<Date | null>(null)
@@ -189,19 +230,22 @@ const getLanguageLogo = (language: string) => {
 
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <h4 class="cursor-default scroll-m-20 text-xl font-semibold tracking-tight">Generate Link Submission
-                    </h4>
-                    <div :class="[
-                        'px-2.5 py-1 rounded-md border text-xs font-medium',
-                        getLanguageColor(props.language_text)
-                    ]">
-                        <div class="flex items-center gap-1.5">
-                            <img v-if="getLanguageLogo(props.language_text)"
-                                :src="getLanguageLogo(props.language_text)!" :alt="`${props.language_text} logo`"
-                                class="h-5 w-5 object-contain" />
-                            <Code2 v-else class="h-5 w-5" />
-                            <span>{{ props.language_text }}</span>
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <h4 class="cursor-default scroll-m-20 text-xl font-semibold tracking-tight">
+                            Generate Link Submission
+                        </h4>
+                        <div :class="[
+                            'px-2.5 py-1 rounded-md border text-xs font-medium',
+                            getLanguageColor(props.language_text)
+                        ]">
+                            <div class="flex items-center gap-1.5">
+                                <img v-if="getLanguageLogo(props.language_text)"
+                                    :src="getLanguageLogo(props.language_text)!" :alt="`${props.language_text} logo`"
+                                    class="h-5 w-5 object-contain" />
+                                <Code2 v-else class="h-5 w-5" />
+                                <span>{{ props.language_text }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -235,19 +279,61 @@ const getLanguageLogo = (language: string) => {
                     </FormField>
                     <Button type="submit" :disabled="form.processing" class="block lg:hidden">Generate</Button>
                 </Form>
-                <div v-if="props.content" class="my-2 bg-muted/50 border border-border rounded-lg p-4">
-                    <div class="prose dark:prose-invert max-w-none" v-html="props.content"></div>
+                <div class="space-y-2">
+                    <div class="flex justify-end">
+                        <div v-if="isEditing" class="space-x-2">
+                            <Button variant="outline" @click="toggleEdit" :disabled="editForm.processing">
+                                <X class="w-4 h-4" />
+                                Cancel
+                            </Button>
+                            <Button @click="saveContent" :disabled="editForm.processing">
+                                <Save class="w-4 h-4" />
+                                {{ editForm.processing ? 'Saving...' : 'Save' }}
+                            </Button>
+                        </div>
+                        <Button v-else-if="!isContentEmpty" variant="outline" @click="toggleEdit">
+                            <Pencil class="w-4 h-4" />
+                            Edit
+                        </Button>
+                    </div>
+
+                    <div v-if="!isEditing" class="border h-100">
+                        <div v-if="isContentEmpty"
+                            class="flex flex-col items-center justify-center h-100 p-6 text-center">
+                            <div class="rounded-full bg-muted p-3 mb-4">
+                                <FileText class="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <h3 class="font-semibold text-lg mb-1">No content added yet</h3>
+                            <p class="text-sm text-muted-foreground mb-4 max-w-sm">
+                                Add instructions, requirements, or details for this activity
+                            </p>
+                            <Button variant="outline" size="sm" @click="toggleEdit">
+                                <Pencil class="w-4 h-4 mr-2" />
+                                Add Content
+                            </Button>
+                        </div>
+
+                        <div v-else class="prose dark:prose-invert p-6 max-w-none" v-html="props.content">
+                        </div>
+                    </div>
+
+                    <div v-else>
+                        <RichTextEditor v-model="editForm.content" />
+                    </div>
                 </div>
             </div>
 
             <Separator />
 
             <div>
-                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight">Manage Link Submission</h4>
+                <h4 class="scroll-m-20 text-xl font-semibold tracking-tight mb-2">Manage Link Submission</h4>
+                <p class="text-sm text-muted-foreground">
+                    Review existing submission links, update their status, and manage deadlines.
+                </p>
                 <Deferred data="links" @resolve="isInitialLoadDone = true">
                     <template #fallback>
-                        <div v-if="!isInitialLoadDone" class="mt-8 space-y-1">
-                            <Skeleton v-for="i in 8" :key="i" class="h-15 w-full rounded-xl" />
+                        <div v-if="!isInitialLoadDone" class="flex items-center justify-center">
+                            <Loader class="h-6 w-6 m-8 animate-spin text-muted-foreground" />
                         </div>
                     </template>
                     <div class="mt-4 rounded-md border">
@@ -370,7 +456,7 @@ const getLanguageLogo = (language: string) => {
                                 </template>
                                 <template v-else>
                                     <TableRow>
-                                        <TableCell colspan="4" class="text-center text-muted-foreground py-6">
+                                        <TableCell colspan="5" class="text-center text-muted-foreground py-6">
                                             No submission links generated yet.
                                         </TableCell>
                                     </TableRow>
@@ -379,8 +465,9 @@ const getLanguageLogo = (language: string) => {
                         </Table>
                     </div>
                 </Deferred>
+                <PaginationComponent class="mt-4" v-if="props.links" :pagination="props.links"
+                    @page-change="handlePageChange" />
             </div>
-            <PaginationComponent v-if="props.links" :pagination="props.links" @page-change="handlePageChange" />
         </div>
     </AppLayout>
     <Toaster rich-colors />

@@ -12,14 +12,14 @@ class ActivityService
     public function getActivitiesList(?string $language = null): array
     {
         return [
-            'activities' => fn () => Activity::where('user_id', Auth::id())
+            'activities' => fn() => Activity::where('user_id', Auth::id())
                 ->when($language && $language !== 'all', function ($query) use ($language) {
                     $query->where('language', ProgrammingLanguage::request(ProgrammingLanguage::response($language)));
                 })
                 ->selectedAttributes()
                 ->withCount([
-                    'activityLinks as open_links_count' => fn ($q) => $q->where('is_open', true),
-                    'activityLinks as closed_links_count' => fn ($q) => $q->where('is_open', false),
+                    'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
+                    'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false),
                 ])
                 ->latest()
                 ->paginate(9)
@@ -39,11 +39,11 @@ class ActivityService
             'content' => $activity->content,
             'appUrl' => config('app.url'),
             'links' => Inertia::defer(
-                fn () => $activity->activityLinks()
+                fn() => $activity->activityLinks()
                     ->selectedAttributes()
                     ->withCount('submissions')
                     ->orderBy('created_at')
-                    ->paginate(8)
+                    ->paginate(6)
                     ->withQueryString()
             ),
         ];

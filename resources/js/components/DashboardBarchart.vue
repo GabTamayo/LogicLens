@@ -135,7 +135,7 @@ const chartConfig = {
             <CardDescription>{{ chartDescription }}</CardDescription>
             <CardAction>
                 <Select v-model="selectedFilter">
-                    <SelectTrigger class="w-[180px]">
+                    <SelectTrigger class="w-[70px] sm:w-[180px]">
                         <SelectValue placeholder="Filter Activity" />
                     </SelectTrigger>
                     <SelectContent>

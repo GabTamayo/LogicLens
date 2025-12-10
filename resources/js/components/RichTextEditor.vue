@@ -68,8 +68,7 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleBold().run()"
-                                :disabled="!editor.can().chain().focus().toggleBold().run()"
-                                :class="[
+                                :disabled="!editor.can().chain().focus().toggleBold().run()" :class="[
                                     { 'bg-gray-200 rounded': editor.isActive('bold') },
                                     'p-1 cursor-pointer disabled:opacity-40 disabled:cursor-default',
                                 ]">
@@ -83,8 +82,7 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleItalic().run()"
-                                :disabled="!editor.can().chain().focus().toggleItalic().run()"
-                                :class="[
+                                :disabled="!editor.can().chain().focus().toggleItalic().run()" :class="[
                                     { 'bg-gray-200 rounded': editor.isActive('italic') },
                                     'p-1 cursor-pointer disabled:opacity-40 disabled:cursor-default',
                                 ]">
@@ -98,8 +96,7 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleUnderline().run()"
-                                :disabled="!editor.can().chain().focus().toggleUnderline().run()"
-                                :class="[
+                                :disabled="!editor.can().chain().focus().toggleUnderline().run()" :class="[
                                     { 'bg-gray-200 rounded': editor.isActive('underline') },
                                     'p-1 cursor-pointer disabled:opacity-40 disabled:cursor-default',
                                 ]">
@@ -113,8 +110,7 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleStrike().run()"
-                                :disabled="!editor.can().chain().focus().toggleStrike().run()"
-                                :class="[
+                                :disabled="!editor.can().chain().focus().toggleStrike().run()" :class="[
                                     { 'bg-gray-200 rounded': editor.isActive('strike') },
                                     'p-1 cursor-pointer disabled:opacity-40 disabled:cursor-default',
                                 ]">
@@ -164,7 +160,8 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleBulletList().run()"
-                                :class="{ 'bg-gray-200 rounded': editor.isActive('bulletList') }" class="p-1 cursor-pointer">
+                                :class="{ 'bg-gray-200 rounded': editor.isActive('bulletList') }"
+                                class="p-1 cursor-pointer">
                                 <List class="h-4 w-4" />
                             </button>
                         </TooltipTrigger>
@@ -175,7 +172,8 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleOrderedList().run()"
-                                :class="{ 'bg-gray-200 rounded': editor.isActive('orderedList') }" class="p-1 cursor-pointer">
+                                :class="{ 'bg-gray-200 rounded': editor.isActive('orderedList') }"
+                                class="p-1 cursor-pointer">
                                 <ListOrdered class="h-4 w-4" />
                             </button>
                         </TooltipTrigger>
@@ -186,7 +184,8 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleCodeBlock().run()"
-                                :class="{ 'bg-gray-200 rounded': editor.isActive('codeBlock') }" class="p-1 cursor-pointer">
+                                :class="{ 'bg-gray-200 rounded': editor.isActive('codeBlock') }"
+                                class="p-1 cursor-pointer">
                                 <SquareCode class="h-4 w-4" />
                             </button>
                         </TooltipTrigger>
@@ -197,7 +196,8 @@ watch(() => props.modelValue, (newValue) => {
                     <Tooltip>
                         <TooltipTrigger as-child>
                             <button type="button" @click="editor.chain().focus().toggleBlockquote().run()"
-                                :class="{ 'bg-gray-200 rounded': editor.isActive('blockquote') }" class="p-1 cursor-pointer">
+                                :class="{ 'bg-gray-200 rounded': editor.isActive('blockquote') }"
+                                class="p-1 cursor-pointer">
                                 <Quote class="h-4 w-4" />
                             </button>
                         </TooltipTrigger>

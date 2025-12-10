@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ProgrammingLanguage;
 use App\Http\Requests\ActivityRequest;
+use App\Http\Requests\ActivityUpdateContentRequest;
 use App\Models\Activity;
 use App\Services\ActivityService;
 use Illuminate\Http\Request;
@@ -42,9 +43,11 @@ class ActivityController extends Controller
         //
     }
 
-    public function update(Request $request, Activity $activity)
+    public function update(ActivityUpdateContentRequest $request, Activity $activity)
     {
-        //
+        $activity->update($request->validated());
+
+        return back();
     }
 
     public function destroy(Activity $activity)

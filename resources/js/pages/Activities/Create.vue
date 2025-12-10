@@ -76,7 +76,9 @@ function submit(close: () => void) {
                         <span class="font-light text-muted-foreground">(Optional)</span>
                     </FormLabel>
                     <FormControl>
-                        <RichTextEditor v-model="form.content" />
+                        <div class="overflow-hidden">
+                            <RichTextEditor v-model="form.content" />
+                        </div>
                     </FormControl>
                     <InputError :message="form.errors.content" />
                 </FormItem>

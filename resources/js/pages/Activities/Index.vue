@@ -100,6 +100,10 @@ const getLanguageLogo = (language: string) => {
     <Head title="Activities" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <template #header-actions v-if="activities.data.length > 0 || selectedLanguage !== 'all'">
+            <AddActivityButton />
+        </template>
+
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
             <template v-if="isLoading">
                 <div class="h-full flex items-center justify-center py-12">
@@ -141,7 +145,6 @@ const getLanguageLogo = (language: string) => {
                                 </SelectGroup>
                             </SelectContent>
                         </Select>
-                        <AddActivityButton />
                     </div>
 
                 </div>

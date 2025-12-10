@@ -67,8 +67,27 @@ export default {
                         thead: {
                             borderBottom: '2px solid var(--color-border)',
                         },
+                        '.column-resize-handle': {
+                            position: 'absolute',
+                            right: '-2px',
+                            top: '0',
+                            bottom: '-2px',
+                            width: '4px',
+                            backgroundColor: 'var(--color-primary)',
+                            pointerEvents: 'none',
+                            cursor: 'col-resize',
+                        },
+                        // Selected cell highlight
+                        '.selectedCell': {
+                            backgroundColor: 'color-mix(in srgb, var(--color-primary) 20%, transparent)',
+                            outline: '2px solid var(--color-primary)',
+                            outlineOffset: '-1px',
+                        },
                     },
                 },
+            },
+            cursor: {
+                'col-resize': 'col-resize',
             },
         },
     },
