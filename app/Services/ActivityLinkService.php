@@ -4,24 +4,31 @@ namespace App\Services;
 
 use App\Models\ActivityLink;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class ActivityLinkService
 {
     public function querySubmissions(ActivityLink $link, Request $request)
     {
-        $submissions = $link->submissions()
+        $sort = $request->input('sort', 'newest');
+
+        $query = $link->submissions()
             ->selectedAttributes()
             ->filterByStudent(
                 $request->input('student_name'),
                 $request->input('student_no')
-            )
-            ->orderBy('created_at')
-            ->paginate(10)
-            ->withQueryString();
+            );
+
+        match ($sort) {
+            'oldest' => $query->orderBy('created_at', 'asc'),
+            'name_asc' => $query->orderBy('student_name', 'asc'),
+            'name_desc' => $query->orderBy('student_name', 'desc'),
+            default => $query->orderBy('created_at', 'desc'),
+        };
+
+        $submissions = $query->paginate(10)->withQueryString();
 
         $submissions->getCollection()
-            ->transform(fn($submission) => $submission->attachFileContent());
+            ->transform(fn ($submission) => $submission->attachFileContent());
 
         return $submissions;
     }

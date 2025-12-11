@@ -61,13 +61,20 @@ class DetectionService
 
     public function queryDetections(ActivityLink $link, array $filters)
     {
-        return Detection::forLink($link->id)
+        $sort = $filters['sort'] ?? 'score_desc';
+
+        $query = Detection::forLink($link->id)
             ->filter($filters)
             ->selectedAttributes()
             ->with(['submissionA', 'submissionB'])
-            ->orderByDesc('flagged')
-            ->orderByDesc('avg_score')
-            ->paginate(10)
+            ->orderByDesc('flagged');
+
+        match ($sort) {
+            'score_asc' => $query->orderBy('avg_score', 'asc'),
+            default => $query->orderBy('avg_score', 'desc'),
+        };
+
+        return $query->paginate(10)
             ->through(fn ($detection) => $this->transformDetectionSummary($detection))
             ->withQueryString();
     }

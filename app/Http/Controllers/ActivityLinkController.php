@@ -44,13 +44,13 @@ class ActivityLinkController extends Controller
         ];
 
         $tabData = $activeTab === 'detection'
-            ? ['detections' => Inertia::defer(fn () => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b']))), 'submissions' => null]
+            ? ['detections' => Inertia::defer(fn () => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b', 'sort']))), 'submissions' => null]
             : ['submissions' => Inertia::defer(fn () => $activityLinkService->querySubmissions($link, $request)), 'detections' => null];
 
         return Inertia::render('Submissions/Index', [
             ...$baseData,
             ...$tabData,
-            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b'] : ['student_name', 'student_no']),
+            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'student_no', 'sort']),
         ]);
     }
 

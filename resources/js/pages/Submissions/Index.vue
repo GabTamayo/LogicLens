@@ -11,13 +11,14 @@ import DataTable from '@/components/DataTable.vue'
 import { columns as submissionColumns } from '@/components/submissions/columns'
 import { columns as detectionColumns } from '@/components/detections/columns'
 import { useDebounceFn } from '@vueuse/core'
-import { LoaderCircle, Circle, CalendarCheck, FileText, Shield } from 'lucide-vue-next'
+import { LoaderCircle, Circle, CalendarCheck, FileText, Shield, ArrowUpDown } from 'lucide-vue-next'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 import { ref, watch, computed } from 'vue'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDeadline } from '@/composables/useDeadline'
 
 interface TabbedPageProps {
@@ -72,6 +73,10 @@ const detectionFilters = useRemember({
     student_name_b: props.filters?.student_name_b || '',
 }, 'detection-filters')
 
+// Sort
+const submissionSort = ref(props.filters?.sort || 'newest')
+const detectionSort = ref(props.filters?.sort || 'score_desc')
+
 // Tab change handler
 watch(activeTab, (newTab) => {
     const page = newTab === 'detection' ? detectionPage.value : submissionPage.value
@@ -111,11 +116,30 @@ const handleDetectSubmission = () => {
     })
 }
 
+// Sort handlers
+watch(submissionSort, () => {
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...submissionFilters.value, sort: submissionSort.value, tab: 'submission' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['submissions'],
+    })
+})
+
+watch(detectionSort, () => {
+    router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
+        data: { ...detectionFilters.value, sort: detectionSort.value, tab: 'detection' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['detections'],
+    })
+})
+
 // Pagination handlers
 const handleSubmissionPageChange = (page: number) => {
     submissionPage.value = page
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
-        data: { ...submissionFilters.value, page, tab: 'submission' },
+        data: { ...submissionFilters.value, sort: submissionSort.value, page, tab: 'submission' },
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
@@ -125,7 +149,7 @@ const handleSubmissionPageChange = (page: number) => {
 const handleDetectionPageChange = (page: number) => {
     detectionPage.value = page
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
-        data: { ...detectionFilters.value, page, tab: 'detection' },
+        data: { ...detectionFilters.value, sort: detectionSort.value, page, tab: 'detection' },
         preserveScroll: true,
         preserveState: true,
         only: ['detections'],
@@ -135,7 +159,7 @@ const handleDetectionPageChange = (page: number) => {
 // Filter change handlers
 const handleSubmissionFilterChange = useDebounceFn(() => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
-        data: { ...submissionFilters.value, tab: 'submission' },
+        data: { ...submissionFilters.value, sort: submissionSort.value, tab: 'submission' },
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
@@ -144,7 +168,7 @@ const handleSubmissionFilterChange = useDebounceFn(() => {
 
 const handleDetectionFilterChange = useDebounceFn(() => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
-        data: { ...detectionFilters.value, tab: 'detection' },
+        data: { ...detectionFilters.value, sort: detectionSort.value, tab: 'detection' },
         preserveScroll: true,
         preserveState: true,
         only: ['detections'],
@@ -226,7 +250,7 @@ const updateDetectionFilter = (column: string, value: string) => {
             <Card>
                 <CardContent class="p-0">
                     <Tabs v-model="activeTab" class="w-full">
-                        <div class="border-b px-6 pt-6">
+                        <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
                                 <TabsTrigger value="submission"
                                     class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
@@ -248,13 +272,32 @@ const updateDetectionFilter = (column: string, value: string) => {
                                             <span class="text-muted-foreground">Loading submissions...</span>
                                         </div>
                                     </template>
-                                    <DataTable :columns="submissionColumns" :data="props.submissions.data"
-                                        :pagination="props.submissions as any" :filter-config="[
-                                            { column: 'student_name', placeholder: 'Filter by Student Name' },
-                                            { column: 'student_no', placeholder: 'Search Student No.' }
-                                        ]" :filter-values="submissionFilters" @page-change="handleSubmissionPageChange"
-                                        @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
-                                        @detect-submission="handleDetectSubmission" :show-detect-button="true" />
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2">
+                                            <Select v-model="submissionSort" aria-label="Sort submissions">
+                                                <SelectTrigger class="w-[200px]">
+                                                    <ArrowUpDown class="h-4 w-4 mr-2" />
+                                                    <SelectValue placeholder="Sort by" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Sort By</SelectLabel>
+                                                        <SelectItem value="newest">Earliest Submission</SelectItem>
+                                                        <SelectItem value="oldest">Latest Submission</SelectItem>
+                                                        <SelectItem value="name_asc">Name (A-Z)</SelectItem>
+                                                        <SelectItem value="name_desc">Name (Z-A)</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <DataTable :columns="submissionColumns" :data="props.submissions.data"
+                                            :pagination="props.submissions as any" :filter-config="[
+                                                { column: 'student_name', placeholder: 'Filter by Student Name' },
+                                                { column: 'student_no', placeholder: 'Search Student No.' }
+                                            ]" :filter-values="submissionFilters" @page-change="handleSubmissionPageChange"
+                                            @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
+                                            @detect-submission="handleDetectSubmission" :show-detect-button="true" />
+                                    </div>
                                 </Deferred>
                             </template>
 
@@ -273,12 +316,29 @@ const updateDetectionFilter = (column: string, value: string) => {
                                             <span class="text-muted-foreground">Loading detection results...</span>
                                         </div>
                                     </template>
-                                    <DataTable :columns="detectionColumns" :data="(props.detections?.data as any) || []"
-                                        :pagination="props.detections as any" :filter-config="[
-                                            { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
-                                            { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
-                                        ]" :filter-values="detectionFilters" @page-change="handleDetectionPageChange"
-                                        @filter-change="updateDetectionFilter" :show-detect-button="false" />
+                                    <div class="space-y-4">
+                                        <div class="flex items-center gap-2">
+                                            <Select v-model="detectionSort" aria-label="Sort detections">
+                                                <SelectTrigger class="w-[200px]">
+                                                    <ArrowUpDown class="h-4 w-4 mr-2" />
+                                                    <SelectValue placeholder="Sort by Score" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Sort By Score</SelectLabel>
+                                                        <SelectItem value="score_desc">Descending</SelectItem>
+                                                        <SelectItem value="score_asc">Ascending</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <DataTable :columns="detectionColumns" :data="(props.detections?.data as any) || []"
+                                            :pagination="props.detections as any" :filter-config="[
+                                                { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
+                                                { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
+                                            ]" :filter-values="detectionFilters" @page-change="handleDetectionPageChange"
+                                            @filter-change="updateDetectionFilter" :show-detect-button="false" />
+                                    </div>
                                 </Deferred>
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md border p-12">

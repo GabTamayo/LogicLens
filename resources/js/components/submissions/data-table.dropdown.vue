@@ -71,7 +71,7 @@ function download(submission: SubmissionRow) {
                 Copy Student No.
             </DropdownMenuItem>
             <DropdownMenuItem @click="download(submission)">
-                <Download class="w-4 h-4 mr-2" />
+                <Download class="w-4 h-4 mr-2 text-primary" />
                 Download File
             </DropdownMenuItem>
         </DropdownMenuContent>
