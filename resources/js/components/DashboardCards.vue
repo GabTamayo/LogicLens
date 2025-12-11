@@ -17,14 +17,13 @@ const animatedScore = ref(totalAverageScore ? Math.round(totalAverageScore * 100
 watch(() => totalAverageScore, (newScore) => {
     const targetScore = newScore ? Math.round(newScore * 100) : 0;
     const startScore = animatedScore.value;
-    const duration = 800; // milliseconds
+    const duration = 800;
     const startTime = Date.now();
 
     const animate = () => {
         const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / duration, 1);
 
-        // Easing function for smooth animation
         const easeOutQuad = (t: number) => t * (2 - t);
         const easedProgress = easeOutQuad(progress);
 

@@ -15,10 +15,10 @@ import { HoverCard, HoverCardContent, HoverCardTrigger, } from '@/components/ui/
 import Badge from './ui/badge/Badge.vue';
 import { ModalLink } from '@inertiaui/modal-vue'
 import { ActiveLinksData, FlaggedDetections, FlaggedDetectionsPagination, UpcomingThisWeekPagination } from '@/types';
-import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import { router, Link, InfiniteScroll } from '@inertiajs/vue3';
 import { useLanguage } from '@/composables/useLanguage';
 import { useSimilarity } from '@/composables/useSimilarity';
+import { useDeadline } from '@/composables/useDeadline';
 
 const props = defineProps<{
     activeLinksData: ActiveLinksData;
@@ -31,6 +31,7 @@ const props = defineProps<{
 
 const { getLanguageLogo } = useLanguage();
 const { getSimilarityBadge, formatScore, formatScoreList } = useSimilarity();
+const { formatRelativeDeadline, getDeadlineUrgency, getUrgencyColor } = useDeadline();
 
 const activeLinksChartData = computed(() => [
     { label: "No Deadline", value: props.activeLinksData?.noDeadline ?? 0, fill: "var(--chart-1)" },
@@ -41,13 +42,7 @@ const activeLinksChartConfig: ChartConfig = {
     "With Deadline": { label: "With Deadline", color: "var(--chart-2)" },
     "No Deadline": { label: "No Deadline", color: "var(--chart-1)" },
 };
-function formatRelativeDeadline(expires_at: string | null) {
-    if (!expires_at) return 'No deadline'
-    const date = parseISO(expires_at)
 
-    const distance = formatDistanceToNow(date, { addSuffix: true })
-    return distance
-}
 function flagDetection(detection: FlaggedDetections): void {
     router.patch(`/detections/${detection.id}/flag`, {}, {
         preserveScroll: true,
@@ -68,23 +63,6 @@ function getInitials(name: string | null | undefined): string {
         .split(' ')
         .map(part => part.charAt(0).toUpperCase())
         .join('');
-}
-
-function getDeadlineUrgency(expires_at: string | null) {
-    if (!expires_at) return 'none';
-    const days = differenceInDays(parseISO(expires_at), new Date());
-    if (days < 1) return 'overdue';
-    if (days <= 2) return 'urgent';
-    if (days <= 5) return 'soon';
-    return 'normal';
-}
-function getUrgencyColor(urgency: string) {
-    switch (urgency) {
-        case 'overdue': return 'text-red-600 dark:text-red-400';
-        case 'urgent': return 'text-orange-600 dark:text-orange-400';
-        case 'soon': return 'text-yellow-600 dark:text-yellow-400';
-        default: return 'text-muted-foreground';
-    }
 }
 
 function handleModalLinkClick() {
