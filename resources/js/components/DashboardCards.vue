@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ModalLink } from "@inertiaui/modal-vue";
 import { computed, ref, watch } from "vue";
+import { useSimilarity } from "@/composables/useSimilarity";
 
 const { totalActivityLinks, totalLinksWithoutDetections, totalAverageScore } = defineProps<{
     totalActivityLinks: number;
@@ -37,42 +38,12 @@ watch(() => totalAverageScore, (newScore) => {
     animate();
 }, { immediate: false });
 
+const { getSimilarityBadge } = useSimilarity();
 const scoreStatus = computed(() => {
-    const score = totalAverageScore;
-    if (score >= 0.90) {
-        return {
-            color: 'text-red-600 dark:text-red-400',
-            bg: 'bg-red-50 dark:bg-red-950/30',
-            label: 'Very High',
-            variant: 'destructive' as const,
-            icon: AlertTriangle
-        };
+    if (totalAverageScore === null) {
+        return getSimilarityBadge(0);
     }
-    if (score >= 0.85) {
-        return {
-            color: 'text-orange-600 dark:text-orange-400',
-            bg: 'bg-orange-50 dark:bg-orange-950/30',
-            label: 'High',
-            variant: 'customOrange' as const,
-            icon: AlertTriangle
-        };
-    }
-    if (score >= 0.75) {
-        return {
-            color: 'text-yellow-600 dark:text-yellow-400',
-            bg: 'bg-yellow-50 dark:bg-yellow-950/30',
-            label: 'Moderate',
-            variant: 'customYellow' as const,
-            icon: TrendingUp
-        };
-    }
-    return {
-        color: 'text-green-600 dark:text-green-400',
-        bg: 'bg-green-50 dark:bg-green-950/30',
-        label: 'Low',
-        variant: 'outline' as const,
-        icon: CheckCircle2
-    };
+    return getSimilarityBadge(totalAverageScore);
 });
 
 const detectionProgress = computed(() => {
@@ -86,20 +57,22 @@ const detectionProgress = computed(() => {
     <div class="grid gap-4 grid-cols-1 lg:grid-cols-3">
         <Card class="@container/card h-full relative overflow-hidden transition-all hover:shadow-md">
             <div :class="[scoreStatus.bg, 'absolute inset-0 opacity-50']" />
+
             <CardHeader class="relative">
                 <div class="flex items-start justify-between">
                     <CardDescription class="font-semibold text-muted-foreground">
                         Overall Similarity Score
                     </CardDescription>
-                    <component :is="scoreStatus.icon" :class="[scoreStatus.color, 'h-5 w-5']" />
+
+                    <component :is="scoreStatus.icon" :class="[scoreStatus.class, 'h-5 w-5']" />
                 </div>
 
                 <div class="flex items-baseline gap-2">
-                    <CardTitle
-                        class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight transition-all duration-300">
+                    <CardTitle class="text-5xl md:text-6xl font-bold tabular-nums tracking-tight">
                         {{ animatedScore }}
                     </CardTitle>
-                    <span :class="[scoreStatus.color, 'text-2xl font-semibold transition-colors duration-300']">%</span>
+
+                    <span :class="[scoreStatus.class, 'text-2xl font-semibold']">%</span>
                 </div>
 
                 <div class="pt-2">
@@ -109,6 +82,7 @@ const detectionProgress = computed(() => {
                 </div>
             </CardHeader>
         </Card>
+
 
         <ModalLink href="dashboard/pending-detections" #default="{ loading }">
             <Card class="@container/card h-full relative overflow-hidden transition-all hover:shadow-md">

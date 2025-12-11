@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "laravel-boost": {
+      "type": "stdio",
+      "command": "php",
+      "args": ["artisan", "boost:mcp"]
+    },
+    "shadcn-vue": {
+      "type": "stdio",
+      "command": "cmd",
+      "args": ["/c", "npx", "shadcn-vue@latest", "mcp"]
+    }
+  }
+}

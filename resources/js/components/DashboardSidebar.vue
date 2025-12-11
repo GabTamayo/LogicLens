@@ -17,6 +17,8 @@ import { ModalLink } from '@inertiaui/modal-vue'
 import { ActiveLinksData, FlaggedDetections, FlaggedDetectionsPagination, UpcomingThisWeekPagination } from '@/types';
 import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
 import { router, Link, InfiniteScroll } from '@inertiajs/vue3';
+import { useLanguage } from '@/composables/useLanguage';
+import { useSimilarity } from '@/composables/useSimilarity';
 
 const props = defineProps<{
     activeLinksData: ActiveLinksData;
@@ -26,6 +28,9 @@ const props = defineProps<{
     totalFlaggedDetections: number;
     closeDrawer?: () => void;
 }>()
+
+const { getLanguageLogo } = useLanguage();
+const { getSimilarityBadge, formatScore, formatScoreList } = useSimilarity();
 
 const activeLinksChartData = computed(() => [
     { label: "No Deadline", value: props.activeLinksData?.noDeadline ?? 0, fill: "var(--chart-1)" },
@@ -64,24 +69,6 @@ function getInitials(name: string | null | undefined): string {
         .map(part => part.charAt(0).toUpperCase())
         .join('');
 }
-function formatScore(score: number): string {
-    return (score * 100).toFixed(2);
-}
-function formatScoreList(score: number): string {
-    return (score * 100).toFixed(0);
-}
-function getSimilarityBadge(score: number) {
-    if (score >= 0.90) {
-        return { variant: 'destructive' as const, label: 'Very High', class: 'bg-red-100 dark:bg-red-950/50 text-red-700 dark:text-red-400 border-red-300 dark:border-red-800' }
-    }
-    if (score >= 0.85) {
-        return { variant: 'customOrange' as const, label: 'High', class: 'bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-400 border-orange-300 dark:border-orange-800' }
-    }
-    if (score >= 0.75) {
-        return { variant: 'customYellow' as const, label: 'Moderate', class: 'bg-yellow-100 dark:bg-yellow-950/50 text-yellow-700 dark:text-yellow-400 border-yellow-300 dark:border-yellow-800' }
-    }
-    return { variant: 'outline' as const, label: 'Low', class: 'bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-400 border-green-300 dark:border-green-800' }
-}
 
 function getDeadlineUrgency(expires_at: string | null) {
     if (!expires_at) return 'none';
@@ -99,16 +86,6 @@ function getUrgencyColor(urgency: string) {
         default: return 'text-muted-foreground';
     }
 }
-const getLanguageLogo = (language: string) => {
-    switch (language) {
-        case 'java':
-            return '/images/java-logo-png.png';
-        case 'python':
-            return '/images/python-logo-png.png';
-        default:
-            return null;
-    }
-};
 
 function handleModalLinkClick() {
     if (props.closeDrawer) {

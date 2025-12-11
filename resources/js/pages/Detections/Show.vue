@@ -16,8 +16,10 @@ import 'prismjs/plugins/line-highlight/prism-line-highlight.css'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { Code2, User, Hash, TrendingUp, GitCompare, FileCode } from 'lucide-vue-next'
 import Card from '@/components/ui/card/Card.vue'
+import { useSimilarity } from '@/composables/useSimilarity'
 
 const props = defineProps<DetectionShowProps>()
+const { getSimilarityBorder, getSimilarityTextColor } = useSimilarity()
 const isSmallScreen = ref(false)
 const checkScreenSize = () => { isSmallScreen.value = window.innerWidth < 1024 }
 const getLanguageFromExtension = (input?: string): string => {
@@ -33,31 +35,6 @@ const getLanguageFromExtension = (input?: string): string => {
 const formatLineMatches = (matches: any[], key: 'code_a' | 'code_b') => {
     if (!matches || matches.length === 0) return ''
     return matches.map(m => `${m[key][0]}-${m[key][1]}`).join(',')
-}
-const getSimilarityBorder = (score: number) => {
-    if (score >= 0.90) {
-        return 'border-red-500 bg-red-500/10'
-    }
-    if (score >= 0.85) {
-        return 'border-orange-500 bg-orange-500/10'
-    }
-    if (score >= 0.75) {
-        return 'border-yellow-500 bg-yellow-500/10'
-    }
-    return 'border-muted-foreground/40 bg-muted/20'
-}
-
-const getSimilarityTextColor = (score: number) => {
-    if (score >= 0.90) {
-        return 'text-red-600 dark:text-red-400'
-    }
-    if (score >= 0.85) {
-        return 'text-orange-600 dark:text-orange-400'
-    }
-    if (score >= 0.75) {
-        return 'text-yellow-600 dark:text-yellow-400'
-    }
-    return 'text-muted-foreground'
 }
 
 
