@@ -397,3 +397,57 @@ watch(() => props.modelValue, (newValue) => {
         <EditorContent :editor="editor" />
     </div>
 </template>
+
+<style lang="scss">
+.tiptap {
+    table {
+        border-collapse: collapse;
+        margin: 0;
+        overflow: hidden;
+        table-layout: fixed;
+        width: 100%;
+
+        td,
+        th {
+            border: 1px solid var(--color-border);
+            box-sizing: border-box;
+            min-width: 1em;
+            padding: 6px 8px;
+            position: relative;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: var(--color-muted);
+            font-weight: bold;
+            text-align: left;
+        }
+
+        .selectedCell:after {
+            background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+            content: '';
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            pointer-events: none;
+            position: absolute;
+            z-index: 2;
+        }
+
+        .column-resize-handle {
+            background-color: var(--color-primary);
+            bottom: -2px;
+            pointer-events: none;
+            position: absolute;
+            right: -2px;
+            top: 0;
+            width: 4px;
+        }
+    }
+
+    &.resize-cursor {
+        cursor: col-resize;
+    }
+}
+</style>
