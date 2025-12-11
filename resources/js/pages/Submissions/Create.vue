@@ -51,14 +51,9 @@ const submit = () => {
                         <h1 class="text-xl font-bold">
                             Welcome to LogicLens
                         </h1>
-                        <div class="text-center text-sm text-muted-foreground">
-                            <p>Submission for {{ props.name }}</p>
+                        <div class="text-sm text-muted-foreground">
+                            <p>{{ props.activityName }}</p>
                         </div>
-                    </div>
-
-                    <div class="bg-muted/50 border border-border rounded-lg p-4 mb-6">
-                        <h2 class="text-sm font-semibold mb-2">{{ props.activityName }}</h2>
-                        <div class="prose dark:prose-invert max-w-none text-muted-foreground" v-html="props.content"></div>
                     </div>
 
                     <div v-if="submitted" class="flex flex-col items-center gap-4 bg-card p-10">

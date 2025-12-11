@@ -2,16 +2,17 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DashboardPageProps } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Deferred, Head } from '@inertiajs/vue3';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from '@/components/ui/drawer'
 import Button from '@/components/ui/button/Button.vue';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';
 import DashboardBarchart from '@/components/DashboardBarchart.vue';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, ref, watch } from 'vue';
 import { ChevronUp } from 'lucide-vue-next';
 import { Toaster } from '@/components/ui/sonner';
 import 'vue-sonner/style.css';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const props = defineProps<DashboardPageProps>();
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,7 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
 ];
-const dynamicAverageScore = ref<number>(props.totalAverageScore);
+const dynamicAverageScore = ref<number>(props.totalAverageScore ?? 0);
 const isLoadingScore = ref(false);
 const isDrawerOpen = ref(false);
 const handleResize = () => {
@@ -33,6 +34,14 @@ window.addEventListener('resize', handleResize);
 onUnmounted(() => {
     window.removeEventListener('resize', handleResize);
 });
+watch(
+    () => props.totalAverageScore,
+    (value) => {
+        if (value !== undefined && value !== null) {
+            dynamicAverageScore.value = value;
+        }
+    },
+);
 const fetchAverageScore = async (filter: string) => {
     isLoadingScore.value = true;
     try {
@@ -85,12 +94,22 @@ const handleFilterChanged = (filter: string) => {
                                     </DrawerHeader>
                                     <div class="flex-1 overflow-y-auto px-4 pb-4">
                                         <div class="space-y-6 pt-4">
-                                            <DashboardSidebar :active-links-data="activeLinksData"
-                                                :upcoming-this-week="upcomingThisWeek"
-                                                :total-upcoming-this-week="totalUpcomingThisWeek"
-                                                :flagged-detections="flaggedDetections"
-                                                :total-flagged-detections="totalFlaggedDetections"
-                                                :close-drawer="() => isDrawerOpen = false" />
+                                            <Deferred
+                                                :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']">
+                                                <template #fallback>
+                                                    <div class="space-y-4">
+                                                        <Skeleton class="h-44 w-full rounded-xl border" />
+                                                        <Skeleton class="h-64 w-full rounded-xl border" />
+                                                        <Skeleton class="h-56 w-full rounded-xl border" />
+                                                    </div>
+                                                </template>
+                                                <DashboardSidebar :active-links-data="activeLinksData"
+                                                    :upcoming-this-week="upcomingThisWeek"
+                                                    :total-upcoming-this-week="totalUpcomingThisWeek"
+                                                    :flagged-detections="flaggedDetections"
+                                                    :total-flagged-detections="totalFlaggedDetections"
+                                                    :close-drawer="() => isDrawerOpen = false" />
+                                            </Deferred>
                                         </div>
                                     </div>
                                 </div>
@@ -99,20 +118,45 @@ const handleFilterChanged = (filter: string) => {
                     </div>
 
                     <div class="w-full">
-                        <DashboardCards :total-activity-links="totalActivityLinks"
-                            :total-links-without-detections="totalLinksWithoutDetections"
-                            :total-average-score="dynamicAverageScore" />
+                        <Deferred
+                            :data="['totalActivityLinks', 'totalLinksWithoutDetections', 'totalAverageScore']">
+                            <template #fallback>
+                                <div class="grid gap-4 grid-cols-1 lg:grid-cols-3">
+                                    <Skeleton class="h-48 w-full rounded-xl" />
+                                    <Skeleton class="h-48 w-full rounded-xl" />
+                                    <Skeleton class="h-48 w-full rounded-xl" />
+                                </div>
+                            </template>
+                            <DashboardCards :total-activity-links="totalActivityLinks"
+                                :total-links-without-detections="totalLinksWithoutDetections"
+                                :total-average-score="dynamicAverageScore" />
+                        </Deferred>
                     </div>
                     <div>
-                        <DashboardBarchart @filter-changed="handleFilterChanged"
-                            :average-score-per-activity="averageScorePerActivity" />
+                        <Deferred data="averageScorePerActivity">
+                            <template #fallback>
+                                <Skeleton class="h-[580px] w-full rounded-xl" />
+                            </template>
+                            <DashboardBarchart @filter-changed="handleFilterChanged"
+                                :average-score-per-activity="averageScorePerActivity" />
+                        </Deferred>
                     </div>
                 </div>
 
                 <aside class="hidden xl:flex flex-col w-80 xl:w-96 min-w-80 shrink-0 gap-4">
-                    <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
-                        :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
-                        :total-flagged-detections="totalFlaggedDetections" />
+                    <Deferred
+                        :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']">
+                        <template #fallback>
+                            <div class="space-y-4">
+                                <Skeleton class="h-52 w-full rounded-xl" />
+                                <Skeleton class="h-66 w-full rounded-xl" />
+                                <Skeleton class="h-66 w-full rounded-xl" />
+                            </div>
+                        </template>
+                        <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
+                            :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
+                            :total-flagged-detections="totalFlaggedDetections" />
+                    </Deferred>
                 </aside>
 
             </div>

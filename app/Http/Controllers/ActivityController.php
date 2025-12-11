@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Enums\ProgrammingLanguage;
 use App\Http\Requests\ActivityRequest;
+use App\Http\Requests\ActivityUpdateContentRequest;
 use App\Models\Activity;
 use App\Services\ActivityService;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class ActivityController extends Controller
 {
     public function index(Request $request, ActivityService $activityService)
     {
-        $data = $activityService->getActivitiesList($request->input('language'));
+        $data = $activityService->getActivitiesList(
+            $request->input('language'),
+            $request->input('search'),
+            $request->input('sort')
+        );
+
         return Inertia::render('Activities/Index', $data);
     }
 
@@ -28,12 +34,14 @@ class ActivityController extends Controller
     public function store(ActivityRequest $request)
     {
         Auth::user()->activities()->create($request->validated());
+
         return redirect()->route('activities.index');
     }
 
     public function show(Activity $activity, ActivityService $activityService)
     {
         $data = $activityService->getActivityDetails($activity);
+
         return Inertia::render('Activities/Show', $data);
     }
 
@@ -42,15 +50,18 @@ class ActivityController extends Controller
         //
     }
 
-    public function update(Request $request, Activity $activity)
+    public function update(ActivityUpdateContentRequest $request, Activity $activity)
     {
-        //
+        $activity->update($request->validated());
+
+        return back();
     }
 
     public function destroy(Activity $activity)
     {
         $activity->delete();
         inertia()->clearHistory();
+
         return redirect()->route('activities.index');
     }
 }

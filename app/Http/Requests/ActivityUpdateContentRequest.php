@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\ProgrammingLanguage;
-use BenSampo\Enum\Rules\EnumValue;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class ActivityRequest extends FormRequest
+class ActivityUpdateContentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,9 +23,15 @@ class ActivityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:100'],
-            'language' => ['required', new EnumValue(ProgrammingLanguage::class)],
-            'content' => ['nullable', 'string'],
+            'content' => ['required', 'string'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'content.required' => 'The activity content is required.',
+            'content.string' => 'The activity content must be a valid text.',
         ];
     }
 }

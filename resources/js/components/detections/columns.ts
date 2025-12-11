@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
 import { Badge } from '@/components/ui/badge'
 import { Flag } from 'lucide-vue-next'
+import { useSimilarity } from '@/composables/useSimilarity'
 
 export interface DetectionRow {
     id: string
@@ -23,17 +24,11 @@ export interface DetectionRow {
     created_at: string
 }
 
-const getSimilarityBadge = (score: number) => {
-    if (score >= 0.90) {
-        return h(Badge, { variant: 'destructive' }, () => 'Very High')
-    }
-    if (score >= 0.85) {
-        return h(Badge, { variant: 'customOrange' }, () => 'High')
-    }
-    if (score >= 0.75) {
-        return h(Badge, { variant: 'customYellow' }, () => 'Moderate')
-    }
-    return h(Badge, { variant: 'outline' }, () => 'Low')
+const { getSimilarityBadge } = useSimilarity()
+
+const getSimilarityBadgeVNode = (score: number) => {
+    const badge = getSimilarityBadge(score)
+    return h(Badge, { variant: badge.variant }, () => badge.label)
 }
 
 export const columns: ColumnDef<DetectionRow>[] = [
@@ -87,7 +82,7 @@ export const columns: ColumnDef<DetectionRow>[] = [
         header: () => h('div', { class: 'text-center' }, 'Level'),
         cell: ({ row }) => {
             const score = row.original.avg_score
-            return h('div', { class: 'flex justify-center' }, getSimilarityBadge(score))
+            return h('div', { class: 'flex justify-center' }, getSimilarityBadgeVNode(score))
         },
     },
     {

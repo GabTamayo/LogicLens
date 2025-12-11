@@ -117,7 +117,7 @@ const groupedByDate = computed(() => {
                         <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
                             {{ groupedByDate.length }}
                         </div>
-                        <div class="text-xs text-muted-foreground">Date Groups</div>
+                        <div class="text-xs text-muted-foreground">Dates</div>
                     </div>
                 </div>
 

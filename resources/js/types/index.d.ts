@@ -63,6 +63,7 @@ export interface ActivityDetail {
     id: number;
     title: string;
     language_text: string;
+    content: string;
     appUrl: string;
     links: {
         data: ActivityLink[];
@@ -84,7 +85,6 @@ export interface SubmissionPageProps {
     activityName: string;
     token: string;
     allowedExtensions: string[];
-    content: string;
 }
 
 export type Submission = {
