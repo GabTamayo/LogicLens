@@ -17,7 +17,7 @@ class ActivityLinkController extends Controller
     public function store(ActivityLinkRequest $request, Activity $activity, GenerateActivityLink $generateActivityLink)
     {
         $data = $request->validated();
-        $generateActivityLink->execute($activity, $data['name'], $data['expires_at'] ?? null);
+        $generateActivityLink->execute($activity, $data['course_id'], $data['expires_at'] ?? null);
 
         return redirect()->route('activities.show', $activity);
     }
@@ -32,7 +32,7 @@ class ActivityLinkController extends Controller
 
     public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService, DetectionService $detectionService)
     {
-        $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
+        $link = $activity->activityLinks()->selectedAttributes()->with('course:id,name')->findOrFail($linkId);
         $activeTab = $request->get('tab', 'submission');
 
         $baseData = [
@@ -44,13 +44,13 @@ class ActivityLinkController extends Controller
         ];
 
         $tabData = $activeTab === 'detection'
-            ? ['detections' => Inertia::defer(fn () => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b']))), 'submissions' => null]
+            ? ['detections' => Inertia::defer(fn () => $detectionService->queryDetections($link, $request->only(['student_name_a', 'student_name_b', 'sort']))), 'submissions' => null]
             : ['submissions' => Inertia::defer(fn () => $activityLinkService->querySubmissions($link, $request)), 'detections' => null];
 
         return Inertia::render('Submissions/Index', [
             ...$baseData,
             ...$tabData,
-            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b'] : ['student_name', 'student_no']),
+            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'student_no', 'sort']),
         ]);
     }
 

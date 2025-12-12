@@ -14,8 +14,8 @@ export function useSimilarity() {
             return {
                 variant: 'destructive',
                 label: 'Very High',
-                class: 'text-red-700 dark:text-red-400',
-                bg: 'bg-red-50 dark:bg-red-950/30',
+                class: '',
+                bg: '',
                 icon: AlertTriangle,
             };
         }
@@ -23,8 +23,8 @@ export function useSimilarity() {
             return {
                 variant: 'customOrange',
                 label: 'High',
-                class: 'text-orange-700 dark:text-orange-400',
-                bg: 'bg-orange-50 dark:bg-orange-950/30',
+                class: '',
+                bg: '',
                 icon: AlertTriangle,
             };
         }
@@ -32,8 +32,8 @@ export function useSimilarity() {
             return {
                 variant: 'customYellow',
                 label: 'Moderate',
-                class: 'text-yellow-700 dark:text-yellow-400',
-                bg: 'bg-yellow-50 dark:bg-yellow-950/30',
+                class: '',
+                bg: '',
                 icon: TrendingUp,
             };
         }

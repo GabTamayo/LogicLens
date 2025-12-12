@@ -19,6 +19,7 @@
         "laravel/tinker": "^2.10.1",
         "laravel/wayfinder": "^0.1.9",
         "predis/predis": "^3.2",
+        "spatie/laravel-permission": "^6.23",
         "stevebauman/purify": "^6.3"
     },
     "require-dev": {

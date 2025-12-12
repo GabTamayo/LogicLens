@@ -39,7 +39,7 @@ const groupedActivities = computed(() => {
 const chartData = computed(() => {
     if (filterType.value === 'activity' && activityLinksData.value.length > 0) {
         return activityLinksData.value.map(item => ({
-            activity: item.link_name,
+            activity: item.course?.name || 'Course',
             activityId: item.link_id,
             score: item.average_score * 100
         }))

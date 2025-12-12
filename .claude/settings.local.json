@@ -1,11 +1,14 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(php artisan test:*)",
+      "Bash(php artisan:*)",
+      "Bash(find:*)",
+      "Bash(git mv:*)"
+    ]
+  },
   "enabledMcpjsonServers": [
     "laravel-boost",
     "shadcn-vue"
-  ],
-  "permissions": {
-    "allow": [
-      "Bash(php artisan test:*)"
-    ]
-  }
+  ]
 }

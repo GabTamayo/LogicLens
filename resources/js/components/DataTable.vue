@@ -75,7 +75,6 @@ const handleFilterInput = debounce((column: string, value: string) => {
 const getLanguageFromExtension = (input?: string): string => {
     if (!input) return 'plaintext'
 
-    // If input is a filename like 'Main.py' or path, extract extension
     const token = input.includes('.') ? input.split('.').pop() || input : input
     const ext = token.toLowerCase()
 

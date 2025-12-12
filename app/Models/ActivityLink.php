@@ -18,7 +18,7 @@ class ActivityLink extends Model
     protected $keyType = 'string';
     public $incrementing = false;
     protected $fillable = [
-        'name',
+        'course_id',
         'token',
         'is_open',
         'expires_at',
@@ -42,6 +42,11 @@ class ActivityLink extends Model
         return $this->belongsTo(Activity::class);
     }
 
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
     public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
@@ -54,7 +59,7 @@ class ActivityLink extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'activity_id', 'name', 'token', 'is_open', 'expires_at', 'created_at');
+        return $query->select('id', 'activity_id', 'course_id', 'token', 'is_open', 'expires_at', 'created_at');
     }
 
     public function scopeWithSubmissions($query)

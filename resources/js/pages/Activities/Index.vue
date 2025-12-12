@@ -55,7 +55,6 @@ watch(viewMode, (newValue) => {
 });
 
 const performSearch = () => {
-    isLoading.value = true;
     router.get('/activities',
         {
             language: selectedLanguage.value,
@@ -66,6 +65,9 @@ const performSearch = () => {
         {
             preserveScroll: true,
             preserveState: true,
+            onStart: () => {
+                isLoading.value = true;
+            },
             onFinish: () => {
                 isLoading.value = false;
             }
@@ -78,6 +80,7 @@ const debouncedSearch = useDebounceFn(() => {
 }, 500);
 
 watch(searchQuery, () => {
+    isLoading.value = true;
     debouncedSearch();
 });
 
@@ -108,7 +111,7 @@ const handlePageChange = (pageNumber: number) => {
 };
 
 const hasActiveFilters = computed(() => {
-    return selectedLanguage.value !== 'all' || searchQuery.value !== '' || sortBy.value !== 'newest';
+    return selectedLanguage.value !== 'all' || (searchQuery.value && searchQuery.value.trim() !== '') || sortBy.value !== 'newest';
 });
 
 const hasContent = computed(() => {
@@ -126,11 +129,11 @@ const hasContent = computed(() => {
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
-            <template v-if="hasContent || isLoading">
+            <template v-if="isLoading || hasContent">
                 <div>
                     <h1 class="text-lg sm:text-2xl font-bold tracking-tight cursor-default">Activities</h1>
                     <p class="text-xs sm:text-sm text-muted-foreground mt-1 mb-4">
-                        Manage and group your submission links into activities.
+                        Organize your activities and assign them to your courses.
                     </p>
 
                     <div class="flex gap-2 flex-wrap items-center">
@@ -146,7 +149,7 @@ const hasContent = computed(() => {
                         </Tabs>
                         <div class="relative w-[180px] sm:w-[280px]">
                             <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input v-model="searchQuery" type="search" placeholder="Search activities..."
+                            <Input v-model="searchQuery" type="search" placeholder="Search"
                                 class="pl-8 w-full" aria-label="Search activities" />
                         </div>
                         <Select v-model="selectedLanguage" aria-label="Filter by language">
@@ -289,7 +292,7 @@ const hasContent = computed(() => {
                                                     <Circle class="h-3 w-3 text-green-500 fill-current"
                                                         aria-hidden="true" />
                                                     <span class="text-sm font-medium">{{ activity.open_links_count
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                                 <span class="text-xs text-muted-foreground">Active</span>
                                             </div>
@@ -301,7 +304,7 @@ const hasContent = computed(() => {
                                                     <Circle class="h-3 w-3 text-red-500 fill-current"
                                                         aria-hidden="true" />
                                                     <span class="text-sm font-medium">{{ activity.closed_links_count
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                                 <span class="text-xs text-muted-foreground">Closed</span>
                                             </div>
@@ -406,7 +409,7 @@ const hasContent = computed(() => {
                             </EmptyMedia>
                             <EmptyTitle>No Activities Found</EmptyTitle>
                             <EmptyDescription>
-                                No activities match your current filters. Try adjusting your search or filters.
+                                No activities match your current filters.
                             </EmptyDescription>
                         </EmptyHeader>
                     </Empty>
