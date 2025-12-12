@@ -117,7 +117,7 @@ function handleModalLinkClick() {
                                         @click="handleModalLinkClick">
                                     <ItemContent>
                                         <ItemTitle class="text-sm font-bold">
-                                            {{ item.name }}
+                                            {{ item.course?.name }}
                                         </ItemTitle>
                                         <ItemDescription class="text-xs font-semibold flex items-center gap-1">
                                             <img v-if="getLanguageLogo(item.language)"
@@ -190,7 +190,7 @@ function handleModalLinkClick() {
                                 <Item>
                                     <ItemContent>
                                         <ItemTitle class="font-bold">
-                                            {{ item.link_name }}
+                                            {{ item.course?.name }}
                                             <HoverCard>
                                                 <HoverCardTrigger>
                                                     <div>
@@ -320,7 +320,7 @@ function handleModalLinkClick() {
                                                     </Button>
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                    View {{ item.link_name }}
+                                                    View {{ item.course?.name }}
                                                 </TooltipContent>
                                             </Tooltip>
                                         </TooltipProvider>

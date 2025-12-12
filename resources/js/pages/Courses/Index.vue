@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type CoursePagination } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -21,24 +21,6 @@ import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
 
 dayjs.extend(relativeTime)
-
-interface Course {
-    id: string;
-    name: string;
-    access_code: string;
-    is_active: boolean;
-    created_at: string;
-}
-
-interface CoursePagination {
-    data: Course[];
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-    from: number;
-    to: number;
-}
 
 const isLoading = ref(false);
 

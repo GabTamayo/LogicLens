@@ -8,15 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import Separator from '@/components/ui/separator/Separator.vue';
 import { Link } from '@inertiajs/vue3';
 import { format, parseISO, isToday, isYesterday, isThisWeek, isThisMonth, differenceInDays } from 'date-fns';
-
-interface PendingDetection {
-    id: string;
-    activity_id: string;
-    activity: string;
-    language: string | null;
-    name: string;
-    created_at: string | null;
-}
+import { type PendingDetection } from '@/types';
 
 interface Props {
     pendingDetections: PendingDetection[];
@@ -144,7 +136,7 @@ const groupedByDate = computed(() => {
                                                         <Link :href="`/activities/${link.activity_id}/links/${link.id}`">
                                                             <ItemContent>
                                                                 <ItemTitle class="text-sm font-bold">
-                                                                    {{ link.name }}
+                                                                    {{ link.course?.name || 'Course' }}
                                                                 </ItemTitle>
                                                                 <ItemDescription class="text-xs font-semibold">
                                                                     {{ link.activity }}

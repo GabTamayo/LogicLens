@@ -85,7 +85,8 @@ function getUrgencyColor(urgency: string) {
                     </div>
                 </template>
 
-                <div class="grid grid-cols-3 gap-4 rounded-lg p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
+                <div
+                    class="grid grid-cols-3 gap-4 rounded-lg p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/50">
                     <div class="text-center">
                         <div class="text-2xl font-bold text-green-600 dark:text-green-400">
                             {{ activeLinks.length }}
@@ -121,35 +122,36 @@ function getUrgencyColor(urgency: string) {
                                     <template v-for="(link, index) in linksWithDeadline" :key="link.id">
                                         <Item as-child @click="close">
                                             <Link :href="`/activities/${link.activity_id}/links/${link.id}`">
-                                            <ItemContent>
-                                                <ItemTitle class="text-sm font-bold">
-                                                    {{ link.name }}
-                                                </ItemTitle>
-                                                <ItemDescription class="text-xs font-semibold">
-                                                    {{ link.activity }}
-                                                    <span class="font-extralight capitalize">
-                                                        - {{ link.language }}
-                                                    </span>
-                                                </ItemDescription>
-                                                <ItemDescription v-if="link.created_at" class="text-xs text-muted-foreground mt-1">
-                                                    {{ formatRelativeDate(link.created_at) }}
-                                                </ItemDescription>
-                                            </ItemContent>
-                                            <ItemContent class="relative">
-                                                <div class="text-end space-y-1">
-                                                    <div class="flex items-center gap-1.5 justify-end">
-                                                        <Clock
-                                                            :class="`size-3 ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`" />
-                                                        <ItemDescription class="text-xs font-medium">
-                                                            {{ formatDate(link.expires_at) }}
+                                                <ItemContent>
+                                                    <ItemTitle class="text-sm font-bold">
+                                                        {{ link.course?.name || 'Course' }}
+                                                    </ItemTitle>
+                                                    <ItemDescription class="text-xs font-semibold">
+                                                        {{ link.activity }}
+                                                        <span class="font-extralight capitalize">
+                                                            - {{ link.language }}
+                                                        </span>
+                                                    </ItemDescription>
+                                                    <ItemDescription v-if="link.created_at"
+                                                        class="text-xs text-muted-foreground mt-1">
+                                                        {{ formatRelativeDate(link.created_at) }}
+                                                    </ItemDescription>
+                                                </ItemContent>
+                                                <ItemContent class="relative">
+                                                    <div class="text-end space-y-1">
+                                                        <div class="flex items-center gap-1.5 justify-end">
+                                                            <Clock
+                                                                :class="`size-3 ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`" />
+                                                            <ItemDescription class="text-xs font-medium">
+                                                                {{ formatDate(link.expires_at) }}
+                                                            </ItemDescription>
+                                                        </div>
+                                                        <ItemDescription
+                                                            :class="`text-xs font-medium ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`">
+                                                            {{ formatRelativeDeadline(link.expires_at) }}
                                                         </ItemDescription>
                                                     </div>
-                                                    <ItemDescription
-                                                        :class="`text-xs font-medium ${getUrgencyColor(getDeadlineUrgency(link.expires_at))}`">
-                                                        {{ formatRelativeDeadline(link.expires_at) }}
-                                                    </ItemDescription>
-                                                </div>
-                                            </ItemContent>
+                                                </ItemContent>
                                             </Link>
                                         </Item>
                                         <ItemSeparator v-if="index < linksWithDeadline.length - 1" />
@@ -159,7 +161,7 @@ function getUrgencyColor(urgency: string) {
                         </ScrollArea>
                     </div>
 
-                    <Separator v-if="linksWithoutDeadline.length && linksWithDeadline.length > 0" class="my-4" />
+                    <Separator v-if="linksWithoutDeadline.length > 0 && linksWithDeadline.length > 0" class="my-4" />
 
                     <div v-if="linksWithoutDeadline.length > 0">
                         <div class="flex items-center gap-2 mb-3">
@@ -174,26 +176,27 @@ function getUrgencyColor(urgency: string) {
                                 <div class="p-2">
                                     <template v-for="(link, index) in linksWithoutDeadline" :key="link.id">
                                         <Item as-child @click="close">
-                                            <Link :href="`/activities/${link.activity_id}`">
-                                            <ItemContent>
-                                                <ItemTitle class="text-sm font-bold">
-                                                    {{ link.name }}
-                                                </ItemTitle>
-                                                <ItemDescription class="text-xs font-semibold">
-                                                    {{ link.activity }}
-                                                    <span class="font-extralight capitalize">
-                                                        - {{ link.language }}
-                                                    </span>
-                                                </ItemDescription>
-                                                <ItemDescription v-if="link.created_at" class="text-xs text-muted-foreground mt-1">
-                                                    {{ formatRelativeDate(link.created_at) }}
-                                                </ItemDescription>
-                                            </ItemContent>
-                                            <ItemContent>
-                                                <Badge variant="outline" class="text-xs">
-                                                    No deadline
-                                                </Badge>
-                                            </ItemContent>
+                                            <Link :href="`/activities/${link.activity_id}/links/${link.id}`">
+                                                <ItemContent>
+                                                    <ItemTitle class="text-sm font-bold">
+                                                        {{ link.course?.name || 'Course' }}
+                                                    </ItemTitle>
+                                                    <ItemDescription class="text-xs font-semibold">
+                                                        {{ link.activity }}
+                                                        <span class="font-extralight capitalize">
+                                                            - {{ link.language }}
+                                                        </span>
+                                                    </ItemDescription>
+                                                    <ItemDescription v-if="link.created_at"
+                                                        class="text-xs text-muted-foreground mt-1">
+                                                        {{ formatRelativeDate(link.created_at) }}
+                                                    </ItemDescription>
+                                                </ItemContent>
+                                                <ItemContent>
+                                                    <Badge variant="outline" class="text-xs">
+                                                        No deadline
+                                                    </Badge>
+                                                </ItemContent>
                                             </Link>
                                         </Item>
                                         <ItemSeparator v-if="index < linksWithoutDeadline.length - 1" />
@@ -203,7 +206,7 @@ function getUrgencyColor(urgency: string) {
                         </ScrollArea>
                     </div>
 
-                    <div v-else
+                    <div v-if="activeLinks.length === 0"
                         class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
                         <Ellipsis class="size-12 mb-4 opacity-20 animate-pulse" />
                         <p class="text-sm font-medium">No active links</p>

@@ -4,6 +4,7 @@ import { ActivityDetail, type BreadcrumbItem } from '@/types';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
@@ -15,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
 import { Input } from '@/components/ui/input';
 import { Switch } from "@/components/ui/switch"
-import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2, Loader, Pencil, Save, X, FileText, Link2 } from 'lucide-vue-next';
+import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2, Loader, Pencil, Save, X, FileText, Link2, Clock } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { toast } from 'vue-sonner';
@@ -27,6 +28,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDeadline } from '@/composables/useDeadline';
 import { useLanguage } from '@/composables/useLanguage';
+import SelectLabel from '@/components/ui/select/SelectLabel.vue';
 
 const props = defineProps<ActivityDetail>()
 
@@ -76,7 +78,7 @@ const saveContent = () => {
 
 // Link Generation Form
 const form = useForm({
-    name: '',
+    course_id: '',
     expires_at: null,
 });
 
@@ -86,18 +88,18 @@ const submit = () => {
     };
 
     form.transform((data) => ({
-        name: data.name,
+        course_id: data.course_id,
         expires_at: data.expires_at ? formatToServerDateTime(data.expires_at as Date) : null
     })).post(`/activities/${props.id}/links`, {
         onSuccess: () => {
-            form.reset('name', 'expires_at');
+            form.reset('course_id', 'expires_at');
             toast.success('Submission link generated', {
                 description: 'You can now use the link for student submissions.',
             });
         },
         onError: () => {
             toast.error('Failed to generate link', {
-                description: form.errors.name || form.errors.expires_at || 'An error occurred.',
+                description: form.errors.course_id || form.errors.expires_at || 'An error occurred.',
             });
         },
     })
@@ -248,19 +250,33 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                 <CardContent>
                     <Form @submit="submit" class="space-y-4">
                         <div class="grid gap-4 md:grid-cols-2">
-                            <FormField name="name">
+                            <FormField name="course_id">
                                 <FormItem>
-                                    <FormLabel>Link Submission Name</FormLabel>
+                                    <FormLabel>Course</FormLabel>
                                     <FormControl>
-                                        <Input type="text" v-model="form.name" placeholder="e.g., Lab 1 - Section A"
-                                            :disabled="form.processing" />
+                                        <Select v-model="form.course_id" :disabled="form.processing">
+                                            <SelectTrigger class="w-full">
+                                                <SelectValue placeholder="Select a course" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>
+                                                        {{ props.courses.length === 0
+                                                            ? 'No course to be assigned.'
+                                                            : 'Courses'
+                                                        }}
+                                                    </SelectLabel>
+                                                    <SelectItem v-for="course in props.courses" :key="course.id"
+                                                        :value="course.id">
+                                                        {{ course.name }}
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
                                     </FormControl>
                                     <FormDescription class="text-xs">
-                                        Enter a descriptive name for this submission link.
+                                        Select the course for this submission link.
                                     </FormDescription>
-                                    <p v-if="form.errors.name" class="text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors.name }}
-                                    </p>
                                 </FormItem>
                             </FormField>
 
@@ -273,15 +289,12 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                     <FormDescription class="text-xs">
                                         Set when submissions should close automatically.
                                     </FormDescription>
-                                    <p v-if="form.errors.expires_at" class="text-xs text-red-600 dark:text-red-400">
-                                        {{ form.errors.expires_at }}
-                                    </p>
                                 </FormItem>
                             </FormField>
                         </div>
 
                         <div class="flex justify-end">
-                            <Button type="submit" :disabled="form.processing || !form.name">
+                            <Button type="submit" :disabled="form.processing || !form.course_id">
                                 <Loader v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
                                 {{ form.processing ? 'Generating...' : 'Generate Link' }}
                             </Button>
@@ -365,7 +378,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead class="w-[200px]">Name</TableHead>
+                                    <TableHead class="w-[200px]">Course</TableHead>
                                     <TableHead class="w-[180px]">Status</TableHead>
                                     <TableHead class="min-w-[250px]">Link</TableHead>
                                     <TableHead class="w-[100px] text-center">Submissions</TableHead>
@@ -376,8 +389,8 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                 <template v-if="props.links.data.length > 0">
                                     <TableRow v-for="link in props.links.data" :key="link.id">
                                         <TableCell class="font-medium">
-                                            <div class="max-w-[180px] truncate" :title="link.name">
-                                                {{ link.name }}
+                                            <div class="max-w-[180px] truncate" :title="link.course?.name">
+                                                {{ link.course?.name }}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -390,7 +403,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                                         {{ link.is_open ? 'Open' : 'Closed' }}
                                                     </Badge>
                                                     <Switch v-model="link.is_open"
-                                                        @update:modelValue="updateStatus(link.id, link.name, $event)" />
+                                                        @update:modelValue="updateStatus(link.id, link.course?.name ?? 'Link', $event)" />
                                                 </div>
                                                 <TooltipProvider v-if="link.expires_at">
                                                     <Tooltip>

@@ -4,7 +4,7 @@ import { Deferred } from '@inertiajs/vue3'
 import { Head, router, useRemember } from '@inertiajs/vue3'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
-import { type BreadcrumbItem, Submission, DetectionPageProps } from '@/types'
+import { type BreadcrumbItem, type ActivityLink, Submission, DetectionPageProps } from '@/types'
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
 import Badge from '@/components/ui/badge/Badge.vue'
 import DataTable from '@/components/DataTable.vue'
@@ -24,14 +24,7 @@ import { useDeadline } from '@/composables/useDeadline'
 interface TabbedPageProps {
     activityId: number
     activityTitle: string
-    link: {
-        id: number
-        name: string
-        token: string
-        is_open: boolean
-        expires_at: string | null
-        created_at: string
-    }
+    link: ActivityLink & { created_at: string }
     filters: Record<string, string>
     submissions?: Submission['submissions'] & { data: any[], path: string }
     detections?: DetectionPageProps['detections']
@@ -57,7 +50,7 @@ const hasDeadline = computed(() => !!props.link.expires_at)
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
-    { title: props.link.name, href: `/activities/${props.activityId}/links/${props.link.id}` }
+    { title: props.link.course?.name || 'Course', href: `/activities/${props.activityId}/links/${props.link.id}` }
 ]
 
 // Filters
@@ -186,12 +179,12 @@ const updateDetectionFilter = (column: string, value: string) => {
 
 <template>
 
-    <Head :title="`Submissions for ${props.link.name}`" />
+    <Head :title="`Submissions for ${props.link.course?.name || 'Course'}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
             <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`" type="link"
-                buttonText="Delete Link" :item-name="props.link.name" />
+                buttonText="Delete Link" :item-name="props.link.course?.name || 'this link'" />
         </template>
 
         <div class="flex h-full flex-col gap-6 overflow-x-auto rounded-xl p-4">
@@ -201,7 +194,7 @@ const updateDetectionFilter = (column: string, value: string) => {
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-3">
                             <div class="flex flex-wrap items-center gap-3">
-                                <CardTitle class="text-2xl">{{ props.link.name }}</CardTitle>
+                                <CardTitle class="text-2xl">{{ props.link.course?.name || 'Course' }}</CardTitle>
                                 <Badge variant="outline" class="h-6">
                                     <Circle class="mr-1.5 size-4" :class="link.is_open
                                         ? 'fill-green-500 text-green-500'

@@ -17,7 +17,7 @@ class ActivityLinkController extends Controller
     public function store(ActivityLinkRequest $request, Activity $activity, GenerateActivityLink $generateActivityLink)
     {
         $data = $request->validated();
-        $generateActivityLink->execute($activity, $data['name'], $data['expires_at'] ?? null);
+        $generateActivityLink->execute($activity, $data['course_id'], $data['expires_at'] ?? null);
 
         return redirect()->route('activities.show', $activity);
     }
@@ -32,7 +32,7 @@ class ActivityLinkController extends Controller
 
     public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService, DetectionService $detectionService)
     {
-        $link = $activity->activityLinks()->selectedAttributes()->findOrFail($linkId);
+        $link = $activity->activityLinks()->selectedAttributes()->with('course:id,name')->findOrFail($linkId);
         $activeTab = $request->get('tab', 'submission');
 
         $baseData = [

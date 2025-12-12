@@ -22,8 +22,23 @@ class ActivityLinkRequest extends FormRequest
      */
     public function rules(): array
     {
+        $activityId = $this->route('activity')?->id;
+
         return [
-            'name'       => ['required', 'string', 'max:100'],
+            'course_id'  => [
+                'required',
+                'uuid',
+                'exists:courses,id',
+                function ($attribute, $value, $fail) use ($activityId) {
+                    $exists = \App\Models\ActivityLink::where('activity_id', $activityId)
+                        ->where('course_id', $value)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('An activity link for this course already exists.');
+                    }
+                },
+            ],
             'expires_at' => ['nullable', 'date', 'after_or_equal:now'],
         ];
     }

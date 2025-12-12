@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ProgrammingLanguage;
 use App\Models\Activity;
+use App\Models\Course;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -46,15 +47,25 @@ class ActivityService
 
     public function getActivityDetails(Activity $activity): array
     {
+        // Get IDs of courses that already have links for this activity
+        $usedCourseIds = $activity->activityLinks()->pluck('course_id')->toArray();
+
         return [
             'id' => $activity->id,
             'title' => $activity->title,
             'language_text' => $activity->language_text,
             'content' => $activity->content,
             'appUrl' => config('app.url'),
+            'courses' => Course::where('user_id', Auth::id())
+                ->where('is_active', true)
+                ->whereNotIn('id', $usedCourseIds)
+                ->select('id', 'name')
+                ->orderBy('name')
+                ->get(),
             'links' => Inertia::defer(
                 fn() => $activity->activityLinks()
                     ->selectedAttributes()
+                    ->with('course:id,name')
                     ->withCount('submissions')
                     ->orderBy('created_at')
                     ->paginate(6)

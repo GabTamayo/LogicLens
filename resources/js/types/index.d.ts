@@ -65,14 +65,34 @@ export interface ActivityDetail {
     language_text: string;
     content: string;
     appUrl: string;
+    courses: Array<{
+        id: string;
+        name: string;
+    }>;
     links: {
         data: ActivityLink[];
     } & PaginationData;
 }
 
+export interface Course {
+    id: string;
+    name: string;
+    access_code: string;
+    is_active: boolean;
+    created_at: string;
+}
+
+export interface CoursePagination extends PaginationData {
+    data: Course[];
+}
+
 export interface ActivityLink {
     id: number;
-    name: string;
+    course_id: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     token: string;
     is_open: boolean;
     expires_at: string | null;
@@ -175,7 +195,11 @@ export interface UpcomingThisWeek {
     activity_id: string;
     activity: string;
     language: string;
-    name: string;
+    course_id: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     expires_at: string;
 }
 
@@ -187,7 +211,11 @@ export interface FlaggedDetections {
     id: string;
     link_id: string;
     activity_id: string;
-    link_name: string;
+    course_id: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     activity: string;
     submitter_a: string;
     submitter_b: string;
@@ -207,7 +235,10 @@ export interface AverageScorePerActivity {
 
 export interface AverageScorePerActivityLink {
     link_id: string;
-    link_name: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     average_score: number;
 }
 
@@ -228,9 +259,26 @@ export interface ActiveLink {
     activity_id: string;
     activity: string;
     language: string;
-    name: string;
+    course_id: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     expires_at: string | null;
     has_deadline: boolean;
+    created_at: string | null;
+}
+
+export interface PendingDetection {
+    id: string;
+    activity_id: string;
+    activity: string;
+    language: string | null;
+    course_id: string;
+    course?: {
+        id: string;
+        name: string;
+    };
     created_at: string | null;
 }
 
