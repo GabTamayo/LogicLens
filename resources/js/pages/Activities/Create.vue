@@ -86,7 +86,7 @@ function submit(close: () => void) {
 
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
-                    Save
+                    {{ form.processing ? 'Saving...' : 'Save' }}
                 </Button>
             </div>
         </Form>

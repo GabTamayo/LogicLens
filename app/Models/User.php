@@ -54,9 +54,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Activity::class);
     }
 
-    public function sections()
+    public function courses()
     {
-        return $this->hasMany(Section::class);
+        return $this->hasMany(Course::class);
     }
 
     public function sendEmailVerificationNotification()

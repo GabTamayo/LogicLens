@@ -3,7 +3,8 @@
     "allow": [
       "Bash(php artisan test:*)",
       "Bash(php artisan:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git mv:*)"
     ]
   },
   "enabledMcpjsonServers": [

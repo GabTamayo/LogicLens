@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\Section;
+use App\Models\Course;
 use Illuminate\Support\Facades\Auth;
 
-class SectionService
+class CourseService
 {
-    public function getSectionsList(?string $search = null, ?string $sort = null): array
+    public function getCoursesList(?string $search = null, ?string $sort = null): array
     {
         return [
-            'sections' => fn () => Section::where('user_id', Auth::id())
+            'courses' => fn () => Course::where('user_id', Auth::id())
                 ->when($search, function ($query) use ($search) {
                     $query->where('name', 'like', '%'.$search.'%')
                         ->orWhere('access_code', 'like', '%'.$search.'%');

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class SectionRequest extends FormRequest
+class CourseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,7 +24,7 @@ class SectionRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'access_code' => ['required', 'string', 'min:6', 'max:12', 'unique:sections,access_code'],
+            'access_code' => ['required', 'string', 'min:6', 'max:12', 'unique:courses,access_code'],
         ];
     }
 }

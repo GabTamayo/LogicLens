@@ -133,7 +133,7 @@ const hasContent = computed(() => {
                 <div>
                     <h1 class="text-lg sm:text-2xl font-bold tracking-tight cursor-default">Activities</h1>
                     <p class="text-xs sm:text-sm text-muted-foreground mt-1 mb-4">
-                        Manage and group your submission links into activities.
+                        Organize your activities and assign them to your courses.
                     </p>
 
                     <div class="flex gap-2 flex-wrap items-center">
@@ -292,7 +292,7 @@ const hasContent = computed(() => {
                                                     <Circle class="h-3 w-3 text-green-500 fill-current"
                                                         aria-hidden="true" />
                                                     <span class="text-sm font-medium">{{ activity.open_links_count
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                                 <span class="text-xs text-muted-foreground">Active</span>
                                             </div>
@@ -304,7 +304,7 @@ const hasContent = computed(() => {
                                                     <Circle class="h-3 w-3 text-red-500 fill-current"
                                                         aria-hidden="true" />
                                                     <span class="text-sm font-medium">{{ activity.closed_links_count
-                                                    }}</span>
+                                                        }}</span>
                                                 </div>
                                                 <span class="text-xs text-muted-foreground">Closed</span>
                                             </div>

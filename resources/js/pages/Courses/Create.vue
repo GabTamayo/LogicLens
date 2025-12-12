@@ -14,13 +14,13 @@ const form = useForm({
 });
 
 function submit(close: () => void) {
-    form.post('/sections', {
+    form.post('/courses', {
         onSuccess: () => {
-            toast.success('Section created successfully!');
+            toast.success('Course created successfully!');
             close();
         },
         onError: () => {
-            toast.error('Failed to create section. Please try again.');
+            toast.error('Failed to create course. Please try again.');
         },
     });
 }
@@ -42,14 +42,14 @@ function generateAccessCode() {
             <FormField name="name">
                 <FormItem>
                     <div class="mb-4">
-                        <h1 class="font-bold text-lg cursor-default">Create New Section</h1>
+                        <h1 class="font-bold text-lg cursor-default">Create New Course</h1>
                         <FormDescription>
-                            Create a new class section with a unique access code for your students.
+                            Create a new class course with a unique access code for your students.
                         </FormDescription>
                     </div>
-                    <FormLabel>Section Name</FormLabel>
+                    <FormLabel>Course Name</FormLabel>
                     <FormControl>
-                        <Input type="text" v-model="form.name" placeholder="Enter your class (e.g., 1BSIT-1)" />
+                        <Input type="text" v-model="form.name" placeholder="e.g., DSA (1BSIT-1)" />
                     </FormControl>
                     <InputError :message="form.errors.name" />
                 </FormItem>
@@ -75,7 +75,7 @@ function generateAccessCode() {
 
             <div class="flex justify-end">
                 <Button type="submit" :disabled="form.processing">
-                    {{ form.processing ? 'Creating...' : 'Create Section' }}
+                    {{ form.processing ? 'Saving...' : 'Save' }}
                 </Button>
             </div>
         </Form>
