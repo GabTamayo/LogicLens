@@ -21,8 +21,8 @@ const mainNavItems: NavItem[] = [
         icon: SquarePen,
     },
     {
-        title: 'Classes',
-        href: '#',
+        title: 'Sections',
+        href: '/sections',
         icon: BookOpenText,
     },
 ];

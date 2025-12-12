@@ -55,7 +55,6 @@ watch(viewMode, (newValue) => {
 });
 
 const performSearch = () => {
-    isLoading.value = true;
     router.get('/activities',
         {
             language: selectedLanguage.value,
@@ -66,6 +65,9 @@ const performSearch = () => {
         {
             preserveScroll: true,
             preserveState: true,
+            onStart: () => {
+                isLoading.value = true;
+            },
             onFinish: () => {
                 isLoading.value = false;
             }
@@ -78,6 +80,7 @@ const debouncedSearch = useDebounceFn(() => {
 }, 500);
 
 watch(searchQuery, () => {
+    isLoading.value = true;
     debouncedSearch();
 });
 
@@ -108,7 +111,7 @@ const handlePageChange = (pageNumber: number) => {
 };
 
 const hasActiveFilters = computed(() => {
-    return selectedLanguage.value !== 'all' || searchQuery.value !== '' || sortBy.value !== 'newest';
+    return selectedLanguage.value !== 'all' || (searchQuery.value && searchQuery.value.trim() !== '') || sortBy.value !== 'newest';
 });
 
 const hasContent = computed(() => {
@@ -126,7 +129,7 @@ const hasContent = computed(() => {
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
-            <template v-if="hasContent || isLoading">
+            <template v-if="isLoading || hasContent">
                 <div>
                     <h1 class="text-lg sm:text-2xl font-bold tracking-tight cursor-default">Activities</h1>
                     <p class="text-xs sm:text-sm text-muted-foreground mt-1 mb-4">
@@ -406,7 +409,7 @@ const hasContent = computed(() => {
                             </EmptyMedia>
                             <EmptyTitle>No Activities Found</EmptyTitle>
                             <EmptyDescription>
-                                No activities match your current filters. Try adjusting your search or filters.
+                                No activities match your current filters.
                             </EmptyDescription>
                         </EmptyHeader>
                     </Empty>

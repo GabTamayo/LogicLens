@@ -9,9 +9,13 @@ export function cn(...inputs: ClassValue[]) {
 export function urlIsActive(urlToCheck: NonNullable<InertiaLinkProps['href']>, currentUrl: string) {
     const target = toUrl(urlToCheck)
 
-    if (currentUrl === target) return true
+    // Strip query parameters and hash from both URLs for comparison
+    const currentPath = currentUrl.split('?')[0].split('#')[0]
+    const targetPath = target.split('?')[0].split('#')[0]
 
-    return currentUrl.startsWith(target + '/')
+    if (currentPath === targetPath) return true
+
+    return currentPath.startsWith(targetPath + '/')
 }
 
 export function toUrl(href: NonNullable<InertiaLinkProps['href']>) {

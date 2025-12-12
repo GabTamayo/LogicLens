@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -53,9 +54,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Activity::class);
     }
 
+    public function sections()
+    {
+        return $this->hasMany(Section::class);
+    }
+
     public function sendEmailVerificationNotification()
     {
-        $this->forceFill(['verification_token' => Str::random(60),])->save();
+        $this->forceFill(['verification_token' => Str::random(60)])->save();
 
         parent::sendEmailVerificationNotification();
     }
@@ -63,6 +69,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getEmailForVerification()
     {
         // Include token in hash to invalidate old links
-        return $this->email . '|' . $this->verification_token;
+        return $this->email.'|'.$this->verification_token;
     }
 }

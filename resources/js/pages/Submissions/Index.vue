@@ -52,8 +52,6 @@ const isInitialLoadDone = ref(false)
 
 // Computed properties
 const hasDeadline = computed(() => !!props.link.expires_at)
-const submissionsCount = computed(() => props.submissions?.data?.length || 0)
-const detectionsCount = computed(() => props.detections?.data?.length || 0)
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
