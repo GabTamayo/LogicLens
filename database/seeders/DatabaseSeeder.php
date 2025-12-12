@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call([
+            RoleSeeder::class,
+        ]);
 
         User::factory()->create([
             'name' => 'Heihachi Mishima',
@@ -29,7 +31,5 @@ class DatabaseSeeder extends Seeder
             'email' => 'gabotamayo@yahoo.com',
             'password' => bcrypt('191423angpogiko'),
         ]);
-
-        //Submission::factory(20)->create();
     }
 }

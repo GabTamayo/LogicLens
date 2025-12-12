@@ -149,7 +149,7 @@ const hasContent = computed(() => {
                         </Tabs>
                         <div class="relative w-[180px] sm:w-[280px]">
                             <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input v-model="searchQuery" type="search" placeholder="Search activities..."
+                            <Input v-model="searchQuery" type="search" placeholder="Search"
                                 class="pl-8 w-full" aria-label="Search activities" />
                         </div>
                         <Select v-model="selectedLanguage" aria-label="Filter by language">

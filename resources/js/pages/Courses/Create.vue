@@ -49,7 +49,7 @@ function generateAccessCode() {
                     </div>
                     <FormLabel>Course Name</FormLabel>
                     <FormControl>
-                        <Input type="text" v-model="form.name" placeholder="e.g., DSA (1BSIT-1)" />
+                        <Input type="text" v-model="form.name" placeholder="Section : Course (e.g., 1BSIT-1 : DSA)" />
                     </FormControl>
                     <InputError :message="form.errors.name" />
                 </FormItem>
@@ -62,8 +62,8 @@ function generateAccessCode() {
                     </FormLabel>
                     <div class="flex gap-2">
                         <FormControl class="flex-1">
-                            <Input type="text" v-model="form.access_code"
-                                placeholder="Enter or generate code" class="font-mono" />
+                            <Input type="text" v-model="form.access_code" placeholder="Enter or generate code"
+                                class="font-mono" />
                         </FormControl>
                         <Button type="button" variant="outline" @click="generateAccessCode">
                             Generate
