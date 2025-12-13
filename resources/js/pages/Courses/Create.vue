@@ -14,6 +14,10 @@ const form = useForm({
 });
 
 function submit(close: () => void) {
+    if (!form.access_code || form.access_code.trim() === '') {
+        generateAccessCode();
+    }
+
     form.post('/courses', {
         onSuccess: () => {
             toast.success('Course created successfully!');

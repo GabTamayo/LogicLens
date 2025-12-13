@@ -4,7 +4,9 @@
       "Bash(php artisan test:*)",
       "Bash(php artisan:*)",
       "Bash(find:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)"
     ]
   },
   "enabledMcpjsonServers": [
