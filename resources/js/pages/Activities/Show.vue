@@ -221,13 +221,12 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-            <!-- Link Generation Card -->
             <Card>
                 <CardHeader>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-wrap items-center gap-3">
-                                <CardTitle>Generate Link Submission</CardTitle>
+                                <CardTitle>Assign Activity to Course</CardTitle>
                                 <Badge :class="[
                                     'px-2.5 py-1 text-xs font-medium',
                                     getLanguageColor(props.language_text)
@@ -242,7 +241,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                 </Badge>
                             </div>
                             <CardDescription>
-                                A submission link allows you to store student submissions for later detection.
+                                Collect student submissions for review and analysis.
                             </CardDescription>
                         </div>
                     </div>

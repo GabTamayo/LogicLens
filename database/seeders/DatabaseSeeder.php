@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Activity;
-use App\Models\ActivityLink;
-use App\Models\Submission;
+use App\Enums\RoleName;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,16 +18,18 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
         ]);
 
-        User::factory()->create([
+        $teacher = User::factory()->create([
             'name' => 'Heihachi Mishima',
             'email' => 'gabotamayo41@gmail.com',
             'password' => bcrypt('191423angpogiko'),
         ]);
+        $teacher->assignRole(RoleName::TEACHER->value);
 
-        User::factory()->create([
+        $student = User::factory()->create([
             'name' => 'Kazuya Mishima',
             'email' => 'gabotamayo@yahoo.com',
             'password' => bcrypt('191423angpogiko'),
         ]);
+        $student->assignRole(RoleName::STUDENT->value);
     }
 }

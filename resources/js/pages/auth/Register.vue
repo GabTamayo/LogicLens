@@ -5,10 +5,14 @@ import TextLink from '@/components/TextLink.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
-import { LoaderCircle } from 'lucide-vue-next';
+import { LoaderCircle, GraduationCap, Users } from 'lucide-vue-next';
+import { ref } from 'vue';
+
+const selectedRole = ref('student');
 </script>
 
 <template>
@@ -32,6 +36,22 @@ import { LoaderCircle } from 'lucide-vue-next';
                     <Label for="email">Email address</Label>
                     <Input id="email" type="email" required :tabindex="2" autocomplete="email" name="email" placeholder="email@example.com" />
                     <InputError :message="errors.email" />
+                </div>
+
+                <div class="grid gap-2">
+                    <Label>Register as</Label>
+                    <ToggleGroup v-model="selectedRole" type="single" class="grid grid-cols-2 w-full">
+                        <ToggleGroupItem value="student" aria-label="Register as Student" class="flex-col gap-2 h-auto py-3">
+                            <GraduationCap class="h-5 w-5" />
+                            <span>Student</span>
+                        </ToggleGroupItem>
+                        <ToggleGroupItem value="teacher" aria-label="Register as Teacher" class="flex-col gap-2 h-auto py-3">
+                            <Users class="h-5 w-5" />
+                            <span>Teacher</span>
+                        </ToggleGroupItem>
+                    </ToggleGroup>
+                    <input type="hidden" name="role" :value="selectedRole" />
+                    <InputError :message="errors.role" />
                 </div>
 
                 <div class="grid gap-2">

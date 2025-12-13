@@ -51,7 +51,7 @@ function flagDetection(detection: FlaggedDetections): void {
                 only: ['flaggedDetections', 'totalFlaggedDetections'],
                 reset: ['flaggedDetections'],
             });
-            toast(`Unflagged ${detection.link_name}`, {
+            toast.success(`Unflagged ${detection.course?.name}`, {
                 description: `detection from (${detection.submitter_a} & ${detection.submitter_b})`
             });
         },

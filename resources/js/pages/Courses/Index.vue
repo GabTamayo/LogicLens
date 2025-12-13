@@ -4,13 +4,15 @@ import { type BreadcrumbItem, type CoursePagination } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { FolderOpen, Search, ArrowUpDown, Users, Copy, ArrowRight } from 'lucide-vue-next';
+import { FolderOpen, Search, ArrowUpDown, Users, Copy, ArrowRight, GalleryVertical, List, Calendar } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 import PaginationComponent from '@/components/Pagination.vue';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle, } from '@/components/ui/empty'
 import AddCourseButton from '@/components/AddCourseButton.vue';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger, } from '@/components/ui/tabs'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDebounceFn } from '@vueuse/core';
@@ -23,7 +25,14 @@ import 'vue-sonner/style.css';
 dayjs.extend(relativeTime)
 
 const isLoading = ref(false);
-
+const getStoredViewMode = (): string => {
+    if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem('courses-view-mode');
+        return stored === 'list' || stored === 'grid' ? stored : 'grid';
+    }
+    return 'grid';
+};
+const viewMode = ref(getStoredViewMode());
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Courses',
@@ -36,6 +45,12 @@ const courses = computed(() => page.props.courses as CoursePagination);
 const filters = computed(() => page.props.filters as { search: string; sort: string });
 const searchQuery = ref(filters.value.search);
 const sortBy = ref(filters.value.sort);
+
+watch(viewMode, (newValue) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('courses-view-mode', newValue);
+    }
+});
 
 const performSearch = () => {
     router.get('/courses',
@@ -96,8 +111,7 @@ const hasContent = computed(() => {
 
 function copy(text: string) {
     navigator.clipboard.writeText(text)
-    toast('Link copied to clipboard', {
-        description: 'The submission link has been copied.',
+    toast('Copied to clipboard', {
     })
 }
 </script>
@@ -120,10 +134,20 @@ function copy(text: string) {
                     </p>
 
                     <div class="flex gap-2 flex-wrap items-center">
+                        <Tabs v-model="viewMode">
+                            <TabsList class="w-fit">
+                                <TabsTrigger value="grid" aria-label="Grid view">
+                                    <GalleryVertical class="size-4" />
+                                </TabsTrigger>
+                                <TabsTrigger value="list" aria-label="List view">
+                                    <List class="size-4" />
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
                         <div class="relative w-[180px] sm:w-[280px]">
                             <Search class="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input v-model="searchQuery" type="search" placeholder="Search"
-                                class="pl-8 w-full" aria-label="Search courses" />
+                            <Input v-model="searchQuery" type="search" placeholder="Search" class="pl-8 w-full"
+                                aria-label="Search courses" />
                         </div>
                         <Select v-model="sortBy" aria-label="Sort courses">
                             <SelectTrigger class="w-[170px]">
@@ -145,7 +169,7 @@ function copy(text: string) {
                 </div>
 
                 <template v-if="isLoading">
-                    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div v-if="viewMode === 'grid'" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         <Card v-for="i in 6" :key="i" class="h-full">
                             <CardHeader class="pb-3">
                                 <div class="flex items-start justify-between gap-3">
@@ -164,10 +188,39 @@ function copy(text: string) {
                             </CardFooter>
                         </Card>
                     </div>
+
+                    <div v-else class="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-[40%]">Course</TableHead>
+                                    <TableHead>Access Code</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead class="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="i in 6" :key="i">
+                                    <TableCell>
+                                        <Skeleton class="h-4 w-3/4" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton class="h-8 w-28" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton class="h-4 w-24" />
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <Skeleton class="h-4 w-16 ml-auto" />
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
+                    </div>
                 </template>
 
                 <template v-else-if="courses.data.length > 0">
-                    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    <div v-if="viewMode === 'grid'" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                         <Card v-for="course in courses.data" :key="course.id"
                             class="group relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/50 h-full">
                             <CardHeader class="pb-3">
@@ -178,6 +231,7 @@ function copy(text: string) {
                                             {{ course.name }}
                                         </CardTitle>
                                         <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
+                                            <Calendar class="h-3.5 w-3.5" aria-hidden="true" />
                                             <span>Created {{ dayjs(course.created_at).fromNow() }}</span>
                                         </CardDescription>
                                     </div>
@@ -187,7 +241,8 @@ function copy(text: string) {
                             <CardContent class="pt-0 pb-4">
                                 <div class="space-y-2">
                                     <div class="text-sm text-muted-foreground">Access Code</div>
-                                    <div class="flex items-center gap-2 px-3 py-2 bg-muted rounded-md">
+                                    <div
+                                        class="flex items-center gap-2 px-3 py-2 bg-muted border rounded-md justify-between">
                                         <code class="text-sm font-mono font-semibold">{{ course.access_code }}</code>
                                         <Button variant="outline" size="icon" @click="copy(course.access_code)"
                                             aria-label="Copy access-code">
@@ -206,6 +261,56 @@ function copy(text: string) {
                                 </div>
                             </CardFooter>
                         </Card>
+                    </div>
+
+                    <div v-else class="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead class="w-[40%]">Course</TableHead>
+                                    <TableHead>Access Code</TableHead>
+                                    <TableHead>Created</TableHead>
+                                    <TableHead class="text-right">Action</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                <TableRow v-for="course in courses.data" :key="course.id"
+                                    class="group cursor-pointer hover:bg-muted/50">
+                                    <TableCell>
+                                        <div class="flex flex-col gap-1">
+                                            <span
+                                                class="text-2xs lg:text-sm group-hover:text-primary dark:text-white transition-colors line-clamp-1">
+                                                {{ course.name }}
+                                            </span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div class="flex items-center gap-2">
+                                            <code
+                                                class="text-xs lg:text-sm font-mono font-semibold">{{ course.access_code }}</code>
+                                            <Button variant="outline" size="icon" @click="copy(course.access_code)"
+                                                aria-label="Copy access-code" class="h-7 w-7">
+                                                <Copy class="size-3.5" />
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                            <Calendar class="h-3.5 w-3.5 hidden xl:block" aria-hidden="true" />
+                                            <span>{{ dayjs(course.created_at).fromNow() }}</span>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell class="text-right">
+                                        <div
+                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary dark:text-white group-hover:underline">
+                                            <span>View</span>
+                                            <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                                                aria-hidden="true" />
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            </TableBody>
+                        </Table>
                     </div>
 
                     <div class="mt-4">
