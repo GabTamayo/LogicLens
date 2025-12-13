@@ -50,6 +50,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        if ($request->role === RoleName::STUDENT->value) {
+            return to_route('student.courses.index');
+        }
+
         return to_route('dashboard');
     }
 }
