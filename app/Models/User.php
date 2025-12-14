@@ -59,6 +59,13 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Course::class);
     }
 
+    public function enrolledCourses()
+    {
+        return $this->belongsToMany(Course::class, 'course_user')
+            ->withTimestamps()
+            ->withPivot('enrolled_at');
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->forceFill(['verification_token' => Str::random(60)])->save();

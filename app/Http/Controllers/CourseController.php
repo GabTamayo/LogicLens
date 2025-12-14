@@ -31,4 +31,11 @@ class CourseController extends Controller
 
         return redirect()->route('courses.index');
     }
+
+    public function show(string $courseId, CourseService $courseService)
+    {
+        $data = $courseService->getCourseDetails($courseId);
+
+        return Inertia::render('Courses/Show', $data);
+    }
 }

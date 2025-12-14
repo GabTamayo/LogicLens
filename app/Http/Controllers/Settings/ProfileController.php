@@ -39,9 +39,7 @@ class ProfileController extends Controller
 
         inertia()->clearHistory();
 
-        $isStudent = $user->hasRole(RoleName::STUDENT->value);
-
-        return to_route($isStudent ? 'student.profile.edit' : 'profile.edit');
+        return to_route('profile.edit');
     }
 
     /**
