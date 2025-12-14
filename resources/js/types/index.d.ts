@@ -80,10 +80,32 @@ export interface Course {
     access_code: string;
     is_active: boolean;
     created_at: string;
+    user?: {
+        id: number;
+        name: string;
+    };
 }
 
 export interface CoursePagination extends PaginationData {
     data: Course[];
+}
+
+export interface CourseActivityLink {
+    id: string;
+    activity_id: string;
+    activity_title: string;
+    activity_language: string;
+    token: string;
+    is_open: boolean;
+    expires_at: string | null;
+    created_at: string;
+    submissions_count: number;
+}
+
+export interface CourseShowProps {
+    course: Course;
+    activities?: CourseActivityLink[];
+    students?: any[];
 }
 
 export interface ActivityLink {
@@ -284,4 +306,10 @@ export interface PendingDetection {
 
 export interface ActiveLinksModalProps {
     activeLinks: ActiveLink[];
+}
+
+export interface EnrollCourseProps {
+    errors?: {
+        access_code?: string;
+    };
 }

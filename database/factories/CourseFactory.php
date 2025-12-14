@@ -17,7 +17,17 @@ class CourseFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'user_id' => \App\Models\User::factory(),
+            'name' => fake()->sentence(3),
+            'access_code' => strtoupper(fake()->unique()->bothify('???-###-???')),
+            'is_active' => true,
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => [
+            'is_active' => false,
+        ]);
     }
 }

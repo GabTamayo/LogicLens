@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type CoursePagination } from '@/types';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { FolderOpen, Search, ArrowUpDown, Users, Copy, ArrowRight, GalleryVertical, List, Calendar } from 'lucide-vue-next';
@@ -221,46 +221,45 @@ function copy(text: string) {
 
                 <template v-else-if="courses.data.length > 0">
                     <div v-if="viewMode === 'grid'" class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                        <Card v-for="course in courses.data" :key="course.id"
-                            class="group relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/50 h-full">
-                            <CardHeader class="pb-3">
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex-1 min-w-0">
-                                        <CardTitle
-                                            class="text-lg font-semibold line-clamp-2 group-hover:text-primary dark:text-white transition-colors">
-                                            {{ course.name }}
-                                        </CardTitle>
-                                        <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
-                                            <Calendar class="h-3.5 w-3.5" aria-hidden="true" />
-                                            <span>Created {{ dayjs(course.created_at).fromNow() }}</span>
-                                        </CardDescription>
-                                    </div>
-                                </div>
-                            </CardHeader>
+                        <Link v-for="course in courses.data" :key="course.id" :href="`/courses/${course.id}`"
+                            prefetch="mount" class="block" :aria-label="`View details for ${course.name}`">
+                            <Card
+                                class="group relative overflow-hidden transition-all hover:shadow-lg hover:border-primary/50 h-full">
+                                <CardHeader class="pb-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="flex-1 min-w-0">
+                                            <CardTitle
+                                                class="text-lg font-semibold line-clamp-2 group-hover:text-primary dark:text-white transition-colors">
+                                                {{ course.name }}
+                                            </CardTitle>
+                                            <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
+                                                <Calendar class="h-3.5 w-3.5" aria-hidden="true" />
+                                                <span>Created {{ dayjs(course.created_at).fromNow() }}</span>
+                                            </CardDescription>
+                                        </div>
 
-                            <CardContent class="pt-0 pb-4">
-                                <div class="space-y-2">
-                                    <div class="text-sm text-muted-foreground">Access Code</div>
+                                        <div>
+                                            <div class="flex items-center p-2 bg-muted border rounded-md">
+                                                <code
+                                                    class="text-sm font-mono font-semibold">{{ course.access_code }}</code>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent class="pt-0 pb-4">
+                                </CardContent>
+
+                                <CardFooter class="pt-0 pb-4">
                                     <div
-                                        class="flex items-center gap-2 px-3 py-2 bg-muted border rounded-md justify-between">
-                                        <code class="text-sm font-mono font-semibold">{{ course.access_code }}</code>
-                                        <Button variant="outline" size="icon" @click="copy(course.access_code)"
-                                            aria-label="Copy access-code">
-                                            <Copy class="size-4" />
-                                        </Button>
+                                        class="flex items-center gap-2 text-sm font-medium text-primary dark:text-white group-hover:underline w-full">
+                                        <span>View Details</span>
+                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                                            aria-hidden="true" />
                                     </div>
-                                </div>
-                            </CardContent>
-
-                            <CardFooter class="pt-0 pb-4">
-                                <div
-                                    class="flex items-center gap-2 text-sm font-medium text-primary dark:text-white group-hover:underline w-full">
-                                    <span>View Details</span>
-                                    <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
-                                        aria-hidden="true" />
-                                </div>
-                            </CardFooter>
-                        </Card>
+                                </CardFooter>
+                            </Card>
+                        </Link>
                     </div>
 
                     <div v-else class="rounded-md border">
@@ -275,7 +274,11 @@ function copy(text: string) {
                             </TableHeader>
                             <TableBody>
                                 <TableRow v-for="course in courses.data" :key="course.id"
-                                    class="group cursor-pointer hover:bg-muted/50">
+                                    class="group cursor-pointer hover:bg-muted/50"
+                                    @click="router.visit(`/courses/${course.id}`)"
+                                    :aria-label="`View details for ${course.name}`" tabindex="0"
+                                    @keydown.enter="router.visit(`/courses/${course.id}`)"
+                                    @keydown.space.prevent="router.visit(`/courses/${course.id}`)">
                                     <TableCell>
                                         <div class="flex flex-col gap-1">
                                             <span
@@ -288,7 +291,7 @@ function copy(text: string) {
                                         <div class="flex items-center gap-2">
                                             <code
                                                 class="text-xs lg:text-sm font-mono font-semibold">{{ course.access_code }}</code>
-                                            <Button variant="outline" size="icon" @click="copy(course.access_code)"
+                                            <Button variant="outline" size="icon" @click.stop="copy(course.access_code)"
                                                 aria-label="Copy access-code" class="h-7 w-7">
                                                 <Copy class="size-3.5" />
                                             </Button>
@@ -301,12 +304,13 @@ function copy(text: string) {
                                         </div>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <div
-                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary dark:text-white group-hover:underline">
+                                        <Link :href="`/courses/${course.id}`" prefetch="mount"
+                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary dark:text-white group-hover:underline"
+                                            @click.stop :aria-label="`View details for ${course.name}`">
                                             <span>View</span>
                                             <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
                                                 aria-hidden="true" />
-                                        </div>
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
