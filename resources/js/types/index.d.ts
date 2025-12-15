@@ -80,6 +80,7 @@ export interface Course {
     access_code: string;
     is_active: boolean;
     created_at: string;
+    enrolled_at?: string;
     user?: {
         id: number;
         name: string;
@@ -104,8 +105,26 @@ export interface CourseActivityLink {
 
 export interface CourseShowProps {
     course: Course;
-    activities?: CourseActivityLink[];
-    students?: any[];
+    activities?: {
+        data: CourseActivityLink[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    students?: {
+        data: Array<{
+            id: number;
+            name: string;
+            email: string;
+            enrolled_at: string;
+        }>;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    activeTab: string;
 }
 
 export interface ActivityLink {

@@ -2,14 +2,14 @@
 import AppLayout from "@/layouts/AppLayout.vue";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import DataTable from "@/components/DataTable.vue";
+import { columns as activityColumns } from "@/components/activities/columns";
+import { columns as studentColumns } from "@/components/students/columns";
 import type { BreadcrumbItem, CourseShowProps } from "@/types";
-import { computed, ref } from "vue";
-import { Circle, ExternalLink, CalendarCheck, Copy } from "lucide-vue-next";
-import { Deferred, Head, Link } from "@inertiajs/vue3";
+import { computed, ref, watch } from "vue";
+import { CalendarCheck, Copy, LoaderCircle } from "lucide-vue-next";
+import { Deferred, Head, router } from "@inertiajs/vue3";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { Toaster } from '@/components/ui/sonner';
@@ -34,16 +34,48 @@ const formattedDate = computed(() => {
     });
 });
 
-const activitiesLoaded = computed(() => props.activities !== undefined);
-const studentsLoaded = computed(() => props.students !== undefined);
-const activeTab = ref('activities');
+const activeTab = ref(props.activeTab || 'activities');
 const isInitialLoadDone = ref(false);
+const activitiesPage = ref(1);
+const studentsPage = ref(1);
 
 function copy(text: string) {
     navigator.clipboard.writeText(text)
     toast('Copied to clipboard', {
     })
 }
+
+// Tab change handler
+watch(activeTab, (newTab) => {
+    const page = newTab === 'students' ? studentsPage.value : activitiesPage.value;
+    router.visit(`/courses/${props.course.id}`, {
+        data: { tab: newTab, page },
+        preserveScroll: true,
+        preserveState: true,
+        only: newTab === 'students' ? ['students', 'activeTab'] : ['activities', 'activeTab'],
+    });
+});
+
+// Pagination handlers
+const handleActivitiesPageChange = (page: number) => {
+    activitiesPage.value = page;
+    router.visit(`/courses/${props.course.id}`, {
+        data: { page, tab: 'activities' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['activities'],
+    });
+};
+
+const handleStudentsPageChange = (page: number) => {
+    studentsPage.value = page;
+    router.visit(`/courses/${props.course.id}`, {
+        data: { page, tab: 'students' },
+        preserveScroll: true,
+        preserveState: true,
+        only: ['students'],
+    });
+};
 </script>
 
 <template>
@@ -69,7 +101,7 @@ function copy(text: string) {
                                 </span>
                                 <Separator orientation="vertical" class="h-4" />
                                 <div class="flex items-center gap-1">
-                                    <Button variant="ghost" size="icon" @click.stop="copy(course.access_code)"
+                                    <Button variant="outline" size="icon-sm" @click.stop="copy(course.access_code)"
                                         aria-label="Copy access-code">
                                         <Copy class="size-4" />
                                     </Button>
@@ -99,97 +131,41 @@ function copy(text: string) {
                         </div>
 
                         <TabsContent value="activities" class="m-0 p-6">
-                            <template v-if="activitiesLoaded">
+                            <template v-if="props.activities">
                                 <Deferred data="activities" @resolve="isInitialLoadDone = true">
                                     <template #fallback>
-                                        <div class="space-y-3">
-                                            <Skeleton class="h-12 w-full" v-for="i in 3" :key="i" />
+                                        <div class="flex items-center justify-center gap-2 rounded-md p-12">
+                                            <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                            <span class="text-muted-foreground">Loading activities...</span>
                                         </div>
                                     </template>
-                                    <div v-if="activities && activities.length > 0" class="rounded-md border">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>Activity</TableHead>
-                                                    <TableHead>Language</TableHead>
-                                                    <TableHead>Status</TableHead>
-                                                    <TableHead>Submissions</TableHead>
-                                                    <TableHead>Created</TableHead>
-                                                    <TableHead class="text-right">Action</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                <TableRow v-for="activity in activities" :key="activity.id"
-                                                    class="group hover:bg-muted/50">
-                                                    <TableCell>
-                                                        <span class="font-medium">{{ activity.activity_title }}</span>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="outline">{{ activity.activity_language }}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <div class="flex items-center gap-1.5">
-                                                            <Circle :class="[
-                                                                'h-2 w-2 fill-current',
-                                                                activity.is_open ? 'text-green-500' : 'text-red-500'
-                                                            ]" />
-                                                            <span class="text-sm">{{ activity.is_open ? 'Open' :
-                                                                'Closed'
-                                                                }}</span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span class="text-sm">{{ activity.submissions_count }}</span>
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <span class="text-xs text-muted-foreground">
-                                                            {{ dayjs(activity.created_at).fromNow() }}
-                                                        </span>
-                                                    </TableCell>
-                                                    <TableCell class="text-right">
-                                                        <Link
-                                                            :href="`/activities/${activity.activity_id}/links/${activity.id}`"
-                                                            prefetch="mount"
-                                                            class="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
-                                                            <span>View</span>
-                                                            <ExternalLink class="h-3.5 w-3.5" />
-                                                        </Link>
-                                                    </TableCell>
-                                                </TableRow>
-                                            </TableBody>
-                                        </Table>
-                                    </div>
-                                    <div v-else class="flex items-center justify-center rounded-md border p-12">
-                                        <p class="text-sm text-muted-foreground text-center">
-                                            No activities assigned to this course yet.
-                                        </p>
-                                    </div>
+                                    <DataTable :columns="activityColumns" :data="props.activities.data"
+                                        :pagination="props.activities as any" @page-change="handleActivitiesPageChange" />
                                 </Deferred>
                             </template>
 
-                            <div v-else class="space-y-3">
-                                <Skeleton class="h-12 w-full" v-for="i in 3" :key="i" />
+                            <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
+                                <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                <span class="text-muted-foreground">Loading activities...</span>
                             </div>
                         </TabsContent>
 
                         <TabsContent value="students" class="m-0 p-6">
-                            <template v-if="studentsLoaded">
+                            <template v-if="props.students">
                                 <Deferred data="students">
                                     <template #fallback>
-                                        <div class="space-y-3">
-                                            <Skeleton class="h-12 w-full" v-for="i in 3" :key="i" />
+                                        <div class="flex items-center justify-center gap-2 rounded-md p-12">
+                                            <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                            <span class="text-muted-foreground">Loading students...</span>
                                         </div>
                                     </template>
-                                    <div class="flex items-center justify-center rounded-md border p-12">
-                                        <p class="text-sm text-muted-foreground text-center">
-                                            Student enrollment feature coming soon.
-                                        </p>
-                                    </div>
+                                    <DataTable :columns="studentColumns" :data="props.students.data"
+                                        :pagination="props.students as any" @page-change="handleStudentsPageChange" />
                                 </Deferred>
                             </template>
-                            <div v-else class="space-y-3">
-                                <Skeleton class="h-12 w-full" v-for="i in 3" :key="i" />
+                            <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
+                                <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                <span class="text-muted-foreground">Loading students...</span>
                             </div>
                         </TabsContent>
                     </Tabs>

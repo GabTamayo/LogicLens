@@ -231,6 +231,13 @@ const updateDetectionFilter = (column: string, value: string) => {
                                         </Tooltip>
                                     </TooltipProvider>
                                 </template>
+
+                                <template v-else>
+                                    <Separator orientation="vertical" class="h-4" />
+                                    <span class="text-muted-foreground">
+                                        No Deadline
+                                    </span>
+                                </template>
                             </CardDescription>
                         </div>
                     </div>
@@ -285,7 +292,8 @@ const updateDetectionFilter = (column: string, value: string) => {
                                             :pagination="props.submissions as any" :filter-config="[
                                                 { column: 'student_name', placeholder: 'Filter by Student Name' },
                                                 { column: 'student_no', placeholder: 'Search Student No.' }
-                                            ]" :filter-values="submissionFilters" @page-change="handleSubmissionPageChange"
+                                            ]" :filter-values="submissionFilters"
+                                            @page-change="handleSubmissionPageChange"
                                             @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
                                             @detect-submission="handleDetectSubmission" :show-detect-button="true" />
                                     </div>
@@ -323,16 +331,18 @@ const updateDetectionFilter = (column: string, value: string) => {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <DataTable :columns="detectionColumns" :data="(props.detections?.data as any) || []"
+                                        <DataTable :columns="detectionColumns"
+                                            :data="(props.detections?.data as any) || []"
                                             :pagination="props.detections as any" :filter-config="[
                                                 { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
                                                 { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
-                                            ]" :filter-values="detectionFilters" @page-change="handleDetectionPageChange"
+                                            ]" :filter-values="detectionFilters"
+                                            @page-change="handleDetectionPageChange"
                                             @filter-change="updateDetectionFilter" :show-detect-button="false" />
                                     </div>
                                 </Deferred>
                             </template>
-                            <div v-else class="flex items-center justify-center gap-2 rounded-md border p-12">
+                            <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
                                 <span class="text-muted-foreground">Loading detection results...</span>
                             </div>

@@ -10,30 +10,31 @@ class StudentCourseService
     public function getEnrolledCourses(?string $search = null, ?string $sort = null): array
     {
         return [
-            'enrolledCourses' => fn() => Auth::user()
+            'enrolledCourses' => fn () => Auth::user()
                 ->enrolledCourses()
+                ->withPivot('enrolled_at')
                 ->with('user:id,name')
                 ->when($search, function ($query) use ($search) {
-                    $query->where('courses.name', 'like', '%' . $search . '%');
+                    $query->where('courses.name', 'like', '%'.$search.'%');
                 })
                 ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.created_at')
                 ->when($sort, function ($query) use ($sort) {
                     match ($sort) {
                         'name_asc' => $query->orderBy('courses.name', 'asc'),
                         'name_desc' => $query->orderBy('courses.name', 'desc'),
-                        'oldest' => $query->oldest('courses.created_at'),
-                        default => $query->latest('courses.created_at'),
+                        'oldest' => $query->orderBy('course_user.enrolled_at', 'asc'),
+                        default => $query->orderBy('course_user.enrolled_at', 'desc'),
                     };
                 }, function ($query) {
-                    $query->latest('courses.created_at');
+                    $query->orderBy('course_user.enrolled_at', 'desc');
                 })
                 ->paginate(9)
                 ->withQueryString()
-                ->through(fn($course) => [
+                ->through(fn ($course) => [
                     'id' => $course->id,
                     'user_id' => $course->user_id,
                     'name' => $course->name,
-                    'created_at' => $course->created_at,
+                    'enrolled_at' => $course->pivot->enrolled_at,
                     'user' => $course->user,
                 ]),
             'filters' => [

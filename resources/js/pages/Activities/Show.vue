@@ -281,7 +281,10 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
 
                             <FormField name="expires_at">
                                 <FormItem>
-                                    <FormLabel>Deadline (Optional)</FormLabel>
+                                    <FormLabel>
+                                        Deadline
+                                        <span class="text-muted-foreground">(Optional)</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <DateTimePicker v-model="form.expires_at" :disabled="form.processing" />
                                     </FormControl>
@@ -419,7 +422,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             <p class="font-medium">{{ formatExpiresAt(link.expires_at)
-                                                                }}</p>
+                                                            }}</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
