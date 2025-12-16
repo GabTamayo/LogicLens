@@ -68,8 +68,8 @@ export const columns: ColumnDef<ActivityRow>[] = [
     },
     {
         accessorKey: 'created_at',
-        label: 'Created',
-        header: () => h('div', { class: 'text-right' }, 'Created'),
+        label: 'Assigned',
+        header: () => h('div', { class: 'text-right' }, 'Assigned'),
         cell: ({ row }) => {
             const date = row.getValue('created_at') as string
             return h('div', { class: 'text-right text-xs text-muted-foreground' }, dayjs(date).fromNow())

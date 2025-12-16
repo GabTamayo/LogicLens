@@ -7,7 +7,9 @@
       "Bash(git mv:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run:*)",
-      "Bash(vendor/bin/pint:*)"
+      "Bash(vendor/bin/pint:*)",
+      "Bash(npm install:*)",
+      "Bash(cmd /c dir:*)"
     ]
   },
   "enabledMcpjsonServers": [

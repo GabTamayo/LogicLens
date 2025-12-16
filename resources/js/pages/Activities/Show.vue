@@ -332,7 +332,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div v-if="!isEditing" class="min-h-[200px] rounded-md border">
+                    <div v-if="!isEditing" class="min-h-[200px] border">
                         <div v-if="isContentEmpty" class="flex flex-col items-center justify-center p-12 text-center">
                             <div class="mb-4 rounded-full bg-muted p-3">
                                 <FileText class="h-6 w-6 text-muted-foreground" />
@@ -347,7 +347,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                             </Button>
                         </div>
 
-                        <div v-else class="prose dark:prose-invert max-w-none p-6" v-html="props.content">
+                        <div v-else class="prose dark:prose-invert max-w-none p-4" v-html="props.content">
                         </div>
                     </div>
 

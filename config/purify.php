@@ -42,11 +42,12 @@ return [
         'default' => [
             'Core.Encoding' => 'utf-8',
             'HTML.Doctype' => 'HTML 4.01 Transitional',
-            'HTML.Allowed' => 'h1,h2,h3,h4,h5,h6,b,u,strong,i,em,s,del,a[href|title],ul,ol,li,p[style],br,span,img[width|height|alt|src],blockquote,code,pre,u,hr,table[width|height|style|class],thead,tbody,tfoot,tr[style|class],th[colspan|rowspan|scope|style|class|align|valign|width|height],td[colspan|rowspan|style|class|align|valign|width|height]',
+            'HTML.Allowed' => 'h1[style|class],h2[style|class],h3[style|class],h4[style|class],h5[style|class],h6[style|class],b,u,strong,i,em,s,del,a[href|title],ul,ol,li,p[style],br,span,img[width|height|alt|src|class|style],blockquote,code,pre,u,hr,table[width|height|style|class],thead,tbody,tfoot,tr[style|class],th[colspan|rowspan|scope|style|class|align|valign|width|height],td[colspan|rowspan|style|class|align|valign|width|height]',
             'HTML.ForbiddenElements' => '',
             'CSS.AllowedProperties' => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
             'AutoFormat.AutoParagraph' => false,
             'AutoFormat.RemoveEmpty' => false,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true, 'data' => true],
         ],
 
     ],
