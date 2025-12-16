@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\RoleName;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -48,6 +49,8 @@ class HandleInertiaRequests extends Middleware
                     'name' => $user->name,
                     'email' => $user->email,
                     'email_verified_at' => $user->email_verified_at,
+                    // Helpful flags for the frontend
+                    'is_student' => $user->hasRole(RoleName::STUDENT->value),
                 ] : null,
             ],
 
@@ -55,7 +58,7 @@ class HandleInertiaRequests extends Middleware
         ];
 
         if (
-            !$user &&
+            ! $user &&
             (
                 $request->is('login') ||
                 $request->is('register') ||

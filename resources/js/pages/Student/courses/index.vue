@@ -119,6 +119,7 @@ const hasContent = computed(() => {
 </script>
 
 <template>
+
     <Head title="Courses" />
 
     <StudentAppLayout :breadcrumbs="breadcrumbs">
@@ -126,7 +127,8 @@ const hasContent = computed(() => {
             <template v-if="isLoading || hasContent">
                 <div>
                     <h1 class="cursor-default text-lg font-bold tracking-tight sm:text-2xl">My Enrolled Courses</h1>
-                    <p class="mt-1 mb-4 text-xs text-muted-foreground sm:text-sm">View and access your enrolled courses</p>
+                    <p class="mt-1 mb-4 text-xs text-muted-foreground sm:text-sm">View and access your enrolled courses
+                    </p>
 
                     <div class="flex flex-wrap items-center gap-2">
                         <Tabs v-model="viewMode">
@@ -141,7 +143,8 @@ const hasContent = computed(() => {
                         </Tabs>
                         <div class="relative w-[180px] sm:w-[280px]">
                             <Search class="absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input v-model="searchQuery" type="search" placeholder="Search courses" class="w-full pl-8" aria-label="Search courses" />
+                            <Input v-model="searchQuery" type="search" placeholder="Search courses" class="w-full pl-8"
+                                aria-label="Search courses" />
                         </div>
                         <Select v-model="sortBy" aria-label="Sort courses">
                             <SelectTrigger class="w-[170px]">
@@ -225,21 +228,16 @@ const hasContent = computed(() => {
 
                 <template v-else-if="enrolledCourses.data.length > 0">
                     <div v-if="viewMode === 'grid'" class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <Link
-                            v-for="course in enrolledCourses.data"
-                            :key="course.id"
-                            href="#"
-                            prefetch="mount"
-                            class="block"
-                            :aria-label="`View details for ${course.name}`"
-                        >
-                            <Card class="group relative h-full overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg">
+                        <Link v-for="course in enrolledCourses.data" :key="course.id"
+                            :href="`/student/courses/${course.id}`" prefetch="mount" class="block"
+                            :aria-label="`View activities for ${course.name}`">
+                            <Card
+                                class="group relative h-full overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg">
                                 <CardHeader class="pb-3">
                                     <div class="flex items-start justify-between gap-3">
                                         <div class="min-w-0 flex-1">
                                             <CardTitle
-                                                class="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary dark:text-white"
-                                            >
+                                                class="line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary dark:text-white">
                                                 {{ course.name }}
                                             </CardTitle>
                                             <CardDescription class="mt-1.5 flex items-center gap-1.5 text-xs">
@@ -261,10 +259,10 @@ const hasContent = computed(() => {
 
                                 <CardFooter class="pt-0 pb-4">
                                     <div
-                                        class="flex w-full items-center gap-2 text-sm font-medium text-primary group-hover:underline dark:text-white"
-                                    >
+                                        class="flex w-full items-center gap-2 text-sm font-medium text-primary group-hover:underline dark:text-white">
                                         <span>View Course</span>
-                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                                        <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                                            aria-hidden="true" />
                                     </div>
                                 </CardFooter>
                             </Card>
@@ -282,21 +280,16 @@ const hasContent = computed(() => {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <TableRow
-                                    v-for="course in enrolledCourses.data"
-                                    :key="course.id"
+                                <TableRow v-for="course in enrolledCourses.data" :key="course.id"
                                     class="group cursor-pointer hover:bg-muted/50"
-                                    @click="router.visit('#')"
-                                    :aria-label="`View details for ${course.name}`"
-                                    tabindex="0"
-                                    @keydown.enter="router.visit('#')"
-                                    @keydown.space.prevent="router.visit('#')"
-                                >
+                                    @click="router.visit(`/student/courses/${course.id}`)"
+                                    :aria-label="`View activities for ${course.name}`" tabindex="0"
+                                    @keydown.enter="router.visit(`/student/courses/${course.id}`)"
+                                    @keydown.space.prevent="router.visit(`/student/courses/${course.id}`)">
                                     <TableCell>
                                         <div class="flex items-center gap-2">
                                             <div
-                                                class="line-clamp-1 text-2xs font-medium transition-colors group-hover:text-primary lg:text-sm dark:text-white"
-                                            >
+                                                class="line-clamp-1 text-2xs font-medium transition-colors group-hover:text-primary lg:text-sm dark:text-white">
                                                 {{ course.name }}
                                             </div>
                                         </div>
@@ -311,15 +304,12 @@ const hasContent = computed(() => {
                                         </div>
                                     </TableCell>
                                     <TableCell class="text-right">
-                                        <Link
-                                            href="#"
-                                            prefetch="mount"
+                                        <Link :href="`/student/courses/${course.id}`" prefetch="mount"
                                             class="inline-flex items-center gap-1 text-sm font-medium text-primary group-hover:underline dark:text-white"
-                                            @click.stop
-                                            :aria-label="`View details for ${course.name}`"
-                                        >
+                                            @click.stop :aria-label="`View activities for ${course.name}`">
                                             <span>View</span>
-                                            <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
+                                            <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1"
+                                                aria-hidden="true" />
                                         </Link>
                                     </TableCell>
                                 </TableRow>
@@ -353,7 +343,8 @@ const hasContent = computed(() => {
                         </EmptyMedia>
                         <EmptyTitle>No Enrolled Courses Yet</EmptyTitle>
                         <EmptyDescription>
-                            You haven't enrolled in any courses yet. Enroll using an access code provided by your teacher.
+                            You haven't enrolled in any courses yet. Enroll using an access code provided by your
+                            teacher.
                         </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent> </EmptyContent>

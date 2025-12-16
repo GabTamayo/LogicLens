@@ -30,7 +30,7 @@ import { Head, Link } from '@inertiajs/vue3';
                     <span class="text-white text-2xl tracking-tight font-bold">LogicLens</span>
                 </div>
                 <nav class="flex items-center gap-4">
-                    <Link v-if="$page.props.auth.user" :href="dashboard()"
+                    <Link v-if="$page.props.auth.user" :href="$page.props.auth.user.is_student ? '/student/courses' : dashboard()"
                         class="inline-block rounded-sm border border-[#ffffff40] px-5 py-1.5 text-sm text-white hover:border-white">
                     Dashboard
                     </Link>
@@ -56,7 +56,7 @@ import { Head, Link } from '@inertiajs/vue3';
                         Can't manage and analyze student submissions? Analyze quickly and detect similarities using
                         LogicLens' advanced logic-based detection system.
                     </p>
-                    <Link :href="register()">
+                    <Link :href="$page.props.auth.user ? ($page.props.auth.user.is_student ? '/student/courses' : dashboard()) : register()">
                     <Button size="lg" class="gap-2">
                         Get Started Now
                         <ChevronRight class="h-4 w-4" />

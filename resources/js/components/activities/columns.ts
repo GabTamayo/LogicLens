@@ -5,8 +5,10 @@ import { Circle } from 'lucide-vue-next'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import DropdownAction from './data-table.dropdown.vue'
+import { useLanguage } from '@/composables/useLanguage'
 
 dayjs.extend(relativeTime)
+const { getLanguageConfig } = useLanguage()
 
 export interface ActivityRow {
     id: string
@@ -30,8 +32,29 @@ export const columns: ColumnDef<ActivityRow>[] = [
     {
         accessorKey: 'activity_language',
         label: 'Language',
-        header: () => h('div', { class: '' }, 'Language'),
-        cell: ({ row }) => h(Badge, { variant: 'outline' }, () => row.getValue('activity_language')),
+        header: () => h('div', {}, 'Language'),
+        cell: ({ row }) => {
+            const language = row.getValue('activity_language') as string
+            const { colors, logo } = getLanguageConfig(language)
+
+            return h(
+                Badge,
+                {
+                    variant: 'outline',
+                    class: `flex items-center gap-1.5 ${colors}`,
+                },
+                () => [
+                    logo
+                        ? h('img', {
+                            src: logo,
+                            alt: language,
+                            class: 'h-3.5 w-3.5 object-contain',
+                        })
+                        : null,
+                    h('span', { class: 'text-xs font-medium' }, language),
+                ]
+            )
+        },
     },
     {
         accessorKey: 'is_open',

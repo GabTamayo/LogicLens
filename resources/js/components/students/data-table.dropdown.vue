@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 import type { StudentRow } from '@/components/students/columns'
+import type { CourseShowProps } from '@/types'
 import { toast } from 'vue-sonner'
 import { router, usePage } from '@inertiajs/vue3'
 
 const { student } = defineProps<{ student: StudentRow }>()
 
-const page = usePage()
+const page = usePage<CourseShowProps>()
 const courseId = page.props.course.id
 
 function removeStudent() {
