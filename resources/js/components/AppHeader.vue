@@ -14,7 +14,7 @@ import { dashboard } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
 import { ModalLink } from '@inertiaui/modal-vue';
-import { Book, BookOpen, Folder, Plus, Menu, Search, Loader } from 'lucide-vue-next';
+import { Book, BookOpen, Folder, Plus, Menu, Search, Loader2 } from 'lucide-vue-next';
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
 
 interface Props {
@@ -44,16 +44,7 @@ const mainNavItems: NavItem[] = [
 ];
 
 const rightNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/vue-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
-        icon: BookOpen,
-    },
+
 ];
 
 // Control sidebar open/close state
@@ -180,7 +171,7 @@ onUnmounted(() => {
                                 <ModalLink href="/student/enroll" #default="{ loading }">
                                     <Button :disabled="loading" class="rounded-full p-1" size="icon-sm"
                                         aria-label="Enroll Course">
-                                        <Loader v-if="loading" class="size-5 animate-spin" />
+                                        <Loader2 v-if="loading" class="size-5 animate-spin" />
                                         <Plus v-else class="size-5" />
                                     </Button>
                                 </ModalLink>

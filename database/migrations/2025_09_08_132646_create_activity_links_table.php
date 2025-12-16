@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('activity_id')->constrained()->onDelete('cascade');
             $table->string('token')->unique();
             $table->string('name');
-            $table->boolean('is_open',)->default(true);
+            $table->boolean('is_open')->default(true);
             $table->dateTime('expires_at')->nullable();
             $table->timestamps();
         });

@@ -18,7 +18,7 @@ class StudentCourseController extends Controller
             $request->input('sort')
         );
 
-        return Inertia::render('Student/Courses', $data);
+        return Inertia::render('Student/courses/index', $data);
     }
 
     public function enrollCourse()
@@ -37,5 +37,26 @@ class StudentCourseController extends Controller
         }
 
         return redirect()->route('student.courses.index')->with('success', $result['message']);
+    }
+
+    public function show(string $courseId, Request $request, StudentCourseService $service): Response
+    {
+        $course = $service->getEnrolledCourse($courseId);
+
+        $activeTab = $request->get('tab', 'activities');
+
+        $baseData = [
+            'course' => $course,
+            'activeTab' => $activeTab,
+        ];
+
+        $tabData = $activeTab === 'students'
+            ? ['students' => Inertia::defer(fn() => $service->queryStudents($course, $request->only(['page']))), 'activities' => null]
+            : ['activities' => Inertia::defer(fn() => $service->queryActivities($course, $request->only(['page']))), 'students' => null];
+
+        return Inertia::render('Student/courses/show', [
+            ...$baseData,
+            ...$tabData,
+        ]);
     }
 }

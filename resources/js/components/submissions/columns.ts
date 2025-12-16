@@ -43,7 +43,7 @@ export const columns: ColumnDef<SubmissionRow>[] = [
                 dateStyle: 'medium',
                 timeStyle: 'short',
             })
-            return h('div', { class: 'text-right text-sm' }, formatted)
+            return h('div', { class: 'text-right text-xs text-muted-foreground' }, formatted)
         },
     },
     {

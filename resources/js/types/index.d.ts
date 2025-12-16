@@ -42,6 +42,7 @@ export interface User {
     email_verified_at: string | null;
     created_at: string;
     updated_at: string;
+    is_student?: boolean;
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
@@ -80,6 +81,7 @@ export interface Course {
     access_code: string;
     is_active: boolean;
     created_at: string;
+    enrolled_at?: string;
     user?: {
         id: number;
         name: string;
@@ -104,8 +106,26 @@ export interface CourseActivityLink {
 
 export interface CourseShowProps {
     course: Course;
-    activities?: CourseActivityLink[];
-    students?: any[];
+    activities?: {
+        data: CourseActivityLink[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    students?: {
+        data: Array<{
+            id: number;
+            name: string;
+            email: string;
+            enrolled_at: string;
+        }>;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    activeTab: string;
 }
 
 export interface ActivityLink {
@@ -312,4 +332,27 @@ export interface EnrollCourseProps {
     errors?: {
         access_code?: string;
     };
+}
+
+export interface StudentCourseShowProps {
+    course: Course;
+    activities?: {
+        data: CourseActivityLink[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    students?: {
+        data: Array<{
+            id: number;
+            name: string;
+            email: string;
+        }>;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    activeTab: string;
 }

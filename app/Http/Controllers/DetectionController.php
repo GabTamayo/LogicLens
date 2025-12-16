@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Jobs\DetectionJob;
 use App\Models\Activity;
-use App\Models\ActivityLink;
 use App\Models\Detection;
 use App\Services\DetectionService;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class DetectionController extends Controller
@@ -15,7 +13,6 @@ class DetectionController extends Controller
     /**
      * Display a listing of the resource.
      */
-
     public function store(Activity $activity, $linkId, DetectionService $service)
     {
         [$valid, $error, $payload] = $service->validateForDetection($activity, $linkId);
@@ -43,7 +40,8 @@ class DetectionController extends Controller
 
     public function flag(Detection $detection)
     {
-        $detection->update(attributes: ['flagged' => !$detection->flagged]);
+        $detection->update(attributes: ['flagged' => ! $detection->flagged]);
+
         return back()->with('success', 'Detection flag updated.');
     }
 }

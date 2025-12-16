@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { Bold, Italic, Grid2X2, Grid2X2X, Grid2x2Plus, ListCollapse, ListStart, RectangleHorizontal, RectangleVertical, UnderlineIcon, Strikethrough, SquareCode, Heading1, Heading2, Heading3, List, ListOrdered, Table, Quote, Minus, Undo, Redo, AlignLeft, AlignCenter, AlignRight, AlignJustify, BetweenHorizonalStart, BetweenHorizonalEnd, BetweenVerticalStart, BetweenVerticalEnd, TableCellsMerge, TableCellsSplit, ChevronDown, Trash2 } from 'lucide-vue-next';
+import { Bold, Italic, Grid2X2, Grid2X2X, Grid2x2Plus, ListCollapse, ListStart, RectangleHorizontal, RectangleVertical, UnderlineIcon, Strikethrough, SquareCode, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Minus, Undo, Redo, AlignLeft, AlignCenter, AlignRight, AlignJustify, BetweenHorizonalStart, BetweenHorizonalEnd, BetweenVerticalStart, BetweenVerticalEnd, TableCellsMerge, TableCellsSplit, ChevronDown, ImageIcon } from 'lucide-vue-next';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
+import Image from '@tiptap/extension-image';
 import { TableCell, TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const props = defineProps<{
     modelValue: string;
@@ -16,6 +21,12 @@ const props = defineProps<{
 const emit = defineEmits<{
     'update:modelValue': [value: string];
 }>();
+
+const isImageDialogOpen = ref(false);
+const imageUrl = ref('');
+const imageAlt = ref('');
+const imageFile = ref<File | null>(null);
+const imagePreview = ref<string>('');
 
 const editor = useEditor({
     editorProps: {
@@ -29,6 +40,17 @@ const editor = useEditor({
         Underline,
         TextAlign.configure({
             types: ['heading', 'paragraph'],
+        }),
+        Image.configure({
+            inline: true,
+            allowBase64: true,
+            resize: {
+                enabled: true,
+                alwaysPreserveAspectRatio: true,
+            },
+            HTMLAttributes: {
+                class: 'max-w-full h-auto',
+            },
         }),
         TableKit.configure({
             table: {
@@ -51,6 +73,53 @@ const insertTable = (): void => {
     }
 
     editor.value.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+};
+
+const openImageDialog = (): void => {
+    isImageDialogOpen.value = true;
+};
+
+const handleFileSelect = (event: Event): void => {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) {
+        return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+    }
+
+    imageFile.value = file;
+
+    // Convert to base64 for preview and insertion
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const result = e.target?.result as string;
+        imagePreview.value = result;
+        imageUrl.value = result; // Set URL to base64 for insertion
+    };
+    reader.readAsDataURL(file);
+};
+
+const insertImage = (): void => {
+    if (!editor.value || !imageUrl.value) {
+        return;
+    }
+
+    editor.value.chain().focus().setImage({
+        src: imageUrl.value,
+        alt: imageAlt.value || '',
+    }).run();
+
+    // Reset and close dialog
+    imageUrl.value = '';
+    imageAlt.value = '';
+    imageFile.value = null;
+    imagePreview.value = '';
+    isImageDialogOpen.value = false;
 };
 
 watch(() => props.modelValue, (newValue) => {
@@ -264,6 +333,17 @@ watch(() => props.modelValue, (newValue) => {
                             Justify
                         </TooltipContent>
                     </Tooltip>
+                    <Tooltip>
+                        <TooltipTrigger as-child>
+                            <button type="button" @click="openImageDialog"
+                                class="p-1 cursor-pointer">
+                                <ImageIcon class="h-4 w-4" />
+                            </button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Insert Image
+                        </TooltipContent>
+                    </Tooltip>
                     <DropdownMenu>
                         <DropdownMenuTrigger as-child>
                             <button type="button" class="p-1 cursor-pointer flex items-center gap-1">
@@ -395,11 +475,181 @@ watch(() => props.modelValue, (newValue) => {
             </TooltipProvider>
         </section>
         <EditorContent :editor="editor" />
+
+        <Dialog v-model:open="isImageDialogOpen">
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Insert Image</DialogTitle>
+                    <DialogDescription>
+                        Upload an image file or enter an image URL.
+                    </DialogDescription>
+                </DialogHeader>
+                <div class="space-y-4 py-4">
+                    <div class="space-y-2">
+                        <Label for="image-file">Upload Image</Label>
+                        <Input
+                            id="image-file"
+                            type="file"
+                            accept="image/*"
+                            @change="handleFileSelect"
+                        />
+                    </div>
+
+                    <div v-if="imagePreview" class="space-y-2">
+                        <Label>Preview</Label>
+                        <img
+                            :src="imagePreview"
+                            alt="Image preview"
+                            class="max-w-full h-auto max-h-48 rounded border"
+                        />
+                    </div>
+
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <span class="w-full border-t" />
+                        </div>
+                        <div class="relative flex justify-center text-xs uppercase">
+                            <span class="bg-background px-2 text-muted-foreground">Or</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="image-url">Image URL</Label>
+                        <Input
+                            id="image-url"
+                            v-model="imageUrl"
+                            type="url"
+                            placeholder="https://example.com/image.jpg"
+                            @keydown.enter="insertImage"
+                        />
+                    </div>
+
+                    <div class="space-y-2">
+                        <Label for="image-alt">
+                        Alt Text
+                        <span class="text-muted-foreground">(Optional)</span>
+                        </Label>
+                        <Input
+                            id="image-alt"
+                            v-model="imageAlt"
+                            type="text"
+                            placeholder="Description of the image"
+                            @keydown.enter="insertImage"
+                        />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button type="button" variant="outline" @click="isImageDialogOpen = false">
+                        Cancel
+                    </Button>
+                    <Button type="button" @click="insertImage" :disabled="!imageUrl">
+                        Insert Image
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
 <style lang="scss">
 .tiptap {
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.375rem;
+        display: block;
+
+        &.ProseMirror-selectednode {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    [data-resize-handle] {
+        position: absolute;
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 2px;
+        z-index: 10;
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Corner handles */
+        &[data-resize-handle='top-left'],
+        &[data-resize-handle='top-right'],
+        &[data-resize-handle='bottom-left'],
+        &[data-resize-handle='bottom-right'] {
+            width: 8px;
+            height: 8px;
+        }
+
+        &[data-resize-handle='top-left'] {
+            top: -4px;
+            left: -4px;
+            cursor: nwse-resize;
+        }
+
+        &[data-resize-handle='top-right'] {
+            top: -4px;
+            right: -4px;
+            cursor: nesw-resize;
+        }
+
+        &[data-resize-handle='bottom-left'] {
+            bottom: -4px;
+            left: -4px;
+            cursor: nesw-resize;
+        }
+
+        &[data-resize-handle='bottom-right'] {
+            bottom: -4px;
+            right: -4px;
+            cursor: nwse-resize;
+        }
+
+        /* Edge handles */
+        &[data-resize-handle='top'],
+        &[data-resize-handle='bottom'] {
+            height: 6px;
+            left: 8px;
+            right: 8px;
+        }
+
+        &[data-resize-handle='top'] {
+            top: -3px;
+            cursor: ns-resize;
+        }
+
+        &[data-resize-handle='bottom'] {
+            bottom: -3px;
+            cursor: ns-resize;
+        }
+
+        &[data-resize-handle='left'],
+        &[data-resize-handle='right'] {
+            width: 6px;
+            top: 8px;
+            bottom: 8px;
+        }
+
+        &[data-resize-handle='left'] {
+            left: -3px;
+            cursor: ew-resize;
+        }
+
+        &[data-resize-handle='right'] {
+            right: -3px;
+            cursor: ew-resize;
+        }
+    }
+
+    [data-resize-state='true'] [data-resize-wrapper] {
+        outline: 1px solid rgba(0, 0, 0, 0.25);
+        border-radius: 0.125rem;
+    }
+
     table {
         border-collapse: collapse;
         margin: 0;

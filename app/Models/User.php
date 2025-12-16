@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\Auth\VerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -70,7 +71,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $this->forceFill(['verification_token' => Str::random(60)])->save();
 
-        parent::sendEmailVerificationNotification();
+        $this->notify(new VerifyEmail);
     }
 
     public function getEmailForVerification()

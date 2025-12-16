@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue'
-import { Deferred } from '@inertiajs/vue3'
+import { Deferred, Link } from '@inertiajs/vue3'
 import { Head, router, useRemember } from '@inertiajs/vue3'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useDeadline } from '@/composables/useDeadline'
+import Button from '@/components/ui/button/Button.vue'
 
 interface TabbedPageProps {
     activityId: number
@@ -193,8 +194,12 @@ const updateDetectionFilter = (column: string, value: string) => {
                 <CardHeader>
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-3">
-                            <div class="flex flex-wrap items-center gap-3">
-                                <CardTitle class="text-2xl">{{ props.link.course?.name || 'Course' }}</CardTitle>
+                            <div class="flex flex-wrap items-center gap-3 mb-1.5">
+                                <Button variant="link" class="p-0 h-auto text-start" as-child>
+                                    <Link :href="`/courses/${props.link.course?.id}`" prefetch="mount">
+                                        <CardTitle class="text-2xl">{{ props.link.course?.name || 'Course' }}</CardTitle>
+                                    </Link>
+                                </Button>
                                 <Badge variant="outline" class="h-6">
                                     <Circle class="mr-1.5 size-4" :class="link.is_open
                                         ? 'fill-green-500 text-green-500'
@@ -202,7 +207,7 @@ const updateDetectionFilter = (column: string, value: string) => {
                                     {{ link.is_open ? 'Open' : 'Closed' }}
                                 </Badge>
                             </div>
-                            <CardDescription class="flex flex-wrap items-center gap-2">
+                            <CardDescription class="flex flex-wrap items-center gap-2 pb-1.5">
                                 <span>{{ props.activityTitle }}</span>
                                 <Separator orientation="vertical" class="h-4" />
                                 <span class="flex items-center gap-1.5">
@@ -230,6 +235,13 @@ const updateDetectionFilter = (column: string, value: string) => {
                                             </TooltipContent>
                                         </Tooltip>
                                     </TooltipProvider>
+                                </template>
+
+                                <template v-else>
+                                    <Separator orientation="vertical" class="h-4" />
+                                    <span class="text-muted-foreground">
+                                        No Deadline
+                                    </span>
                                 </template>
                             </CardDescription>
                         </div>
@@ -285,7 +297,8 @@ const updateDetectionFilter = (column: string, value: string) => {
                                             :pagination="props.submissions as any" :filter-config="[
                                                 { column: 'student_name', placeholder: 'Filter by Student Name' },
                                                 { column: 'student_no', placeholder: 'Search Student No.' }
-                                            ]" :filter-values="submissionFilters" @page-change="handleSubmissionPageChange"
+                                            ]" :filter-values="submissionFilters"
+                                            @page-change="handleSubmissionPageChange"
                                             @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
                                             @detect-submission="handleDetectSubmission" :show-detect-button="true" />
                                     </div>
@@ -323,16 +336,18 @@ const updateDetectionFilter = (column: string, value: string) => {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <DataTable :columns="detectionColumns" :data="(props.detections?.data as any) || []"
+                                        <DataTable :columns="detectionColumns"
+                                            :data="(props.detections?.data as any) || []"
                                             :pagination="props.detections as any" :filter-config="[
                                                 { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
                                                 { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
-                                            ]" :filter-values="detectionFilters" @page-change="handleDetectionPageChange"
+                                            ]" :filter-values="detectionFilters"
+                                            @page-change="handleDetectionPageChange"
                                             @filter-change="updateDetectionFilter" :show-detect-button="false" />
                                     </div>
                                 </Deferred>
                             </template>
-                            <div v-else class="flex items-center justify-center gap-2 rounded-md border p-12">
+                            <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
                                 <span class="text-muted-foreground">Loading detection results...</span>
                             </div>
