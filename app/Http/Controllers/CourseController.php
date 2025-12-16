@@ -47,12 +47,20 @@ class CourseController extends Controller
         ];
 
         $tabData = $activeTab === 'students'
-            ? ['students' => Inertia::defer(fn () => $courseService->queryStudents($course, $request->only(['page']))), 'activities' => null]
-            : ['activities' => Inertia::defer(fn () => $courseService->queryActivities($course, $request->only(['page']))), 'students' => null];
+            ? ['students' => Inertia::defer(fn() => $courseService->queryStudents($course, $request->only(['page']))), 'activities' => null]
+            : ['activities' => Inertia::defer(fn() => $courseService->queryActivities($course, $request->only(['page']))), 'students' => null];
 
         return Inertia::render('Courses/Show', [
             ...$baseData,
             ...$tabData,
         ]);
+    }
+
+    public function removeStudent(string $courseId, int $studentId)
+    {
+        $course = Auth::user()->courses()->findOrFail($courseId);
+        $course->students()->detach($studentId);
+
+        return back();
     }
 }
