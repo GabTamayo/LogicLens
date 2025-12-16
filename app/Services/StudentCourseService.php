@@ -91,7 +91,7 @@ class StudentCourseService
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
             ->latest()
-            ->paginate(10, ['*'], 'page', $page)
+            ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
             ->through(fn($link) => [
                 'id' => $link->id,

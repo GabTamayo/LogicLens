@@ -129,6 +129,11 @@ const handleStudentsPageChange = (page: number) => {
                                                             {{ dayjs(activity.expires_at).format('MMM D, YYYY h:mm A')
                                                             }}
                                                         </span>
+                                                        <span v-else
+                                                            class="flex items-center gap-1.5 text-muted-foreground">
+                                                            <Calendar class="h-3.5 w-3.5" />
+                                                            No deadline
+                                                        </span>
                                                     </ItemDescription>
                                                 </ItemContent>
                                                 <ItemActions>
