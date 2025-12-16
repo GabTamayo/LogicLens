@@ -27,6 +27,9 @@ Route::middleware(['auth', 'verified', 'role:' . RoleName::TEACHER->value])->gro
     Route::post('activities/{activity}/links/{link}/detect', [DetectionController::class, 'store'])->name('detections.detect');
     Route::get('detections/{detection}', [DetectionController::class, 'show'])->name('detections.show');
     Route::patch('/detections/{detection}/flag', [DetectionController::class, 'flag'])->name('detections.flag');
+
+    // Submission Routes
+    Route::delete('submissions/{submission}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
 });
 
 // Student Submission Routes

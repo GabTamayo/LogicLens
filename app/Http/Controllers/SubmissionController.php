@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\OneTimeSubmission;
-use App\Enums\ProgrammingLanguage;
 use App\Http\Requests\SubmissionRequest;
 use App\Models\ActivityLink;
 use App\Models\Submission;
 use App\Services\SubmissionService;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SubmissionController extends Controller
@@ -24,6 +21,7 @@ class SubmissionController extends Controller
         }
 
         $data = $service->getSubmissionFormData($token);
+
         return Inertia::render('Submissions/Create', $data);
     }
 
@@ -31,6 +29,14 @@ class SubmissionController extends Controller
     {
         $activityLink = ActivityLink::where('token', $token)->firstOrFail();
         $submissionService->storeSubmission($activityLink, $request->validated(), $request->file('code_file'));
+
+        return redirect()->back();
+    }
+
+    public function destroy(Submission $submission)
+    {
+        $submission->delete();
+        inertia()->clearHistory();
 
         return redirect()->back();
     }

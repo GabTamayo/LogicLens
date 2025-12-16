@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { MoreHorizontal, Code, Copy, Download } from 'lucide-vue-next'
+import { MoreHorizontal, Code, Copy, Download, Trash } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import { toast } from 'vue-sonner';
 import type { SubmissionRow } from '@/components/submissions/columns'
+import { router } from '@inertiajs/vue3'
 
 const { submission } = defineProps<{ submission: SubmissionRow }>()
 
@@ -49,6 +51,18 @@ function download(submission: SubmissionRow) {
     document.body.removeChild(link);
 }
 
+function deleteSubmission(submission: SubmissionRow) {
+    router.delete(`/submissions/${submission.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Submission deleted successfully')
+        },
+        onError: () => {
+            toast.error('Failed to delete submission')
+        }
+    })
+}
+
 </script>
 
 <template>
@@ -70,10 +84,32 @@ function download(submission: SubmissionRow) {
                 <Copy class="w-4 h-4 mr-2" />
                 Copy Student No.
             </DropdownMenuItem>
-            <DropdownMenuItem @click="download(submission)">
-                <Download class="w-4 h-4 mr-2 text-primary" />
+            <DropdownMenuItem @click="download(submission)" class="text-primary">
+                <Download class="w-4 h-4 mr-2" />
                 Download File
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <AlertDialog>
+                <AlertDialogTrigger as-child>
+                    <DropdownMenuItem class="text-destructive" @select.prevent>
+                        <Trash class="w-4 h-4 mr-2" />
+                        Remove Submission
+                    </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete this
+                            submission and remove the data from the server.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <Button variant="destructive" @click="deleteSubmission(submission)">Continue</Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </DropdownMenuContent>
     </DropdownMenu>
 </template>
