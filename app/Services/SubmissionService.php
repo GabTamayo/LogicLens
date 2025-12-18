@@ -16,6 +16,7 @@ class SubmissionService
             'bgImage' => asset('images/clonewave-bg.jpg'),
             'courseName' => $activityLink->course->name,
             'courseId' => $activityLink->course->id,
+            'activityId' => $activityLink->activity->id,
             'activityName' => $activityLink->activity->title,
             'activityContent' => $activityLink->activity->content,
             'token' => $activityLink->token,

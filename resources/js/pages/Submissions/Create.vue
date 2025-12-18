@@ -54,7 +54,7 @@ const runCode = () => {
                             class="flex aspect-square size-10 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
                             <AppLogoIcon class="size-10 fill-current text-white dark:text-black" />
                         </div>
-                        <Link :href="`/student/courses/${props.courseId}`">
+                        <Link :href="$page.props.auth.user.is_student ? `/student/courses/${props.courseId}` : `/activities/${props.activityId}`">
                             <Button variant="ghost" size="sm" class="gap-2">
                                 <ArrowLeft class="h-4 w-4" />
                                 Back
