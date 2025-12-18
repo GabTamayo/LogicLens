@@ -144,6 +144,7 @@ export interface ActivityLink {
 export interface SubmissionPageProps {
     bgImage: string;
     courseName: string;
+    courseId: string;
     activityName: string;
     activityContent: string | null;
     token: string;

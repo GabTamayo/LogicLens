@@ -10,7 +10,9 @@
       "Bash(vendor/bin/pint:*)",
       "Bash(npm install:*)",
       "Bash(cmd /c dir:*)",
-      "Bash(composer require:*)"
+      "Bash(composer require:*)",
+      "Bash(npm shadcn-vue add:*)",
+      "Bash(npx shadcn-vue@latest add:*)"
     ]
   },
   "enabledMcpjsonServers": [
