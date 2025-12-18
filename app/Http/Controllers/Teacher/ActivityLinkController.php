@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Actions\GenerateActivityLink;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ActivityLinkRequest;
 use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;

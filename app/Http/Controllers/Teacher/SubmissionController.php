@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Http\Requests\SubmissionRequest;
+use App\Http\Controllers\Controller;
 use App\Models\ActivityLink;
 use App\Models\Submission;
 use App\Services\SubmissionService;
