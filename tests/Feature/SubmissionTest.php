@@ -63,3 +63,82 @@ test('guest cannot delete a submission', function () {
     $response->assertStatus(302);
     expect(Submission::count())->toBe(1);
 });
+
+test('teacher who created activity can access submission page', function () {
+    $teacher = User::factory()->create();
+    $teacher->assignRole(RoleName::TEACHER->value);
+
+    $activity = Activity::factory()->create(['user_id' => $teacher->id]);
+    $activityLink = ActivityLink::factory()->create([
+        'activity_id' => $activity->id,
+        'is_open' => true,
+    ]);
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('submissions.create', ['token' => $activityLink->token]));
+
+    $response->assertSuccessful();
+});
+
+test('teacher who did not create activity cannot access submission page', function () {
+    $teacher = User::factory()->create();
+    $teacher->assignRole(RoleName::TEACHER->value);
+
+    $anotherTeacher = User::factory()->create();
+    $anotherTeacher->assignRole(RoleName::TEACHER->value);
+
+    $activity = Activity::factory()->create(['user_id' => $anotherTeacher->id]);
+    $activityLink = ActivityLink::factory()->create([
+        'activity_id' => $activity->id,
+        'is_open' => true,
+    ]);
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('submissions.create', ['token' => $activityLink->token]));
+
+    $response->assertForbidden();
+});
+
+test('enrolled student can access submission page', function () {
+    $teacher = User::factory()->create();
+    $teacher->assignRole(RoleName::TEACHER->value);
+
+    $student = User::factory()->create();
+    $student->assignRole(RoleName::STUDENT->value);
+
+    $activity = Activity::factory()->create(['user_id' => $teacher->id]);
+    $activityLink = ActivityLink::factory()->create([
+        'activity_id' => $activity->id,
+        'is_open' => true,
+    ]);
+
+    $activityLink->course->students()->attach($student->id, ['enrolled_at' => now()]);
+
+    $this->actingAs($student);
+
+    $response = $this->get(route('submissions.create', ['token' => $activityLink->token]));
+
+    $response->assertSuccessful();
+});
+
+test('non-enrolled student cannot access submission page', function () {
+    $teacher = User::factory()->create();
+    $teacher->assignRole(RoleName::TEACHER->value);
+
+    $student = User::factory()->create();
+    $student->assignRole(RoleName::STUDENT->value);
+
+    $activity = Activity::factory()->create(['user_id' => $teacher->id]);
+    $activityLink = ActivityLink::factory()->create([
+        'activity_id' => $activity->id,
+        'is_open' => true,
+    ]);
+
+    $this->actingAs($student);
+
+    $response = $this->get(route('submissions.create', ['token' => $activityLink->token]));
+
+    $response->assertForbidden();
+});

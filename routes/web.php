@@ -1,11 +1,18 @@
 <?php
 
+use App\Http\Controllers\Teacher\SubmissionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+// Shared Submission Routes (accessible by both teachers who created the activity and enrolled students)
+Route::middleware(['auth', 'verified', 'enrolled'])->prefix('student')->group(function () {
+    Route::get('submit/{token}', [SubmissionController::class, 'create'])->name('submissions.create');
+    Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store');
+});
 
 require __DIR__.'/teacher.php';
 require __DIR__.'/settings.php';
