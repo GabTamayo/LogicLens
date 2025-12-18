@@ -6,7 +6,7 @@ import Image from '@tiptap/extension-image';
 import { TableCell, TableKit } from '@tiptap/extension-table';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import StarterKit from '@tiptap/starter-kit';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -23,8 +23,6 @@ const emit = defineEmits<{
 }>();
 
 const isImageDialogOpen = ref(false);
-const imageUrl = ref('');
-const imageAlt = ref('');
 const imageFile = ref<File | null>(null);
 const imagePreview = ref<string>('');
 
@@ -99,24 +97,21 @@ const handleFileSelect = (event: Event): void => {
     reader.onload = (e) => {
         const result = e.target?.result as string;
         imagePreview.value = result;
-        imageUrl.value = result; // Set URL to base64 for insertion
     };
     reader.readAsDataURL(file);
 };
 
 const insertImage = (): void => {
-    if (!editor.value || !imageUrl.value) {
+    if (!editor.value || !imagePreview.value) {
         return;
     }
 
     editor.value.chain().focus().setImage({
-        src: imageUrl.value,
-        alt: imageAlt.value || '',
+        src: imagePreview.value,
+        alt: '',
     }).run();
 
     // Reset and close dialog
-    imageUrl.value = '';
-    imageAlt.value = '';
     imageFile.value = null;
     imagePreview.value = '';
     isImageDialogOpen.value = false;
@@ -125,6 +120,23 @@ const insertImage = (): void => {
 watch(() => props.modelValue, (newValue) => {
     if (editor.value && editor.value.getHTML() !== newValue) {
         editor.value.commands.setContent(newValue || '');
+    }
+});
+
+// Hide tooltip portal content while the image dialog is open so tooltips don't
+// appear or block dialog inputs. We toggle a class on <body> which targets
+// the tooltip portal elements rendered outside this component.
+watch(isImageDialogOpen, (isOpen) => {
+    try {
+        document.body.classList.toggle('no-tooltips', Boolean(isOpen));
+    } catch (e) {
+        // ignore (SSR or no document)
+    }
+});
+
+onBeforeUnmount(() => {
+    if (typeof document !== 'undefined') {
+        document.body.classList.remove('no-tooltips');
     }
 });
 </script>
@@ -504,45 +516,13 @@ watch(() => props.modelValue, (newValue) => {
                         />
                     </div>
 
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <span class="w-full border-t" />
-                        </div>
-                        <div class="relative flex justify-center text-xs uppercase">
-                            <span class="bg-background px-2 text-muted-foreground">Or</span>
-                        </div>
-                    </div>
 
-                    <div class="space-y-2">
-                        <Label for="image-url">Image URL</Label>
-                        <Input
-                            id="image-url"
-                            v-model="imageUrl"
-                            type="url"
-                            placeholder="https://example.com/image.jpg"
-                            @keydown.enter="insertImage"
-                        />
-                    </div>
-
-                    <div class="space-y-2">
-                        <Label for="image-alt">
-                        Alt Text
-                        <span class="text-muted-foreground">(Optional)</span>
-                        </Label>
-                        <Input
-                            id="image-alt"
-                            v-model="imageAlt"
-                            type="text"
-                            placeholder="Description of the image"
-                            @keydown.enter="insertImage"
-                        />
-                    </div>
                 </div>
                 <DialogFooter>
                     <Button type="button" variant="outline" @click="isImageDialogOpen = false">
                         Cancel
                     </Button>
-                    <Button type="button" @click="insertImage" :disabled="!imageUrl">
+                    <Button type="button" @click="insertImage" :disabled="!imagePreview">
                         Insert Image
                     </Button>
                 </DialogFooter>
@@ -699,5 +679,13 @@ watch(() => props.modelValue, (newValue) => {
     &.resize-cursor {
         cursor: col-resize;
     }
+}
+
+/* When the image dialog is open, hide tooltip portal content so it cannot
+   overlap or block dialog inputs. */
+.no-tooltips [data-slot="tooltip-content"],
+.no-tooltips [data-slot="tooltip"] {
+    display: none !important;
+    pointer-events: none !important;
 }
 </style>

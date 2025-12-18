@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ const deadlineStatus = computed(() => {
 
     <div v-else class="flex h-full flex-col">
         <div class="flex-1 overflow-y-auto p-6">
-            <div class="mx-auto max-w-3xl space-y-6">
+            <div class="mx-auto max-w-4xl space-y-6">
                 <!-- Header -->
                 <div class="space-y-4">
                     <div class="flex items-start justify-between gap-4">
@@ -75,15 +75,6 @@ const deadlineStatus = computed(() => {
                                     </h2>
                                 </Link>
                             </Button>
-                        </div>
-                        <div class="flex items-center gap-2 border rounded-md px-2">
-                            <Circle :class="[
-                                'h-3 w-3 fill-current',
-                                activity.is_open ? 'text-green-500' : 'text-red-500',
-                            ]" />
-                            <span class="text-sm font-medium">
-                                {{ activity.is_open ? 'Open' : 'Closed' }}
-                            </span>
                         </div>
                     </div>
 
@@ -99,7 +90,7 @@ const deadlineStatus = computed(() => {
                                     :alt="activity.activity_language" class="h-3.5 w-3.5 object-contain" />
                                 <span class="text-xs font-medium">{{
                                     activity.activity_language
-                                    }}</span>
+                                }}</span>
                             </Badge>
                         </div>
 
@@ -115,13 +106,21 @@ const deadlineStatus = computed(() => {
                 <Separator />
 
                 <!-- Statistics -->
-                <div class="grid gap-4 sm:grid-cols-2">
+                <div class="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
                     <Card>
                         <CardHeader class="pb-3">
                             <CardDescription>Total Submissions</CardDescription>
                             <CardTitle class="text-3xl">{{
                                 activity.submissions_count
-                                }}</CardTitle>
+                            }}</CardTitle>
+                            <CardAction>
+                                <Link :href="`/activities/${activity.activity_id}/links/${activity.id}`"
+                                    prefetch="mount">
+                                    <Button class="w-fit" size="sm" variant="link">
+                                        <span class="block md:hidden lg:hidden xl:block">View Submissions</span>
+                                    </Button>
+                                </Link>
+                            </CardAction>
                         </CardHeader>
                     </Card>
 
@@ -181,22 +180,6 @@ const deadlineStatus = computed(() => {
                                 </Button>
                             </Link>
                         </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Actions -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Actions</CardTitle>
-                        <CardDescription>Manage this activity</CardDescription>
-                    </CardHeader>
-                    <CardContent class="space-y-3">
-                        <Link :href="`/activities/${activity.activity_id}/links/${activity.id}`" prefetch="mount">
-                            <Button class="w-full" variant="default">
-                                <Eye class="mr-2 h-4 w-4" />
-                                View Submissions
-                            </Button>
-                        </Link>
                     </CardContent>
                 </Card>
             </div>
