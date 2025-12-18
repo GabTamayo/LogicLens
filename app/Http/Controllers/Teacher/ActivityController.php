@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Enums\ProgrammingLanguage;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ActivityRequest;
 use App\Http\Requests\ActivityUpdateContentRequest;
 use App\Models\Activity;

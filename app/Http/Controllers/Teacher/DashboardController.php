@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Models\ActivityLink;
+use App\Http\Controllers\Controller;
 use App\Services\DashboardService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;

@@ -52,7 +52,7 @@ class CourseService
         $page = $params['page'] ?? 1;
 
         return $course->activityLinks()
-            ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->with(['activity:id,title,language,content', 'activity.user:id,name'])
             ->latest()
             ->paginate(10, ['*'], 'page', $page)
             ->withQueryString()
@@ -61,6 +61,7 @@ class CourseService
                 'activity_id' => $link->activity_id,
                 'activity_title' => $link->activity->title ?? 'N/A',
                 'activity_language' => $link->activity->language ?? 'N/A',
+                'activity_content' => $link->activity->content ?? null,
                 'token' => $link->token,
                 'is_open' => $link->is_open,
                 'expires_at' => $link->expires_at,

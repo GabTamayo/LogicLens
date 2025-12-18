@@ -3,12 +3,20 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 import DataTable from "@/components/DataTable.vue";
-import { columns as activityColumns } from "@/components/activities/columns";
 import { columns as studentColumns } from "@/components/students/columns";
+import ActivitySidebar from "@/components/activities/ActivitySidebar.vue";
+import ActivityContent from "@/components/activities/ActivityContent.vue";
 import type { BreadcrumbItem, CourseShowProps } from "@/types";
 import { computed, ref, watch } from "vue";
-import { CalendarCheck, Copy, LoaderCircle } from "lucide-vue-next";
+import { CalendarCheck, Copy, LoaderCircle, Menu } from "lucide-vue-next";
 import { Deferred, Head, router } from "@inertiajs/vue3";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -38,11 +46,18 @@ const activeTab = ref(props.activeTab || 'activities');
 const isInitialLoadDone = ref(false);
 const activitiesPage = ref(1);
 const studentsPage = ref(1);
+const selectedActivity = ref(props.activities?.data[0] || null);
+const mobileSheetOpen = ref(false);
 
 function copy(text: string) {
     navigator.clipboard.writeText(text)
     toast('Copied to clipboard', {
     })
+}
+
+function handleActivitySelect(activity: any) {
+    selectedActivity.value = activity;
+    mobileSheetOpen.value = false;
 }
 
 // Tab change handler
@@ -130,7 +145,7 @@ const handleStudentsPageChange = (page: number) => {
                             </TabsList>
                         </div>
 
-                        <TabsContent value="activities" class="m-0 p-6">
+                        <TabsContent value="activities" class="m-0 p-0">
                             <template v-if="props.activities">
                                 <Deferred data="activities" @resolve="isInitialLoadDone = true">
                                     <template #fallback>
@@ -139,8 +154,48 @@ const handleStudentsPageChange = (page: number) => {
                                             <span class="text-muted-foreground">Loading activities...</span>
                                         </div>
                                     </template>
-                                    <DataTable :columns="activityColumns" :data="props.activities.data"
-                                        :pagination="props.activities as any" @page-change="handleActivitiesPageChange" />
+                                    <div class="flex h-[calc(100vh-20rem)]">
+                                        <!-- Desktop Sidebar -->
+                                        <div class="hidden w-80 border-r md:block">
+                                            <ActivitySidebar
+                                                :activities="props.activities.data"
+                                                :selected-activity-id="selectedActivity?.id"
+                                                @select="handleActivitySelect"
+                                            />
+                                        </div>
+
+                                        <!-- Main Content -->
+                                        <div class="flex flex-1 flex-col">
+                                            <!-- Mobile Header with Menu Button -->
+                                            <div class="flex items-center gap-2 border-b p-4 md:hidden">
+                                                <Sheet v-model:open="mobileSheetOpen">
+                                                    <SheetTrigger as-child>
+                                                        <Button variant="outline" size="icon">
+                                                            <Menu class="h-5 w-5" />
+                                                        </Button>
+                                                    </SheetTrigger>
+                                                    <SheetContent side="left" class="w-80 p-0">
+                                                        <SheetHeader class="border-b p-4">
+                                                            <SheetTitle>Activities</SheetTitle>
+                                                        </SheetHeader>
+                                                        <ActivitySidebar
+                                                            :activities="props.activities.data"
+                                                            :selected-activity-id="selectedActivity?.id"
+                                                            @select="handleActivitySelect"
+                                                        />
+                                                    </SheetContent>
+                                                </Sheet>
+                                                <h3 class="line-clamp-1 text-sm font-semibold">
+                                                    {{ selectedActivity?.activity_title || 'Select an activity' }}
+                                                </h3>
+                                            </div>
+
+                                            <!-- Activity Content -->
+                                            <div class="flex-1 overflow-y-auto">
+                                                <ActivityContent :activity="selectedActivity" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </Deferred>
                             </template>
 

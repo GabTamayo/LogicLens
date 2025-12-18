@@ -143,10 +143,14 @@ export interface ActivityLink {
 
 export interface SubmissionPageProps {
     bgImage: string;
-    name: string;
+    courseName: string;
     activityName: string;
+    activityContent: string | null;
     token: string;
-    allowedExtensions: string[];
+    language: string;
+    languageText: string;
+    studentName: string;
+    studentEmail: string;
 }
 
 export type Submission = {
@@ -157,11 +161,8 @@ export type Submission = {
         id: number;
         student_name: string;
         student_email: string;
-        student_no: string;
-        file_path: string;
+        code_content: string;
         created_at: string;
-        file_content?: string;
-        file_extension?: string;
         language: string;
     }>;
 };
@@ -170,13 +171,11 @@ export interface DetectionRow {
     submission_a: {
         id: number;
         student_name: string;
-        student_no: string;
         student_email: string;
     };
     submission_b: {
         id: number;
         student_name: string;
-        student_no: string;
         student_email: string;
     };
     similarity_score: number;
@@ -209,16 +208,11 @@ export interface DetectionShowProps {
         submission_a: {
             id: string;
             student_name: string;
-            student_no: string;
-            file_path: string;
             language: string;
         };
         submission_b: {
             id: string;
             student_name: string;
-            student_no: string;
-            student_email: string;
-            file_path: string;
             language: string;
         };
     };

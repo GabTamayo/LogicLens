@@ -1,37 +1,50 @@
 <script setup lang="ts">
-import StudentAppLayout from '@/layouts/StudentAppLayout.vue';
-import type { BreadcrumbItem, StudentCourseShowProps } from '@/types';
-import { Tabs, TabsContent, TabsList, TabsTrigger, } from '@/components/ui/tabs'
-import { Card, CardContent } from '@/components/ui/card'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle, } from '@/components/ui/item'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Deferred, router } from '@inertiajs/vue3'
-import { LoaderCircle, Play, Calendar } from 'lucide-vue-next'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import { ref, watch } from 'vue'
-import DataTable from '@/components/DataTable.vue'
-import { columns as studentColumns } from '@/components/students(student)/columns'
-import PaginationComponent from '@/components/Pagination.vue'
-import { useLanguage } from '@/composables/useLanguage'
+import StudentAppLayout from "@/layouts/StudentAppLayout.vue";
+import type { BreadcrumbItem, StudentCourseShowProps } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import {
+    Item,
+    ItemActions,
+    ItemContent,
+    ItemDescription,
+    ItemMedia,
+    ItemTitle,
+} from "@/components/ui/item";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Deferred, router, Link, Head } from "@inertiajs/vue3";
+import { LoaderCircle, Play, Calendar, CalendarCheck } from "lucide-vue-next";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import { ref, watch, computed } from "vue";
+import DataTable from "@/components/DataTable.vue";
+import { columns as studentColumns } from "@/components/students(student)/columns";
+import PaginationComponent from "@/components/Pagination.vue";
+import { useLanguage } from "@/composables/useLanguage";
 
-dayjs.extend(relativeTime)
+dayjs.extend(relativeTime);
 
-const { getLanguageLogo, getLanguageColor } = useLanguage()
+const { getLanguageLogo, getLanguageColor } = useLanguage();
 
-const props = defineProps<StudentCourseShowProps>()
+const props = defineProps<StudentCourseShowProps>();
 
-const isInitialLoadDone = ref(false)
-const activeTab = ref(props.activeTab || 'activities')
-const activitiesPage = ref(1)
-const studentsPage = ref(1)
+const isInitialLoadDone = ref(false);
+const activeTab = ref(props.activeTab || "activities");
+const activitiesPage = ref(1);
+const studentsPage = ref(1);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Courses',
-        href: '/student/courses',
+        title: "Courses",
+        href: "/student/courses",
     },
     {
         title: props.course.name,
@@ -39,53 +52,75 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Tab change handler
 watch(activeTab, (newTab) => {
-    const page = newTab === 'students' ? studentsPage.value : activitiesPage.value
+    const page = newTab === "students" ? studentsPage.value : activitiesPage.value;
     router.visit(`/student/courses/${props.course.id}`, {
         data: { tab: newTab, page },
         preserveScroll: true,
         preserveState: true,
-        only: newTab === 'students' ? ['students', 'activeTab'] : ['activities', 'activeTab'],
-    })
-})
+        only: newTab === "students" ? ["students", "activeTab"] : ["activities", "activeTab"],
+    });
+});
 
-// Pagination handlers
 const handleActivitiesPageChange = (page: number) => {
-    activitiesPage.value = page
+    activitiesPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: 'activities' },
+        data: { page, tab: "activities" },
         preserveScroll: true,
         preserveState: true,
-        only: ['activities'],
-    })
-}
+        only: ["activities"],
+    });
+};
 
 const handleStudentsPageChange = (page: number) => {
-    studentsPage.value = page
+    studentsPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: 'students' },
+        data: { page, tab: "students" },
         preserveScroll: true,
         preserveState: true,
-        only: ['students'],
-    })
-}
+        only: ["students"],
+    });
+};
 </script>
 
 <template>
+
+    <Head :title="`${course.name}`" />
+
     <StudentAppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
+            <!-- Header Card -->
+            <Card>
+                <CardHeader>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-wrap items-center">
+                                <CardTitle class="text-2xl">{{ course.name }}</CardTitle>
+                            </div>
+                            <CardDescription class="flex flex-wrap items-center gap-2">
+                                <span>Created by {{ course.user?.name }}</span>
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            <!-- Tabs Section -->
             <Card>
                 <CardContent class="p-0">
                     <Tabs v-model="activeTab" class="w-full">
-                        <div class="flex justify-center border-b">
+                        <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
                                 <TabsTrigger value="activities"
-                                    class="relative text-md rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
                                     Activities
                                 </TabsTrigger>
+                                <TabsTrigger value="completed"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    Completed
+                                </TabsTrigger>
                                 <TabsTrigger value="students"
-                                    class="relative text-md rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
                                     Students
                                 </TabsTrigger>
                             </TabsList>
@@ -106,7 +141,8 @@ const handleStudentsPageChange = (page: number) => {
                                                 :key="activity.id">
                                                 <ItemContent>
                                                     <ItemTitle class="capitalize text-xl font-bold">{{
-                                                        activity.activity_title }}</ItemTitle>
+                                                        activity.activity_title
+                                                    }}</ItemTitle>
                                                     <ItemDescription>
                                                         <span :class="getLanguageColor(activity.activity_language)"
                                                             class="inline-flex items-center mb-2 gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border">
@@ -119,14 +155,16 @@ const handleStudentsPageChange = (page: number) => {
                                                         <span class="flex items-center gap-1.5">
                                                             <Calendar
                                                                 class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                            {{ dayjs(activity.created_at).format('MMM D, YYYY h:mm A')
+                                                            {{
+                                                                dayjs(activity.created_at).format("MMM D, YYYY h:mm A")
                                                             }}
                                                         </span>
                                                         <span v-if="activity.expires_at"
                                                             class="flex items-center gap-1.5">
                                                             <Calendar
                                                                 class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                                                            {{ dayjs(activity.expires_at).format('MMM D, YYYY h:mm A')
+                                                            {{
+                                                                dayjs(activity.expires_at).format("MMM D, YYYY h:mm A")
                                                             }}
                                                         </span>
                                                         <span v-else
@@ -140,13 +178,13 @@ const handleStudentsPageChange = (page: number) => {
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger as-child>
-                                                                <Button size="icon-lg" class="rounded-full">
-                                                                    <Play class="fill-white stroke-none" />
-                                                                </Button>
+                                                                <Link :href="`/student/submit/${activity.token}`">
+                                                                    <Button size="icon-lg" class="rounded-full">
+                                                                        <Play class="size-5 fill-white stroke-none" />
+                                                                    </Button>
+                                                                </Link>
                                                             </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                Start
-                                                            </TooltipContent>
+                                                            <TooltipContent> Start </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </ItemActions>

@@ -67,6 +67,11 @@ class User extends Authenticatable implements MustVerifyEmail
             ->withPivot('enrolled_at');
     }
 
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
+
     public function sendEmailVerificationNotification()
     {
         $this->forceFill(['verification_token' => Str::random(60)])->save();

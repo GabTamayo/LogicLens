@@ -11,13 +11,11 @@ export interface DetectionRow {
     submission_a: {
         id: number
         student_name: string
-        student_no: string
         student_email: string
     }
     submission_b: {
         id: number
         student_name: string
-        student_no: string
         student_email: string
     }
     avg_score: number
@@ -51,7 +49,6 @@ export const columns: ColumnDef<DetectionRow>[] = [
             const studentA = row.original.submission_a
             return h('div', { class: 'flex flex-col' }, [
                 h('span', { class: 'font-medium' }, studentA.student_name),
-                h('span', { class: 'text-xs text-muted-foreground' }, studentA.student_no),
             ])
         },
     },
@@ -63,7 +60,6 @@ export const columns: ColumnDef<DetectionRow>[] = [
             const studentB = row.original.submission_b
             return h('div', { class: 'flex flex-col' }, [
                 h('span', { class: 'font-medium' }, studentB.student_name),
-                h('span', { class: 'text-xs text-muted-foreground' }, studentB.student_no),
             ])
         },
     },

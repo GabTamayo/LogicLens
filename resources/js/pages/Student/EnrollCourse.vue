@@ -47,7 +47,7 @@ function submit(close: () => void) {
                             </div>
                         </div>
                         <FormDescription>
-                            Enter the access code provided by your teacher
+                            Enter the access code provided by your Professor
                         </FormDescription>
                     </div>
                     <FormLabel>Access Code</FormLabel>

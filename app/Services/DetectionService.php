@@ -9,23 +9,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class DetectionService
 {
+    protected string $fastApiUrl;
+
+    public function __construct()
+    {
+        $this->fastApiUrl = config('services.plagiarism_detector.url');
+    }
+
     public function validateForDetection(Activity $activity, $linkId): array
     {
-        $link = ActivityLink::with('submissions')->findOrFail($linkId);
+        $link = ActivityLink::with(['submissions'])->findOrFail($linkId);
 
         if ($link->is_open) {
             return [false, 'The link must be closed before running detection.', null];
         }
 
-        $submissions = $link->submissions->filter(
-            fn ($s) => $s->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($s->file_path)
-        );
+        $submissions = $link->submissions->filter(fn ($s) => ! empty($s->code_content));
 
         if ($submissions->count() < 2) {
             return [false, 'At least 2 submissions are required for detection.', null];
@@ -35,9 +39,14 @@ class DetectionService
             return [false, "One or more submissions use a different programming language than {$activity->language}.", null];
         }
 
+        // FIX: Map code_content instead of file_path
         $payload = [
             'submissions' => $submissions
-                ->map(fn ($s) => ['id' => $s->id, 'file_path' => $s->file_path, 'language' => $s->language])
+                ->map(fn ($s) => [
+                    'id' => $s->id,
+                    'code_content' => $s->code_content,  // Changed from file_path
+                    'language' => $s->language,
+                ])
                 ->values()
                 ->toArray(),
             'language' => $activity->language,
@@ -66,7 +75,7 @@ class DetectionService
         $query = Detection::forLink($link->id)
             ->filter($filters)
             ->selectedAttributes()
-            ->with(['submissionA', 'submissionB'])
+            ->with(['submissionA.user', 'submissionB.user'])
             ->orderByDesc('flagged');
 
         match ($sort) {
@@ -84,12 +93,10 @@ class DetectionService
         return [
             'id' => $detection->id,
             'submission_a' => [
-                'student_name' => $detection->submissionA->student_name,
-                'student_no' => $detection->submissionA->student_no,
+                'student_name' => $detection->submissionA->user->name,
             ],
             'submission_b' => [
-                'student_name' => $detection->submissionB->student_name,
-                'student_no' => $detection->submissionB->student_no,
+                'student_name' => $detection->submissionB->user->name,
             ],
             'avg_score' => $detection->avg_score,
             'flagged' => $detection->flagged,
@@ -117,40 +124,25 @@ class DetectionService
 
         return [
             'id' => $submission->id,
-            'student_name' => $submission->student_name,
-            'student_no' => $submission->student_no,
+            'student_name' => $submission->user->name,
             'language' => $submission->language,
         ];
     }
 
     public function getDetectionDetail(Detection $detection): array
     {
-        $detection->load(['submissionA', 'submissionB']);
+        $detection->load(['submissionA.user', 'submissionB.user']);
 
         return [
             'detection' => $this->transformDetection($detection),
-            'fileA' => $this->loadFile($detection->submissionA->file_path),
-            'fileB' => $this->loadFile($detection->submissionB->file_path),
+            'fileA' => $detection->submissionA->code_content,
+            'fileB' => $detection->submissionB->code_content,
         ];
-    }
-
-    private function loadFile(?string $path = null): ?string
-    {
-        return ($path && Storage::disk(env('FILESYSTEM_DISK'))->exists($path))
-            ? Storage::disk(env('FILESYSTEM_DISK'))->get($path)
-            : null;
-    }
-
-    protected string $fastApiUrl;
-
-    public function __construct()
-    {
-        $this->fastApiUrl = config('services.plagiarism_detector.url');
     }
 
     public function detectAndStore(string $activityLinkId, array $submissionsData, string $language): void
     {
-        $submissions = $this->loadSubmissions($submissionsData);
+        $submissions = $this->prepareSubmissions($submissionsData);
 
         if (empty($submissions)) {
             Log::warning("No valid submissions for {$activityLinkId}");
@@ -158,50 +150,65 @@ class DetectionService
             return;
         }
 
+        Log::info('Sending to FastAPI', [
+            'url' => $this->fastApiUrl,
+            'submission_count' => count($submissions),
+            'language' => $language,
+        ]);
+
         $response = Http::timeout(120)->post("{$this->fastApiUrl}/detect", [
             'submissions' => $submissions,
             'language' => $language,
         ]);
 
         if ($response->successful()) {
-            $this->storeDetections($activityLinkId, $response->json()['results'] ?? []);
+            $results = $response->json()['results'] ?? [];
+            Log::info('FastAPI response received', ['result_count' => count($results)]);
+            $this->storeDetections($activityLinkId, $results);
         } else {
-            Log::error("Detection API failed: {$response->body()}");
+            Log::error('Detection API failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
             throw new \Exception("Detection API returned error: {$response->status()}");
         }
     }
 
-    private function loadSubmissions(array $submissionsData): array
+    private function prepareSubmissions(array $submissionsData): array
     {
         return collect($submissionsData)
-            ->map(fn ($s) => $this->loadContent($s))
+            ->map(fn ($s) => $this->validateSubmission($s))
             ->filter()
             ->values()
             ->toArray();
     }
 
-    private function loadContent(array $submission): ?array
+    private function validateSubmission(array $submission): ?array
     {
-        if (! Storage::disk(env('FILESYSTEM_DISK'))->exists($submission['file_path'])) {
+        if (empty($submission['code_content'])) {
+            Log::warning("Empty code content for submission: {$submission['id']}");
+
             return null;
         }
 
-        $size = Storage::disk(env('FILESYSTEM_DISK'))->size($submission['file_path']);
-        if ($size > 10 * 1024 * 1024) { // 10MB limit
-            Log::warning("File too large, skipping: {$submission['id']}");
+        $size = strlen($submission['code_content']);
+        if ($size > 10 * 1024 * 1024) {
+            Log::warning("Code too large, skipping: {$submission['id']}");
 
             return null;
         }
 
         return [
             'id' => $submission['id'],
-            'file_content' => Storage::disk(env('FILESYSTEM_DISK'))->get($submission['file_path']),
+            'code_content' => $submission['code_content'],
         ];
     }
 
     private function storeDetections(string $activityLinkId, array $results): void
     {
         if (empty($results)) {
+            Log::warning("No detection results to store for {$activityLinkId}");
+
             return;
         }
 
@@ -223,6 +230,7 @@ class DetectionService
             ])->toArray();
 
             Detection::insert($data);
+            Log::info("Stored {count} detections for {$activityLinkId}", ['count' => count($data)]);
         });
     }
 }

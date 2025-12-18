@@ -4,46 +4,34 @@ namespace App\Services;
 
 use App\Enums\ProgrammingLanguage;
 use App\Models\ActivityLink;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 
 class SubmissionService
 {
-    public function getSubmissionFormData(string $token): array
+    public function getSubmissionFormData(ActivityLink $activityLink, User $user): array
     {
-        $activityLink = ActivityLink::with('activity')->where('token', $token)->firstOrFail();
         $language = $activityLink->activity->language;
 
         return [
             'bgImage' => asset('images/clonewave-bg.jpg'),
-            'name' => $activityLink->name,
+            'courseName' => $activityLink->course->name,
             'activityName' => $activityLink->activity->title,
-            'token' => $token,
-            'allowedExtensions' => ProgrammingLanguage::fileExtensions($language),
+            'activityContent' => $activityLink->activity->content,
+            'token' => $activityLink->token,
+            'language' => $language,
+            'languageText' => ProgrammingLanguage::response($language),
+            'studentName' => $user->name,
+            'studentEmail' => $user->email,
         ];
     }
 
-    public function storeSubmission(ActivityLink $activityLink, array $validatedData, UploadedFile $file)
+    public function storeSubmission(ActivityLink $activityLink, User $user, array $validatedData)
     {
-        $content = file_get_contents($file->getRealPath());
-
-        $baseName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $activityTitle = str_replace([' ', '/', '\\'], '_', strtoupper($activityLink->name));
-        $extension = 'txt';
-
-        do {
-            $random = bin2hex(random_bytes(8));
-            $filename = "{$baseName}_{$activityTitle}_".now()->timestamp."{$random}.{$extension}";
-            $path = "submissions/{$filename}";
-        } while (Storage::disk(env('FILESYSTEM_DISK'))->exists($path));
-
-        Storage::disk(env('FILESYSTEM_DISK'))->put($path, $content);
-
-        $language = ProgrammingLanguage::fromFileExtension($file->getClientOriginalExtension());
+        $language = $activityLink->activity->language;
 
         return $activityLink->submissions()->create([
-            ...$validatedData,
-            'file_path' => $path,
+            'user_id' => $user->id,
+            'code_content' => $validatedData['code_content'],
             'language' => $language,
         ]);
     }

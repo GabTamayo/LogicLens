@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Jobs\DetectionJob;
+use App\Http\Controllers\Controller;
 use App\Models\Activity;
 use App\Models\Detection;
 use App\Services\DetectionService;

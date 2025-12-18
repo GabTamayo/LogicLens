@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Teacher;
 
 use App\Actions\GenerateActivityLink;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\ActivityLinkRequest;
 use App\Http\Requests\ActivityLinkUpdateRequest;
 use App\Models\Activity;
@@ -50,7 +51,7 @@ class ActivityLinkController extends Controller
         return Inertia::render('Submissions/Index', [
             ...$baseData,
             ...$tabData,
-            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'student_no', 'sort']),
+            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'sort']),
         ]);
     }
 

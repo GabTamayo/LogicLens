@@ -97,8 +97,6 @@ watch(
                                 A</span>
                             <span class="text-2xs sm:text-xs font-medium mt-1 truncate">{{
                                 props.detection.submission_a.student_name }}</span>
-                            <span class="text-2xs sm:text-xs text-muted-foreground truncate">{{
-                                props.detection.submission_a.student_no }}</span>
                         </div>
 
                         <div class="flex flex-col items-center justify-center gap-1 min-w-0">
@@ -119,8 +117,6 @@ watch(
                                 B</span>
                             <span class="text-2xs sm:text-xs font-medium mt-1 truncate">{{
                                 props.detection.submission_b.student_name }}</span>
-                            <span class="text-2xs sm:text-xs text-muted-foreground truncate">{{
-                                props.detection.submission_b.student_no }}</span>
                         </div>
                     </div>
                 </Card>
