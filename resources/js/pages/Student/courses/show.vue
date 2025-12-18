@@ -2,7 +2,8 @@
 import StudentAppLayout from "@/layouts/StudentAppLayout.vue";
 import type { BreadcrumbItem, StudentCourseShowProps } from "@/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import {
     Item,
     ItemActions,
@@ -19,11 +20,11 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Deferred, router, Link } from "@inertiajs/vue3";
-import { LoaderCircle, Play, Calendar } from "lucide-vue-next";
+import { Deferred, router, Link, Head } from "@inertiajs/vue3";
+import { LoaderCircle, Play, Calendar, CalendarCheck } from "lucide-vue-next";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import DataTable from "@/components/DataTable.vue";
 import { columns as studentColumns } from "@/components/students(student)/columns";
 import PaginationComponent from "@/components/Pagination.vue";
@@ -51,7 +52,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Tab change handler
 watch(activeTab, (newTab) => {
     const page = newTab === "students" ? studentsPage.value : activitiesPage.value;
     router.visit(`/student/courses/${props.course.id}`, {
@@ -62,7 +62,6 @@ watch(activeTab, (newTab) => {
     });
 });
 
-// Pagination handlers
 const handleActivitiesPageChange = (page: number) => {
     activitiesPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
@@ -85,19 +84,43 @@ const handleStudentsPageChange = (page: number) => {
 </script>
 
 <template>
+
+    <Head :title="`${course.name}`" />
+
     <StudentAppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 p-4 lg:p-6">
+            <!-- Header Card -->
+            <Card>
+                <CardHeader>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex flex-wrap items-center">
+                                <CardTitle class="text-2xl">{{ course.name }}</CardTitle>
+                            </div>
+                            <CardDescription class="flex flex-wrap items-center gap-2">
+                                <span>Created by {{ course.user?.name }}</span>
+                            </CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            <!-- Tabs Section -->
             <Card>
                 <CardContent class="p-0">
                     <Tabs v-model="activeTab" class="w-full">
-                        <div class="flex justify-center border-b">
+                        <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
                                 <TabsTrigger value="activities"
-                                    class="relative text-md rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
                                     Activities
                                 </TabsTrigger>
+                                <TabsTrigger value="completed"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    Completed
+                                </TabsTrigger>
                                 <TabsTrigger value="students"
-                                    class="relative text-md rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
                                     Students
                                 </TabsTrigger>
                             </TabsList>
@@ -119,7 +142,7 @@ const handleStudentsPageChange = (page: number) => {
                                                 <ItemContent>
                                                     <ItemTitle class="capitalize text-xl font-bold">{{
                                                         activity.activity_title
-                                                        }}</ItemTitle>
+                                                    }}</ItemTitle>
                                                     <ItemDescription>
                                                         <span :class="getLanguageColor(activity.activity_language)"
                                                             class="inline-flex items-center mb-2 gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border">
@@ -155,10 +178,10 @@ const handleStudentsPageChange = (page: number) => {
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger as-child>
-                                                                <Link :href="`/student/submit${activity.token}`">
-                                                                <Button size="icon-lg" class="rounded-full">
-                                                                    <Play class="size-5 fill-white stroke-none" />
-                                                                </Button>
+                                                                <Link :href="`/student/submit/${activity.token}`">
+                                                                    <Button size="icon-lg" class="rounded-full">
+                                                                        <Play class="size-5 fill-white stroke-none" />
+                                                                    </Button>
                                                                 </Link>
                                                             </TooltipTrigger>
                                                             <TooltipContent> Start </TooltipContent>

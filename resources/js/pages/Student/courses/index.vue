@@ -344,7 +344,7 @@ const hasContent = computed(() => {
                         <EmptyTitle>No Enrolled Courses Yet</EmptyTitle>
                         <EmptyDescription>
                             You haven't enrolled in any courses yet. Enroll using an access code provided by your
-                            teacher.
+                            Professor.
                         </EmptyDescription>
                     </EmptyHeader>
                     <EmptyContent> </EmptyContent>

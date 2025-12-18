@@ -437,7 +437,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                             <div class="flex items-center gap-2">
                                                 <code
                                                     class="relative max-w-[200px] truncate rounded bg-muted px-2 py-1 font-mono text-xs md:max-w-full">
-                                                    {{ props.appUrl }}/student/submit{{ link.token }}
+                                                    {{ props.appUrl }}/student/submit/{{ link.token }}
                                                 </code>
                                                 <Button variant="ghost" size="icon"
                                                     @click="copy(`${props.appUrl}/student/submit/${link.token}`)"

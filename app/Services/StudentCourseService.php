@@ -10,12 +10,12 @@ class StudentCourseService
     public function getEnrolledCourses(?string $search = null, ?string $sort = null): array
     {
         return [
-            'enrolledCourses' => fn() => Auth::user()
+            'enrolledCourses' => fn () => Auth::user()
                 ->enrolledCourses()
                 ->withPivot('enrolled_at')
                 ->with('user:id,name')
                 ->when($search, function ($query) use ($search) {
-                    $query->where('courses.name', 'like', '%' . $search . '%');
+                    $query->where('courses.name', 'like', '%'.$search.'%');
                 })
                 ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.created_at')
                 ->when($sort, function ($query) use ($sort) {
@@ -30,7 +30,7 @@ class StudentCourseService
                 })
                 ->paginate(9)
                 ->withQueryString()
-                ->through(fn($course) => [
+                ->through(fn ($course) => [
                     'id' => $course->id,
                     'user_id' => $course->user_id,
                     'name' => $course->name,
@@ -79,7 +79,7 @@ class StudentCourseService
     public function getEnrolledCourse(string $courseId)
     {
         return Auth::user()->enrolledCourses()
-            ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.access_code', 'courses.is_active', 'courses.created_at')
+            ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.created_at')
             ->with('user:id,name')
             ->findOrFail($courseId);
     }
@@ -93,7 +93,7 @@ class StudentCourseService
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
-            ->through(fn($link) => [
+            ->through(fn ($link) => [
                 'id' => $link->id,
                 'activity_id' => $link->activity_id,
                 'activity_title' => $link->activity->title ?? 'N/A',
@@ -115,7 +115,7 @@ class StudentCourseService
             ->orderBy('users.name')
             ->paginate(10, ['*'], 'page', $page)
             ->withQueryString()
-            ->through(fn($student) => [
+            ->through(fn ($student) => [
                 'id' => $student->id,
                 'name' => $student->name,
                 'email' => $student->email,
