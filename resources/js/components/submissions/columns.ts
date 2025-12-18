@@ -3,15 +3,12 @@ import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
 
 export interface SubmissionRow {
-    id: number
+    id: string
     student_name: string
     student_email: string
-    student_no: string
-    file_path: string
+    code_content: string
     language: string
     created_at: string
-    file_content?: string
-    file_extension?: string
 }
 
 export const columns: ColumnDef<SubmissionRow>[] = [
@@ -26,12 +23,6 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         label: 'Email',
         header: () => h('div', { class: '' }, 'Student Email'),
         cell: ({ row }) => h('div', { class: '' }, row.getValue('student_email')),
-    },
-    {
-        accessorKey: 'student_no',
-        label: 'Student No',
-        header: () => h('div', { class: '' }, 'Student No.'),
-        cell: ({ row }) => h('div', { class: '' }, row.getValue('student_no')),
     },
     {
         accessorKey: 'created_at',

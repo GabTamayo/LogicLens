@@ -7,7 +7,7 @@ use App\Http\Controllers\DetectionController;
 use App\Http\Controllers\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'role:' . RoleName::TEACHER->value])->group(function () {
+Route::middleware(['auth', 'verified', 'role:'.RoleName::TEACHER->value])->group(function () {
     // Activity Routes
     Route::get('activities', [ActivityController::class, 'index'])->name('activities.index');
     Route::get('activities/create', [ActivityController::class, 'create'])->name('activities.create');
@@ -20,7 +20,7 @@ Route::middleware(['auth', 'verified', 'role:' . RoleName::TEACHER->value])->gro
     Route::post('activities/{activity}/links', [ActivityLinkController::class, 'store'])->name('activities.links.store');
     Route::patch('activities/{activity}/links/{link}', [ActivityLinkController::class, 'update'])->name('activities.links.update');
     Route::get('activities/{activity}/links/{link}', [ActivityLinkController::class, 'show'])->name('activities.links.show');
-    Route::delete('activities/{activity}/links/{link}', [ActivityLinkController::class, 'destroy'])->name('submissions.destroy')->middleware('password.confirm');
+    Route::delete('activities/{activity}/links/{link}', [ActivityLinkController::class, 'destroy'])->name('activities.links.destroy')->middleware('password.confirm');
     Route::delete('/activities/{activity}/links/{link}/deadline', [ActivityLinkController::class, 'removeDeadline'])->name('activities.links.deadline.destroy');
 
     // Detection routes
@@ -31,7 +31,3 @@ Route::middleware(['auth', 'verified', 'role:' . RoleName::TEACHER->value])->gro
     // Submission Routes
     Route::delete('submissions/{submission}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
 });
-
-// Student Submission Routes
-Route::get('submit{token}', [SubmissionController::class, 'create'])->name('submissions.create');
-Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store');

@@ -50,7 +50,7 @@ class ActivityLinkController extends Controller
         return Inertia::render('Submissions/Index', [
             ...$baseData,
             ...$tabData,
-            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'student_no', 'sort']),
+            'filters' => $request->only($activeTab === 'detection' ? ['student_name_a', 'student_name_b', 'sort'] : ['student_name', 'sort']),
         ]);
     }
 

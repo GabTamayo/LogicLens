@@ -176,7 +176,7 @@ onMounted(() => {
                             <TableRow v-if="row.getIsExpanded()">
                                 <TableCell :colspan="row.getAllCells().length">
                                     <div class="max-h-200 overflow-auto">
-                                        <pre class="line-numbers"><code :class="`language-${getLanguageFromExtension(row.original.language)}`">{{ row.original.file_content }}
+                                        <pre class="line-numbers"><code :class="`language-${getLanguageFromExtension(row.original.language)}`">{{ row.original.code_content }}
                                             </code>
                                         </pre>
                                     </div>

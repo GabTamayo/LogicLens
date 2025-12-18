@@ -44,7 +44,7 @@ function removeStudent() {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger as-child>
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer" @select.prevent>
+                    <DropdownMenuItem class="text-destructive focus:text-destructive" @select.prevent>
                         <CircleMinus class="w-4 h-4 mr-2" />
                         Remove Student
                     </DropdownMenuItem>

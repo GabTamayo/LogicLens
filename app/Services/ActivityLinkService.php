@@ -13,22 +13,30 @@ class ActivityLinkService
 
         $query = $link->submissions()
             ->selectedAttributes()
+            ->with('user:id,name,email')
             ->filterByStudent(
                 $request->input('student_name'),
-                $request->input('student_no')
             );
 
         match ($sort) {
             'oldest' => $query->orderBy('created_at', 'asc'),
-            'name_asc' => $query->orderBy('student_name', 'asc'),
-            'name_desc' => $query->orderBy('student_name', 'desc'),
+            'name_asc' => $query->orderByRaw('(SELECT name FROM users WHERE users.id = submissions.user_id) asc'),
+            'name_desc' => $query->orderByRaw('(SELECT name FROM users WHERE users.id = submissions.user_id) desc'),
             default => $query->orderBy('created_at', 'desc'),
         };
 
         $submissions = $query->paginate(10)->withQueryString();
 
-        $submissions->getCollection()
-            ->transform(fn ($submission) => $submission->attachFileContent());
+        $submissions->getCollection()->transform(function ($submission) {
+            return [
+                'id' => $submission->id,
+                'student_name' => $submission->user->name,
+                'student_email' => $submission->user->email,
+                'code_content' => $submission->code_content,
+                'language' => $submission->language,
+                'created_at' => $submission->created_at,
+            ];
+        });
 
         return $submissions;
     }

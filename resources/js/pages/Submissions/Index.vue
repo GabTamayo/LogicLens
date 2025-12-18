@@ -57,7 +57,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 // Filters
 const submissionFilters = useRemember({
     student_name: props.filters?.student_name || '',
-    student_no: props.filters?.student_no || '',
 }, 'submissions-filters')
 
 const detectionFilters = useRemember({
@@ -296,7 +295,6 @@ const updateDetectionFilter = (column: string, value: string) => {
                                         <DataTable :columns="submissionColumns" :data="props.submissions.data"
                                             :pagination="props.submissions as any" :filter-config="[
                                                 { column: 'student_name', placeholder: 'Filter by Student Name' },
-                                                { column: 'student_no', placeholder: 'Search Student No.' }
                                             ]" :filter-values="submissionFilters"
                                             @page-change="handleSubmissionPageChange"
                                             @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"

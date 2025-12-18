@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class ActivityLink extends Model
 {
@@ -16,7 +15,9 @@ class ActivityLink extends Model
     use HasFactory, HasUuid;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
+
     protected $fillable = [
         'course_id',
         'token',
@@ -64,7 +65,7 @@ class ActivityLink extends Model
 
     public function scopeWithSubmissions($query)
     {
-        return $query->with(['submissions' => fn($q) => $q->latest()]);
+        return $query->with(['submissions' => fn ($q) => $q->latest()]);
     }
 
     public function scopeExpired($query)
@@ -82,16 +83,5 @@ class ActivityLink extends Model
     public function getExpiresAtAttribute($value)
     {
         return $value ? Carbon::parse($value)->timezone('Asia/Manila') : null;
-    }
-
-    protected static function booted()
-    {
-        static::deleting(function ($activityLink) {
-            foreach ($activityLink->submissions as $submission) {
-                if ($submission->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($submission->file_path)) {
-                    Storage::disk(env('FILESYSTEM_DISK'))->delete($submission->file_path);
-                }
-            }
-        });
     }
 }

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Submission extends Model
 {
@@ -15,19 +14,24 @@ class Submission extends Model
     use HasFactory, HasUuid;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
+
     protected $fillable = [
         'activity_link_id',
-        'student_name',
-        'student_email',
-        'student_no',
-        'file_path',
+        'user_id',
+        'code_content',
         'language',
     ];
 
     public function activityLink(): BelongsTo
     {
         return $this->belongsTo(ActivityLink::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function detection(): HasMany
@@ -50,25 +54,14 @@ class Submission extends Model
         return $query->whereDoesntHave('detectionA')->whereDoesntHave('detectionB');
     }
 
-
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'student_name', 'student_email', 'student_no', 'file_path', 'language', 'created_at');
+        return $query->select('id', 'user_id', 'code_content', 'language', 'created_at');
     }
 
-    public function scopeFilterByStudent($query, ?string $name = null, ?string $number = null)
+    public function scopeFilterByStudent($query, ?string $name = null)
     {
-        return $query
-            ->when($name, fn($q, $search) => $q->where('student_name', 'like', '%' . $search . '%'))
-            ->when($number, fn($q, $search) => $q->where('student_no', 'like', '%' . $search . '%'));
-    }
-
-    public function attachFileContent()
-    {
-        if ($this->file_path && Storage::disk(env('FILESYSTEM_DISK'))->exists($this->file_path)) {
-            $this->file_content = Storage::disk(env('FILESYSTEM_DISK'))->get($this->file_path);
-        }
-        return $this;
+        return $query->when($name, fn ($q) => $q->whereHas('user', fn ($userQuery) => $userQuery->where('name', 'like', "%{$name}%")));
     }
 
     public function activityLanguage(): ?string

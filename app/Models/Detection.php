@@ -6,12 +6,12 @@ use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
 class Detection extends Model
 {
     /** @use HasFactory<\Database\Factories\DetectionFactory> */
     use HasFactory, HasUuid;
+
     public $incrementing = false;
 
     protected $fillable = [
@@ -40,22 +40,25 @@ class Detection extends Model
 
     public function submissionA(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_a_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path', 'language']);
+        return $this->belongsTo(Submission::class, 'submission_a_id')
+            ->select(['id', 'user_id', 'code_content', 'language']);
     }
 
     public function submissionB(): BelongsTo
     {
-        return $this->belongsTo(Submission::class, 'submission_b_id')->select(['id', 'student_name', 'student_no', 'student_email', 'file_path', 'language']);
+        return $this->belongsTo(Submission::class, 'submission_b_id')
+            ->select(['id', 'user_id', 'code_content', 'language']);
     }
 
-    public function getFileContentA()
+    // Code content is now directly accessible from submission models
+    public function getCodeContentA()
     {
-        return Storage::disk(env('FILESYSTEM_DISK'))->get($this->submissionA->file_path);
+        return $this->submissionA->code_content;
     }
 
-    public function getFileContentB()
+    public function getCodeContentB()
     {
-        return Storage::disk(env('FILESYSTEM_DISK'))->get($this->submissionB->file_path);
+        return $this->submissionB->code_content;
     }
 
     public function flag()
@@ -72,12 +75,11 @@ class Detection extends Model
     {
         return $query
             ->when($filters['student_name_a'] ?? null, function ($q, $name) {
-                $q->whereHas('submissionA', fn($s) => $s->where('student_name', 'like', "%{$name}%"));
+                $q->whereHas('submissionA.user', fn ($s) => $s->where('name', 'like', "%{$name}%"));
             })
             ->when($filters['student_name_b'] ?? null, function ($q, $name) {
-                $q->whereHas('submissionB', fn($s) => $s->where('student_name', 'like', "%{$name}%"));
+                $q->whereHas('submissionB.user', fn ($s) => $s->where('name', 'like', "%{$name}%"));
             });
-        //->when($filters['min_score'] ?? null, fn($q, $score) => $q->where('similarity_score', '>=', (float) $score));
     }
 
     public function scopeSelectedAttributes($query)
