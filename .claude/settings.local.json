@@ -12,7 +12,8 @@
       "Bash(cmd /c dir:*)",
       "Bash(composer require:*)",
       "Bash(npm shadcn-vue add:*)",
-      "Bash(npx shadcn-vue@latest add:*)"
+      "Bash(npx shadcn-vue@latest add:*)",
+      "Bash(curl:*)"
     ]
   },
   "enabledMcpjsonServers": [

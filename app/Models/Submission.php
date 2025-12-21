@@ -22,6 +22,13 @@ class Submission extends Model
         'user_id',
         'code_content',
         'language',
+        'draft_code',
+        'draft_stdin',
+        'draft_saved_at',
+    ];
+
+    protected $casts = [
+        'draft_saved_at' => 'datetime',
     ];
 
     public function activityLink(): BelongsTo

@@ -38,4 +38,8 @@ return [
     'plagiarism_detector' => [
         'url' => env('PLAGIARISM_DETECTOR_URL'),
     ],
+
+    'piston' => [
+        'url' => env('PISTON_API_URL', 'http://localhost:2000/api/v2'),
+    ],
 ];
