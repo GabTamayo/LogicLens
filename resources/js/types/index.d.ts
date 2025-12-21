@@ -153,6 +153,7 @@ export interface SubmissionPageProps {
     languageText: string;
     studentName: string;
     studentEmail: string;
+    hasSubmitted: boolean;
 }
 
 export type Submission = {

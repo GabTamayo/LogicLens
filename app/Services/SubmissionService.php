@@ -11,6 +11,7 @@ class SubmissionService
     public function getSubmissionFormData(ActivityLink $activityLink, User $user): array
     {
         $language = $activityLink->activity->language;
+        $hasSubmitted = $activityLink->submissions()->where('user_id', $user->id)->exists();
 
         return [
             'bgImage' => asset('images/clonewave-bg.jpg'),
@@ -24,6 +25,7 @@ class SubmissionService
             'languageText' => ProgrammingLanguage::response($language),
             'studentName' => $user->name,
             'studentEmail' => $user->email,
+            'hasSubmitted' => $hasSubmitted,
         ];
     }
 

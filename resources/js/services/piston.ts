@@ -114,7 +114,7 @@ export class PistonService {
     /**
      * Format execution output for display
      */
-    static formatOutput(result: PistonExecuteResponse): string {
+    static formatOutput(result: PistonExecuteResponse, stdin?: string): string {
         let output = '';
 
         // Add compile output if present (for compiled languages like Java)
@@ -133,38 +133,33 @@ export class PistonService {
 
         // Add run output
         if (result.run.stdout) {
-            // Clean up the output by removing common input() prompt patterns
             let cleanedOutput = result.run.stdout;
 
-            // Split into lines to better format the output
-            const lines = cleanedOutput.split('\n');
-            const formattedLines: string[] = [];
+            // Python input() prompts appear concatenated with stdin values
+            // We need to properly format them to look like IDE output
+            if (stdin && stdin.trim()) {
+                const stdinLines = stdin.trim().split('\n');
+                let stdinIndex = 0;
 
-            for (const line of lines) {
-                // Check if line contains input prompts (lines ending with ?)
-                // and try to separate them
-                if (line.includes('?')) {
-                    // Split on question marks followed by non-whitespace
-                    const parts = line.split(/(\?)/);
-                    let buffer = '';
+                // Replace each stdin value that appears right after a prompt with prompt + value on same line
+                cleanedOutput = cleanedOutput.replace(/([^\n]*[?:>]\s*)(\S[^\n]*?)(?=\n|$)/g, (match, prompt, restOfLine) => {
+                    // Check if this looks like an input prompt (ends with ?, :, or >)
+                    const isPrompt = /[?:>]\s*$/.test(prompt);
 
-                    for (let i = 0; i < parts.length; i++) {
-                        buffer += parts[i];
-                        // If we just added a '?', add newline before next part
-                        if (parts[i] === '?' && i < parts.length - 1 && parts[i + 1].trim()) {
-                            formattedLines.push(buffer);
-                            buffer = '';
+                    if (isPrompt && stdinIndex < stdinLines.length) {
+                        const stdinValue = stdinLines[stdinIndex];
+                        // Check if the stdin value appears at the start of restOfLine
+                        if (restOfLine.startsWith(stdinValue)) {
+                            stdinIndex++;
+                            // Keep prompt and stdin on same line, move rest to new line
+                            const afterStdin = restOfLine.substring(stdinValue.length);
+                            return prompt + stdinValue + (afterStdin ? '\n' + afterStdin.trimStart() : '');
                         }
                     }
-                    if (buffer.trim()) {
-                        formattedLines.push(buffer);
-                    }
-                } else {
-                    formattedLines.push(line);
-                }
+                    return match;
+                });
             }
 
-            cleanedOutput = formattedLines.join('\n');
             output += `=== Program Output ===\n${cleanedOutput}\n`;
         }
 
