@@ -144,6 +144,8 @@ export interface ActivityLink {
 export interface SubmissionPageProps {
     bgImage: string;
     courseName: string;
+    courseId: string;
+    activityId: string;
     activityName: string;
     activityContent: string | null;
     token: string;
@@ -151,6 +153,7 @@ export interface SubmissionPageProps {
     languageText: string;
     studentName: string;
     studentEmail: string;
+    hasSubmitted: boolean;
 }
 
 export type Submission = {

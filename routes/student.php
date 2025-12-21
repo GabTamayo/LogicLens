@@ -2,7 +2,7 @@
 
 use App\Enums\RoleName;
 use App\Http\Controllers\Student\StudentCourseController;
-use App\Http\Controllers\Teacher\SubmissionController;
+use App\Http\Controllers\Student\SubmissionDraftController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:'.RoleName::STUDENT->value])->prefix('student')->group(function () {
@@ -11,7 +11,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleName::STUDENT->value])->prefi
     Route::post('enroll', [StudentCourseController::class, 'storeEnrollment'])->name('student.enroll.store');
     Route::get('courses/{course}', [StudentCourseController::class, 'show'])->name('student.courses.show');
 
-    // Student Submission Routes
-    Route::get('submit/{token}', [SubmissionController::class, 'create'])->name('submissions.create')->middleware('enrolled');
-    Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store')->middleware('enrolled');
+    // Draft auto-save routes
+    Route::post('submission/{token}/draft', [SubmissionDraftController::class, 'saveDraft'])->name('student.submission.draft.save');
+    Route::get('submission/{token}/draft', [SubmissionDraftController::class, 'getDraft'])->name('student.submission.draft.get');
 });

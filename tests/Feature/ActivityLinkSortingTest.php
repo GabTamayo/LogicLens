@@ -16,15 +16,18 @@ test('submissions can be sorted by newest first', function () {
     $activity = Activity::factory()->create(['user_id' => $user->id]);
     $link = ActivityLink::factory()->create(['activity_id' => $activity->id]);
 
+    $alice = User::factory()->create(['name' => 'Alice']);
+    $bob = User::factory()->create(['name' => 'Bob']);
+
     $oldSubmission = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Alice',
+        'user_id' => $alice->id,
         'created_at' => now()->subDays(2),
     ]);
 
     $newSubmission = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Bob',
+        'user_id' => $bob->id,
         'created_at' => now(),
     ]);
 
@@ -49,15 +52,18 @@ test('submissions can be sorted by oldest first', function () {
     $activity = Activity::factory()->create(['user_id' => $user->id]);
     $link = ActivityLink::factory()->create(['activity_id' => $activity->id]);
 
+    $alice = User::factory()->create(['name' => 'Alice']);
+    $bob = User::factory()->create(['name' => 'Bob']);
+
     $oldSubmission = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Alice',
+        'user_id' => $alice->id,
         'created_at' => now()->subDays(2),
     ]);
 
     $newSubmission = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Bob',
+        'user_id' => $bob->id,
         'created_at' => now(),
     ]);
 
@@ -82,19 +88,23 @@ test('submissions can be sorted by name A to Z', function () {
     $activity = Activity::factory()->create(['user_id' => $user->id]);
     $link = ActivityLink::factory()->create(['activity_id' => $activity->id]);
 
+    $charlieUser = User::factory()->create(['name' => 'Charlie']);
+    $aliceUser = User::factory()->create(['name' => 'Alice']);
+    $bobUser = User::factory()->create(['name' => 'Bob']);
+
     $charlie = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Charlie',
+        'user_id' => $charlieUser->id,
     ]);
 
     $alice = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Alice',
+        'user_id' => $aliceUser->id,
     ]);
 
     $bob = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Bob',
+        'user_id' => $bobUser->id,
     ]);
 
     $response = $this->get(route('activities.links.show', [
@@ -119,19 +129,23 @@ test('submissions can be sorted by name Z to A', function () {
     $activity = Activity::factory()->create(['user_id' => $user->id]);
     $link = ActivityLink::factory()->create(['activity_id' => $activity->id]);
 
+    $charlieUser = User::factory()->create(['name' => 'Charlie']);
+    $aliceUser = User::factory()->create(['name' => 'Alice']);
+    $bobUser = User::factory()->create(['name' => 'Bob']);
+
     $charlie = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Charlie',
+        'user_id' => $charlieUser->id,
     ]);
 
     $alice = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Alice',
+        'user_id' => $aliceUser->id,
     ]);
 
     $bob = Submission::factory()->create([
         'activity_link_id' => $link->id,
-        'student_name' => 'Bob',
+        'user_id' => $bobUser->id,
     ]);
 
     $response = $this->get(route('activities.links.show', [

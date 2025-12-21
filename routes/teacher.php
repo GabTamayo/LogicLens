@@ -3,10 +3,10 @@
 use App\Enums\RoleName;
 use App\Http\Controllers\Teacher\ActivityController;
 use App\Http\Controllers\Teacher\ActivityLinkController;
-use App\Http\Controllers\Teacher\DetectionController;
-use App\Http\Controllers\Teacher\SubmissionController;
 use App\Http\Controllers\Teacher\CourseController;
 use App\Http\Controllers\Teacher\DashboardController;
+use App\Http\Controllers\Teacher\DetectionController;
+use App\Http\Controllers\Teacher\SubmissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'role:'.RoleName::TEACHER->value])->group(function () {

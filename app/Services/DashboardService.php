@@ -62,8 +62,10 @@ class DashboardService
             'activityLink:id,course_id,activity_id',
             'activityLink.activity:id,title',
             'activityLink.course:id,name',
-            'submissionA:id,student_name',
-            'submissionB:id,student_name',
+            'submissionA:id,user_id',
+            'submissionA.user:id,name',
+            'submissionB:id,user_id',
+            'submissionB.user:id,name',
         ])
             ->whereHas('activityLink.activity', fn ($q) => $q->where('user_id', $userId))
             ->where('flagged', true)
@@ -78,8 +80,8 @@ class DashboardService
                     'name' => $detection->activityLink->course->name,
                 ] : null,
                 'activity' => $detection->activityLink->activity->title,
-                'submitter_a' => $detection->submissionA?->student_name,
-                'submitter_b' => $detection->submissionB?->student_name,
+                'submitter_a' => $detection->submissionA?->user?->name,
+                'submitter_b' => $detection->submissionB?->user?->name,
                 'avg_score' => $detection->avg_score,
             ]);
     }

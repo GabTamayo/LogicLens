@@ -18,10 +18,8 @@ class SubmissionFactory extends Factory
     {
         return [
             'activity_link_id' => '99062b03-6560-4000-b491-37716f86fb10',
-            'student_name' => fake()->name(),
-            'student_email' => fake()->unique()->safeEmail(),
-            'student_no' => fake()->unique()->numerify('S########'),
-            'file_path' => fake()->filePath(),
+            'user_id' => \App\Models\User::factory(),
+            'code_content' => fake()->paragraph(),
             'language' => 'java'
         ];
     }
