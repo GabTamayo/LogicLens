@@ -41,6 +41,11 @@ class Activity extends Model
         return $this->hasMany(ActivityLink::class);
     }
 
+    public function testCases(): HasMany
+    {
+        return $this->hasMany(TestCase::class)->orderBy('order');
+    }
+
     public function scopeSelectedAttributes($query)
     {
         return $query->select('id', 'user_id', 'title', 'language', 'content', 'created_at');
@@ -52,6 +57,8 @@ class Activity extends Model
             foreach ($activity->activityLinks as $link) {
                 $link->delete();
             }
+
+            $activity->testCases()->delete();
         });
     }
 

@@ -34,7 +34,25 @@ class ActivityController extends Controller
 
     public function store(ActivityRequest $request)
     {
-        Auth::user()->activities()->create($request->validated());
+        $validated = $request->validated();
+
+        $activity = Auth::user()->activities()->create([
+            'title' => $validated['title'],
+            'language' => $validated['language'],
+            'content' => $validated['content'] ?? null,
+        ]);
+
+        if (!empty($validated['test_cases'])) {
+            foreach ($validated['test_cases'] as $index => $testCase) {
+                $activity->testCases()->create([
+                    'title' => $testCase['title'],
+                    'input' => $testCase['input'] ?? null,
+                    'output' => $testCase['output'],
+                    'score' => $testCase['score'],
+                    'order' => $index,
+                ]);
+            }
+        }
 
         return redirect()->route('activities.index');
     }
