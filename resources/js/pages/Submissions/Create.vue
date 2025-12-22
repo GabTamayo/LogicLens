@@ -4,6 +4,16 @@ import MonacoEditor from '@/components/MonacoEditor.vue';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Kbd } from '@/components/ui/kbd';
 import { Label } from '@/components/ui/label';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
@@ -28,6 +38,7 @@ const stdinInput = ref('');
 const showStdinInput = ref(false);
 const lastSaved = ref<string>('');
 const isSavingToBackend = ref(false);
+const showSubmitDialog = ref(false);
 
 const windowWidth = ref(window.innerWidth);
 const windowHeight = ref(window.innerHeight);
@@ -58,6 +69,13 @@ let backendSaveTimeout: ReturnType<typeof setTimeout> | null = null;
 const form = useForm({
     code_content: '',
 });
+
+const getDefaultCodeTemplate = (): string => {
+    if (props.language === 'java') {
+        return `public static void main(String[] args) {\n    \n}`;
+    }
+    return '';
+};
 
 const handleKeyDown = (event: KeyboardEvent) => {
     if (event.shiftKey && event.key === 'F10') {
@@ -95,6 +113,10 @@ onMounted(async () => {
         } catch (e) {
             console.error('Failed to load saved code from localStorage:', e);
         }
+    }
+
+    if (!form.code_content) {
+        form.code_content = getDefaultCodeTemplate();
     }
 });
 
@@ -156,6 +178,7 @@ const submit = () => {
         onSuccess: () => {
             form.reset();
             submitted.value = true;
+            showSubmitDialog.value = false;
             localStorage.removeItem(STORAGE_KEY);
         },
         onError: () => {
@@ -163,6 +186,7 @@ const submit = () => {
             toast.error('Submission Failed', {
                 description: errorMessage,
             });
+            showSubmitDialog.value = false;
         },
     });
 };
@@ -313,7 +337,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                 <h2 class="font-semibold">Activity Instructions</h2>
                             </div>
                         </div>
-                        <ScrollArea class="flex-1 p-4 border m-2 rounded-lg">
+                        <ScrollArea class="m-2 flex-1 rounded-lg border p-4">
                             <div>
                                 <div v-if="props.activityContent">
                                     <div
@@ -350,10 +374,29 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                     <span v-if="lastSaved" class="ml-2 text-xs text-muted-foreground"> • Saved {{ lastSaved }} </span>
                                                 </div>
                                                 <div class="flex items-center">
-                                                    <Button size="sm" @click="submit" :disabled="form.processing">
-                                                        <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
-                                                        Submit
-                                                    </Button>
+                                                    <Dialog v-model:open="showSubmitDialog">
+                                                        <DialogTrigger as-child>
+                                                            <Button size="sm" :disabled="form.processing"> Submit </Button>
+                                                        </DialogTrigger>
+                                                        <DialogContent class="sm:max-w-md">
+                                                            <DialogHeader>
+                                                                <DialogTitle>Submit Your Code</DialogTitle>
+                                                                <DialogDescription>
+                                                                    Ready to submit? Please double-check your work. You will not be able to edit your
+                                                                    code after this submission.
+                                                                </DialogDescription>
+                                                            </DialogHeader>
+                                                            <DialogFooter>
+                                                                <DialogClose as-child>
+                                                                    <Button variant="outline"> Cancel </Button>
+                                                                </DialogClose>
+                                                                <Button @click="submit" :disabled="form.processing">
+                                                                    <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
+                                                                    Confirm Submit
+                                                                </Button>
+                                                            </DialogFooter>
+                                                        </DialogContent>
+                                                    </Dialog>
                                                 </div>
                                             </div>
                                         </div>
@@ -505,10 +548,28 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                             <h2 class="text-sm font-semibold">Your Code</h2>
                             <span class="text-xs text-muted-foreground">({{ props.languageText }})</span>
                         </div>
-                        <Button size="sm" @click="submit" :disabled="form.processing">
-                            <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
-                            Submit
-                        </Button>
+                        <Dialog v-model:open="showSubmitDialog">
+                            <DialogTrigger as-child>
+                                <Button size="sm" :disabled="form.processing"> Submit </Button>
+                            </DialogTrigger>
+                            <DialogContent class="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Submit Your Code</DialogTitle>
+                                    <DialogDescription>
+                                        Are you sure you want to submit your code? Make sure you've tested it thoroughly.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <DialogClose as-child>
+                                        <Button variant="outline"> Cancel </Button>
+                                    </DialogClose>
+                                    <Button @click="submit" :disabled="form.processing">
+                                        <LoaderCircle v-if="form.processing" class="mr-2 h-4 w-4 animate-spin" />
+                                        Confirm Submit
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
                 <div class="flex-1">
