@@ -39,6 +39,7 @@ const showStdinInput = ref(false);
 const lastSaved = ref<string>('');
 const isSavingToBackend = ref(false);
 const showSubmitDialog = ref(false);
+const testCaseResults = ref<Record<string, { output: string; passed: boolean; isRunning: boolean }>>({});
 
 const windowWidth = ref(window.innerWidth);
 const windowHeight = ref(window.innerHeight);
@@ -215,6 +216,59 @@ const toggleStdinInput = () => {
     showStdinInput.value = !showStdinInput.value;
 };
 
+const runTestCase = async (testCaseId: string, input: string, expectedOutput: string) => {
+    if (!form.code_content || !props.language) {
+        return;
+    }
+
+    testCaseResults.value[testCaseId] = {
+        output: '',
+        passed: false,
+        isRunning: true,
+    };
+
+    try {
+        const result = await PistonService.executeCode(props.language, form.code_content, input);
+
+        // For test cases, use stdout only (without prompts and formatting)
+        let actualOutput = result.run.stdout.trim();
+
+        // If there's a compilation error, show it
+        if (result.compile && result.compile.code !== 0) {
+            actualOutput = result.compile.stderr || result.compile.output || 'Compilation failed';
+        }
+        // If there's a runtime error, show it
+        else if (result.run.stderr) {
+            actualOutput = result.run.stderr.trim();
+        }
+
+        const expected = expectedOutput.trim();
+        const passed = actualOutput === expected;
+
+        testCaseResults.value[testCaseId] = {
+            output: actualOutput || '(no output)',
+            passed,
+            isRunning: false,
+        };
+    } catch (error) {
+        testCaseResults.value[testCaseId] = {
+            output: `Execution Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+            passed: false,
+            isRunning: false,
+        };
+    }
+};
+
+const runAllTestCases = async () => {
+    if (!props.testCases || props.testCases.length === 0) {
+        return;
+    }
+
+    for (const testCase of props.testCases) {
+        await runTestCase(testCase.id, testCase.input, testCase.output);
+    }
+};
+
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateViewport);
     window.removeEventListener('keydown', handleKeyDown);
@@ -261,7 +315,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                         <Link :href="$page.props.auth.user.is_student ? `/student/courses/${props.courseId}` : `/activities/${props.activityId}`">
                             <Button variant="ghost" size="sm" class="gap-2">
                                 <ArrowLeft class="h-4 w-4" />
-                                Back
+                                Back to the Activities
                             </Button>
                         </Link>
                     </div>
@@ -412,9 +466,22 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                 <ResizablePanel :default-size="40" :min-size="30">
                                     <div class="flex h-full flex-col">
                                         <div class="border-b bg-muted/40 px-4 py-3">
-                                            <div class="flex items-center gap-2">
-                                                <CheckCircle2 class="h-4 w-4" />
-                                                <h2 class="font-semibold">Test Cases</h2>
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-2">
+                                                    <CheckCircle2 class="h-4 w-4" />
+                                                    <h2 class="font-semibold">Test Cases</h2>
+                                                </div>
+                                                <Button
+                                                    v-if="props.testCases && props.testCases.length > 0"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    @click="runAllTestCases"
+                                                    :disabled="!form.code_content || isRunning"
+                                                    class="gap-2"
+                                                >
+                                                    <Play class="h-3 w-3 fill-current stroke-none" />
+                                                    Run All Tests
+                                                </Button>
                                             </div>
                                         </div>
                                         <ScrollArea class="flex-1 p-4">
@@ -423,12 +490,24 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                     <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
                                                         <AccordionTrigger>
                                                             <div class="flex items-center gap-2">
-                                                                <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                                                <LoaderCircle
+                                                                    v-if="testCaseResults[testCase.id]?.isRunning"
+                                                                    class="h-3 w-3 animate-spin text-blue-500"
+                                                                />
+                                                                <div
+                                                                    v-else
+                                                                    class="h-2 w-2 rounded-full"
+                                                                    :class="{
+                                                                        'bg-green-500': testCaseResults[testCase.id]?.passed,
+                                                                        'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
+                                                                        'bg-yellow-500': !testCaseResults[testCase.id]
+                                                                    }"
+                                                                ></div>
                                                                 <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
                                                             </div>
                                                         </AccordionTrigger>
                                                         <AccordionContent>
-                                                            <div class="space-y-2 text-sm">
+                                                            <div class="space-y-3 text-sm">
                                                                 <div>
                                                                     <p class="font-medium">Input:</p>
                                                                     <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
@@ -437,6 +516,38 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     <p class="font-medium">Expected Output:</p>
                                                                     <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
                                                                 </div>
+                                                                <div v-if="testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.isRunning">
+                                                                    <div class="flex items-center justify-between">
+                                                                        <p class="font-medium">Actual Output:</p>
+                                                                        <span
+                                                                            class="text-xs font-semibold"
+                                                                            :class="{
+                                                                                'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
+                                                                                'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                                            }"
+                                                                        >
+                                                                            {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <code
+                                                                        class="block rounded p-2 font-mono whitespace-pre-wrap"
+                                                                        :class="{
+                                                                            'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
+                                                                            'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                                        }"
+                                                                    >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                                                </div>
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="secondary"
+                                                                    @click="runTestCase(testCase.id, testCase.input, testCase.output)"
+                                                                    :disabled="!form.code_content || testCaseResults[testCase.id]?.isRunning"
+                                                                    class="w-full gap-2"
+                                                                >
+                                                                    <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-4 w-4 animate-spin" />
+                                                                    <Play v-else class="h-4 w-4 fill-current stroke-none" />
+                                                                    {{ testCaseResults[testCase.id]?.isRunning ? 'Running...' : 'Run This Test' }}
+                                                                </Button>
                                                             </div>
                                                         </AccordionContent>
                                                     </AccordionItem>
@@ -598,18 +709,42 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
 
                 <!-- Test Cases Section (Mobile) -->
                 <div v-else-if="showTestCases" class="flex flex-1 flex-col overflow-hidden">
+                    <div v-if="props.testCases && props.testCases.length > 0" class="border-b bg-muted/40 px-4 py-2">
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            @click="runAllTestCases"
+                            :disabled="!form.code_content || isRunning"
+                            class="w-full gap-2"
+                        >
+                            <Play class="h-3 w-3 fill-current stroke-none" />
+                            Run All Tests
+                        </Button>
+                    </div>
                     <ScrollArea class="flex-1 p-4">
                         <div v-if="props.testCases && props.testCases.length > 0">
                             <Accordion type="single" collapsible class="w-full">
                                 <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
                                     <AccordionTrigger>
                                         <div class="flex items-center gap-2">
-                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                            <LoaderCircle
+                                                v-if="testCaseResults[testCase.id]?.isRunning"
+                                                class="h-3 w-3 animate-spin text-blue-500"
+                                            />
+                                            <div
+                                                v-else
+                                                class="h-2 w-2 rounded-full"
+                                                :class="{
+                                                    'bg-green-500': testCaseResults[testCase.id]?.passed,
+                                                    'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
+                                                    'bg-yellow-500': !testCaseResults[testCase.id]
+                                                }"
+                                            ></div>
                                             <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
                                         </div>
                                     </AccordionTrigger>
                                     <AccordionContent>
-                                        <div class="space-y-2 text-sm">
+                                        <div class="space-y-3 text-sm">
                                             <div>
                                                 <p class="font-medium">Input:</p>
                                                 <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
@@ -618,6 +753,38 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                 <p class="font-medium">Expected Output:</p>
                                                 <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
                                             </div>
+                                            <div v-if="testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.isRunning">
+                                                <div class="flex items-center justify-between">
+                                                    <p class="font-medium">Actual Output:</p>
+                                                    <span
+                                                        class="text-xs font-semibold"
+                                                        :class="{
+                                                            'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
+                                                            'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                        }"
+                                                    >
+                                                        {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
+                                                    </span>
+                                                </div>
+                                                <code
+                                                    class="block rounded p-2 font-mono whitespace-pre-wrap"
+                                                    :class="{
+                                                        'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
+                                                        'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                    }"
+                                                >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                            </div>
+                                            <Button
+                                                size="sm"
+                                                variant="secondary"
+                                                @click="runTestCase(testCase.id, testCase.input, testCase.output)"
+                                                :disabled="!form.code_content || testCaseResults[testCase.id]?.isRunning"
+                                                class="w-full gap-2"
+                                            >
+                                                <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-4 w-4 animate-spin" />
+                                                <Play v-else class="h-4 w-4 fill-current stroke-none" />
+                                                {{ testCaseResults[testCase.id]?.isRunning ? 'Running...' : 'Run This Test' }}
+                                            </Button>
                                         </div>
                                     </AccordionContent>
                                 </AccordionItem>
