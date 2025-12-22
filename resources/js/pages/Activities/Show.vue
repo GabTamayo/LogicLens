@@ -2,6 +2,7 @@
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
 import DateTimePicker from '@/components/DateTimePicker.vue';
 import DateTimePickerDialog from '@/components/DateTimePickerDialog.vue';
+import InputError from '@/components/InputError.vue';
 import PaginationComponent from '@/components/Pagination.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import { Badge } from '@/components/ui/badge';
@@ -18,12 +19,15 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput } from '@/components/ui/number-field';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SelectLabel from '@/components/ui/select/SelectLabel.vue';
 import { Separator } from '@/components/ui/separator';
 import { Toaster } from '@/components/ui/sonner';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDeadline } from '@/composables/useDeadline';
 import { useLanguage } from '@/composables/useLanguage';
@@ -31,7 +35,24 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { ActivityDetail, type BreadcrumbItem } from '@/types';
 import { Deferred, Head, Link, router, useForm, usePoll } from '@inertiajs/vue3';
 import { createReusableTemplate, useMediaQuery } from '@vueuse/core';
-import { CalendarCog, Circle, Clock, Code2, Copy, Delete, Eye, FileText, Link2, Loader, MoreHorizontal, Pencil, Save, X } from 'lucide-vue-next';
+import {
+    CalendarCog,
+    Circle,
+    Clock,
+    Code2,
+    Copy,
+    Delete,
+    Eye,
+    FileText,
+    Link2,
+    Loader,
+    MoreHorizontal,
+    Pencil,
+    Plus,
+    Save,
+    Trash2,
+    X,
+} from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -77,6 +98,70 @@ const saveContent = () => {
         onError: () => {
             toast.error('Failed to update content', {
                 description: editForm.errors.content || 'An error occurred while saving.',
+            });
+        },
+    });
+};
+
+// Test Cases Management
+interface TestCase {
+    title: string;
+    input: string;
+    output: string;
+    score: number;
+}
+
+const isTestCasesEmpty = computed(() => {
+    return !props.test_cases || props.test_cases.length === 0;
+});
+
+const isEditingTestCases = ref(false);
+const testCasesForm = useForm({
+    test_cases: props.test_cases.map((tc) => ({
+        title: tc.title,
+        input: tc.input,
+        output: tc.output,
+        score: tc.score,
+    })) as TestCase[],
+});
+
+const toggleEditTestCases = () => {
+    if (isEditingTestCases.value) {
+        testCasesForm.test_cases = props.test_cases.map((tc) => ({
+            title: tc.title,
+            input: tc.input,
+            output: tc.output,
+            score: tc.score,
+        }));
+    }
+    isEditingTestCases.value = !isEditingTestCases.value;
+};
+
+const addTestCase = () => {
+    testCasesForm.test_cases.unshift({
+        title: '',
+        input: '',
+        output: '',
+        score: 0,
+    });
+};
+
+const removeTestCase = (index: number) => {
+    testCasesForm.test_cases.splice(index, 1);
+};
+
+const saveTestCases = () => {
+    testCasesForm.patch(`/activities/${props.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditingTestCases.value = false;
+            toast.success('Test cases updated', {
+                description: 'The test cases have been saved successfully.',
+            });
+        },
+        onError: () => {
+            toast.error('Failed to update test cases', {
+                description: 'An error occurred while saving test cases.',
             });
         },
     });
@@ -348,6 +433,150 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
 
                     <div v-else>
                         <RichTextEditor v-model="editForm.content" />
+                    </div>
+                </CardContent>
+            </Card>
+
+            <!-- Test Cases Section -->
+            <Card>
+                <CardHeader>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Test Cases</CardTitle>
+                            <CardDescription>Define test cases to automatically grade student submissions</CardDescription>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <template v-if="isEditingTestCases">
+                                <Button variant="outline" size="sm" @click="toggleEditTestCases" :disabled="testCasesForm.processing">
+                                    <X class="mr-2 h-4 w-4" />
+                                    Cancel
+                                </Button>
+                                <Button size="sm" @click="saveTestCases" :disabled="testCasesForm.processing">
+                                    <Save class="mr-2 h-4 w-4" />
+                                    {{ testCasesForm.processing ? 'Saving...' : 'Save' }}
+                                </Button>
+                            </template>
+                            <Button v-else-if="!isTestCasesEmpty" variant="outline" size="sm" @click="toggleEditTestCases">
+                                <Pencil class="mr-2 h-4 w-4" />
+                                Edit
+                            </Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="!isEditingTestCases">
+                        <div v-if="isTestCasesEmpty" class="flex min-h-[200px] flex-col items-center justify-center border p-12 text-center">
+                            <div class="mb-4 rounded-full bg-muted p-3">
+                                <FileText class="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <h3 class="mb-1 text-lg font-semibold">No test cases added yet</h3>
+                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">Add test cases to automatically evaluate student submissions</p>
+                            <Button variant="outline" size="sm" @click="toggleEditTestCases">
+                                <Pencil class="mr-2 h-4 w-4" />
+                                Add Test Cases
+                            </Button>
+                        </div>
+
+                        <div v-else class="space-y-4">
+                            <div v-for="(testCase, index) in props.test_cases" :key="index" class="space-y-3 rounded-lg border bg-muted/10 p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <Badge>{{ testCase.score }} pts</Badge>
+                                        <h4 class="font-medium">{{ testCase.title || `Test Case ${index + 1}` }}</h4>
+                                    </div>
+                                </div>
+                                <div v-if="testCase.input" class="space-y-1">
+                                    <p class="text-sm font-medium text-muted-foreground">Input:</p>
+                                    <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.input }}</pre>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-sm font-medium text-muted-foreground">Expected Output:</p>
+                                    <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.output }}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-muted-foreground">
+                                    {{ testCasesForm.test_cases.length }} test case{{ testCasesForm.test_cases.length !== 1 ? 's' : '' }}
+                                </p>
+                            </div>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <Button class="rounded-full" type="button" variant="outline" @click="addTestCase">
+                                            <Plus class="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Add a new test case</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
+
+                        <div v-if="testCasesForm.test_cases.length > 0" class="space-y-4">
+                            <div
+                                v-for="(testCase, index) in testCasesForm.test_cases"
+                                :key="index"
+                                class="space-y-3 rounded-lg border bg-muted/10 p-4"
+                            >
+                                <div class="flex items-center justify-between">
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Score
+                                            <span class="font-light text-muted-foreground">(Points)</span>
+                                        </label>
+                                        <NumberField
+                                            v-model="testCase.score"
+                                            :step="0.5"
+                                            :format-options="{
+                                                signDisplay: 'exceptZero',
+                                                minimumFractionDigits: 1,
+                                            }"
+                                        >
+                                            <NumberFieldContent>
+                                                <NumberFieldDecrement />
+                                                <NumberFieldInput />
+                                                <NumberFieldIncrement />
+                                            </NumberFieldContent>
+                                        </NumberField>
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.score`]" />
+                                    </div>
+                                    <Button type="button" variant="destructive" size="icon" @click="removeTestCase(index)">
+                                        <Trash2 class="h-4 w-4" />
+                                    </Button>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Title
+                                    </label>
+                                    <Input type="text" v-model="testCase.title" placeholder="e.g., Basic Addition" />
+                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.title`]" />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Input
+                                        <span class="font-light text-muted-foreground">(Optional)</span>
+                                    </label>
+                                    <Textarea v-model="testCase.input" placeholder="Input for the test case" :rows="2" />
+                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.input`]" />
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Expected Output
+                                    </label>
+                                    <Textarea v-model="testCase.output" placeholder="Expected output for the test case" :rows="2" />
+                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.output`]" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

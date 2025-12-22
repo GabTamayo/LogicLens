@@ -73,6 +73,13 @@ export interface ActivityDetail {
     links: {
         data: ActivityLink[];
     } & PaginationData;
+    test_cases: Array<{
+        id: number;
+        title: string;
+        input: string;
+        output: string;
+        score: number;
+    }>;
 }
 
 export interface Course {

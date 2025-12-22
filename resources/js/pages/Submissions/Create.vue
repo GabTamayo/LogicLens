@@ -526,7 +526,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                 </div>
 
                                 <!-- Output Section -->
-                                <ScrollArea class="flex-1 bg-black p-4 font-mono text-sm text-green-400">
+                                <ScrollArea class="flex-1 bg-stone-900 p-4 font-mono text-sm text-white">
                                     <pre v-if="codeOutput" class="whitespace-pre-wrap">{{ codeOutput }}</pre>
                                     <p v-else class="text-muted-foreground">Run your code to see the output here...</p>
                                 </ScrollArea>

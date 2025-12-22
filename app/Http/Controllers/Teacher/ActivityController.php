@@ -71,7 +71,25 @@ class ActivityController extends Controller
 
     public function update(ActivityUpdateContentRequest $request, Activity $activity)
     {
-        $activity->update($request->validated());
+        $validated = $request->validated();
+
+        if (isset($validated['content'])) {
+            $activity->update(['content' => $validated['content']]);
+        }
+
+        if (isset($validated['test_cases'])) {
+            $activity->testCases()->delete();
+
+            foreach ($validated['test_cases'] as $index => $testCase) {
+                $activity->testCases()->create([
+                    'title' => $testCase['title'],
+                    'input' => $testCase['input'] ?? null,
+                    'output' => $testCase['output'],
+                    'score' => $testCase['score'],
+                    'order' => $index,
+                ]);
+            }
+        }
 
         return back();
     }

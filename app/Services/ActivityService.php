@@ -62,6 +62,16 @@ class ActivityService
                 ->select('id', 'name')
                 ->orderBy('name')
                 ->get(),
+            'test_cases' => $activity->testCases()
+                ->orderBy('order')
+                ->get()
+                ->map(fn($testCase) => [
+                    'id' => $testCase->id,
+                    'title' => $testCase->title,
+                    'input' => $testCase->input,
+                    'output' => $testCase->output,
+                    'score' => $testCase->score,
+                ]),
             'links' => Inertia::defer(
                 fn() => $activity->activityLinks()
                     ->selectedAttributes()
