@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified', 'role:'.RoleName::TEACHER->value])->group
     Route::get('courses/create', [CourseController::class, 'create'])->name('courses.create');
     Route::post('courses', [CourseController::class, 'store'])->name('courses.store');
     Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
+    Route::delete('courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy')->middleware('password.confirm');
     Route::delete('/courses/{course}/students/{student}', [CourseController::class, 'removeStudent'])->name('courses.students.destroy');
 
     // Activity Routes

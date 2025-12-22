@@ -14,6 +14,7 @@ import DataTable from "@/components/DataTable.vue";
 import { columns as studentColumns } from "@/components/students/columns";
 import ActivitySidebar from "@/components/activities/ActivitySidebar.vue";
 import ActivityContent from "@/components/activities/ActivityContent.vue";
+import AlertDialogDelete from "@/components/AlertDialogDelete.vue";
 import type { BreadcrumbItem, CourseShowProps } from "@/types";
 import { computed, ref, watch } from "vue";
 import { CalendarCheck, Copy, LoaderCircle, Menu } from "lucide-vue-next";
@@ -98,6 +99,9 @@ const handleStudentsPageChange = (page: number) => {
     <Head :title="`${course.name}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
+        <template #header-actions>
+            <AlertDialogDelete :endpoint="`/courses/${course.id}`" type="course" buttonText="Delete Course" :itemName="course.name" />
+        </template>
         <div class="flex h-full flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <!-- Header Card -->
             <Card>
