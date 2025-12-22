@@ -380,10 +380,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                         </DialogTrigger>
                                                         <DialogContent class="sm:max-w-md">
                                                             <DialogHeader>
-                                                                <DialogTitle>Submit Your Code</DialogTitle>
+                                                                <DialogTitle>Ready to submit?</DialogTitle>
                                                                 <DialogDescription>
-                                                                    Ready to submit? Please double-check your work. You will not be able to edit your
-                                                                    code after this submission.
+                                                                    Please double-check your work. You will not be able to edit your code after this
+                                                                    submission.
                                                                 </DialogDescription>
                                                             </DialogHeader>
                                                             <DialogFooter>
