@@ -418,70 +418,34 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                             </div>
                                         </div>
                                         <ScrollArea class="flex-1 p-4">
-                                            <Accordion type="single" collapsible class="w-full">
-                                                <AccordionItem value="test-1">
-                                                    <AccordionTrigger>
-                                                        <div class="flex items-center gap-2">
-                                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                                            <span>Test Case 1</span>
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div class="space-y-2 text-sm">
-                                                            <div>
-                                                                <p class="font-medium">Input:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample input 1</code>
+                                            <div v-if="props.testCases && props.testCases.length > 0">
+                                                <Accordion type="single" collapsible class="w-full">
+                                                    <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
+                                                        <AccordionTrigger>
+                                                            <div class="flex items-center gap-2">
+                                                                <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                                                <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
                                                             </div>
-                                                            <div>
-                                                                <p class="font-medium">Expected Output:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample output 1</code>
+                                                        </AccordionTrigger>
+                                                        <AccordionContent>
+                                                            <div class="space-y-2 text-sm">
+                                                                <div>
+                                                                    <p class="font-medium">Input:</p>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
+                                                                </div>
+                                                                <div>
+                                                                    <p class="font-medium">Expected Output:</p>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
-
-                                                <AccordionItem value="test-2">
-                                                    <AccordionTrigger>
-                                                        <div class="flex items-center gap-2">
-                                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                                            <span>Test Case 2</span>
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div class="space-y-2 text-sm">
-                                                            <div>
-                                                                <p class="font-medium">Input:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample input 2</code>
-                                                            </div>
-                                                            <div>
-                                                                <p class="font-medium">Expected Output:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample output 2</code>
-                                                            </div>
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
-
-                                                <AccordionItem value="test-3">
-                                                    <AccordionTrigger>
-                                                        <div class="flex items-center gap-2">
-                                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                                            <span>Test Case 3</span>
-                                                        </div>
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        <div class="space-y-2 text-sm">
-                                                            <div>
-                                                                <p class="font-medium">Input:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample input 3</code>
-                                                            </div>
-                                                            <div>
-                                                                <p class="font-medium">Expected Output:</p>
-                                                                <code class="block rounded bg-muted p-2 font-mono">Sample output 3</code>
-                                                            </div>
-                                                        </div>
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                            </Accordion>
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+                                                </Accordion>
+                                            </div>
+                                            <div v-else class="rounded-md border border-dashed p-8 text-center">
+                                                <CheckCircle2 class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                                                <p class="text-sm text-muted-foreground">No test cases available</p>
+                                            </div>
                                         </ScrollArea>
                                     </div>
                                 </ResizablePanel>
@@ -635,70 +599,34 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 <!-- Test Cases Section (Mobile) -->
                 <div v-else-if="showTestCases" class="flex flex-1 flex-col overflow-hidden">
                     <ScrollArea class="flex-1 p-4">
-                        <Accordion type="single" collapsible class="w-full">
-                            <AccordionItem value="test-1">
-                                <AccordionTrigger>
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                        <span>Test Case 1</span>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div class="space-y-2 text-sm">
-                                        <div>
-                                            <p class="font-medium">Input:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample input 1</code>
+                        <div v-if="props.testCases && props.testCases.length > 0">
+                            <Accordion type="single" collapsible class="w-full">
+                                <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
+                                    <AccordionTrigger>
+                                        <div class="flex items-center gap-2">
+                                            <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
+                                            <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
                                         </div>
-                                        <div>
-                                            <p class="font-medium">Expected Output:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample output 1</code>
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <div class="space-y-2 text-sm">
+                                            <div>
+                                                <p class="font-medium">Input:</p>
+                                                <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium">Expected Output:</p>
+                                                <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
+                                            </div>
                                         </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-
-                            <AccordionItem value="test-2">
-                                <AccordionTrigger>
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                        <span>Test Case 2</span>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div class="space-y-2 text-sm">
-                                        <div>
-                                            <p class="font-medium">Input:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample input 2</code>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium">Expected Output:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample output 2</code>
-                                        </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-
-                            <AccordionItem value="test-3">
-                                <AccordionTrigger>
-                                    <div class="flex items-center gap-2">
-                                        <div class="h-2 w-2 rounded-full bg-yellow-500"></div>
-                                        <span>Test Case 3</span>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <div class="space-y-2 text-sm">
-                                        <div>
-                                            <p class="font-medium">Input:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample input 3</code>
-                                        </div>
-                                        <div>
-                                            <p class="font-medium">Expected Output:</p>
-                                            <code class="block rounded bg-muted p-2 font-mono">Sample output 3</code>
-                                        </div>
-                                    </div>
-                                </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </div>
+                        <div v-else class="rounded-md border border-dashed p-8 text-center">
+                            <CheckCircle2 class="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+                            <p class="text-sm text-muted-foreground">No test cases available</p>
+                        </div>
                     </ScrollArea>
                 </div>
 

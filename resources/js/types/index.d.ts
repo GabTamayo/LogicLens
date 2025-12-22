@@ -161,6 +161,13 @@ export interface SubmissionPageProps {
     studentName: string;
     studentEmail: string;
     hasSubmitted: boolean;
+    testCases: Array<{
+        id: string;
+        title: string;
+        input: string;
+        output: string;
+        order: number;
+    }>;
 }
 
 export type Submission = {
