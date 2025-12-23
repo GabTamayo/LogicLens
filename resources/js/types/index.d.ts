@@ -354,6 +354,23 @@ export interface StudentCourseShowProps {
         per_page: number;
         total: number;
     };
+    completedActivities?: {
+        data: Array<{
+            id: number;
+            activity_id: number;
+            activity_title: string;
+            activity_language: string;
+            token: string;
+            submission_id: string;
+            score: number | null;
+            total_score: number;
+            submitted_at: string;
+        }>;
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
     students?: {
         data: Array<{
             id: number;

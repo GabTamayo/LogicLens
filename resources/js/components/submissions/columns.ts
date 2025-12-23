@@ -1,6 +1,7 @@
 import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
+import { useScore } from '@/composables/useScore'
 
 export interface SubmissionRow {
     id: string
@@ -33,17 +34,14 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         cell: ({ row }) => {
             const score = row.getValue('score') as number | null
             const totalScore = row.original.total_score
+            const { getScoreDisplay } = useScore()
+            const scoreDisplay = getScoreDisplay(score, totalScore)
 
             if (score === null || totalScore === null) {
-                return h('div', { class: 'text-center text-xs text-muted-foreground' }, 'Not graded')
+                return h('div', { class: 'text-center text-xs text-muted-foreground' }, scoreDisplay.text)
             }
 
-            const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0
-            const colorClass = percentage >= 70 ? 'text-green-600 dark:text-green-500' :
-                               percentage >= 50 ? 'text-yellow-600 dark:text-yellow-500' :
-                               'text-red-600 dark:text-red-500'
-
-            return h('div', { class: `text-center font-medium ${colorClass}` }, `${score}/${totalScore}`)
+            return h('div', { class: `text-center font-medium ${scoreDisplay.colorClass}` }, scoreDisplay.text)
         },
     },
     {

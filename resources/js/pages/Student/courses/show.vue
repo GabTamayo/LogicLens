@@ -21,7 +21,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Deferred, router, Link, Head } from "@inertiajs/vue3";
-import { LoaderCircle, Play, Calendar, CalendarCheck } from "lucide-vue-next";
+import { LoaderCircle, Play, Eye, Calendar, CalendarCheck } from "lucide-vue-next";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ref, watch, computed } from "vue";
@@ -29,16 +29,19 @@ import DataTable from "@/components/DataTable.vue";
 import { columns as studentColumns } from "@/components/students(student)/columns";
 import PaginationComponent from "@/components/Pagination.vue";
 import { useLanguage } from "@/composables/useLanguage";
+import { useScore } from "@/composables/useScore";
 
 dayjs.extend(relativeTime);
 
 const { getLanguageLogo, getLanguageColor } = useLanguage();
+const { getScoreDisplay, getScoreBackgroundClass } = useScore();
 
 const props = defineProps<StudentCourseShowProps>();
 
 const isInitialLoadDone = ref(false);
 const activeTab = ref(props.activeTab || "activities");
 const activitiesPage = ref(1);
+const completedPage = ref(1);
 const studentsPage = ref(1);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -53,12 +56,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 watch(activeTab, (newTab) => {
-    const page = newTab === "students" ? studentsPage.value : activitiesPage.value;
+    const page = newTab === "students" ? studentsPage.value :
+                 newTab === "completed" ? completedPage.value :
+                 activitiesPage.value;
     router.visit(`/student/courses/${props.course.id}`, {
         data: { tab: newTab, page },
         preserveScroll: true,
         preserveState: true,
-        only: newTab === "students" ? ["students", "activeTab"] : ["activities", "activeTab"],
+        only: newTab === "students" ? ["students", "activeTab"] :
+              newTab === "completed" ? ["completedActivities", "activeTab"] :
+              ["activities", "activeTab"],
     });
 });
 
@@ -69,6 +76,16 @@ const handleActivitiesPageChange = (page: number) => {
         preserveScroll: true,
         preserveState: true,
         only: ["activities"],
+    });
+};
+
+const handleCompletedPageChange = (page: number) => {
+    completedPage.value = page;
+    router.visit(`/student/courses/${props.course.id}`, {
+        data: { page, tab: "completed" },
+        preserveScroll: true,
+        preserveState: true,
+        only: ["completedActivities"],
     });
 };
 
@@ -201,6 +218,75 @@ const handleStudentsPageChange = (page: number) => {
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
                                 <span class="text-muted-foreground">Loading activities...</span>
+                            </div>
+                        </TabsContent>
+
+                        <TabsContent value="completed" class="m-0 p-6">
+                            <template v-if="completedActivities">
+                                <Deferred data="completedActivities">
+                                    <template #fallback>
+                                        <div class="flex items-center justify-center gap-2 rounded-md p-12">
+                                            <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                            <span class="text-muted-foreground">Loading completed activities...</span>
+                                        </div>
+                                    </template>
+                                    <div class="space-y-4">
+                                        <div v-if="completedActivities?.data.length" class="space-y-4">
+                                            <Item variant="outline" v-for="activity in completedActivities.data"
+                                                :key="activity.id"
+                                                :class="getScoreBackgroundClass(activity.score, activity.total_score)"
+                                                class="shadow-md hover:shadow-lg transition-shadow duration-200">
+                                                <ItemContent>
+                                                    <ItemTitle class="capitalize text-xl font-bold text-white">
+                                                        {{ activity.activity_title }}
+                                                    </ItemTitle>
+                                                    <ItemDescription>
+                                                        <span class="inline-flex items-center mb-2 gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/20 backdrop-blur-sm border border-white/30 text-white">
+                                                            <img v-if="getLanguageLogo(activity.activity_language)"
+                                                                :src="getLanguageLogo(activity.activity_language)!"
+                                                                :alt="activity.activity_language"
+                                                                class="h-4 w-4 object-contain" />
+                                                            {{ activity.activity_language }}
+                                                        </span>
+                                                        <span class="flex items-center gap-1.5 text-white/90">
+                                                            <Calendar class="h-3.5 w-3.5" />
+                                                            Submitted: {{ dayjs(activity.submitted_at).format("MMM D, YYYY h:mm A") }}
+                                                        </span>
+                                                    </ItemDescription>
+                                                </ItemContent>
+                                                <ItemActions class="flex items-center gap-4">
+                                                    <div class="flex flex-col items-end gap-1">
+                                                        <span class="text-xs font-medium text-white/70 uppercase tracking-wider">Score</span>
+                                                        <span class="text-2xl font-bold text-white">
+                                                            {{ getScoreDisplay(activity.score, activity.total_score).text }}
+                                                        </span>
+                                                    </div>
+                                                    <TooltipProvider>
+                                                        <Tooltip>
+                                                            <TooltipTrigger as-child>
+                                                                <Link :href="`/student/submit/${activity.token}`">
+                                                                    <Button size="icon-lg" variant="secondary" class="rounded-full bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm">
+                                                                        <Eye class="size-5" />
+                                                                    </Button>
+                                                                </Link>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent> View Submission </TooltipContent>
+                                                        </Tooltip>
+                                                    </TooltipProvider>
+                                                </ItemActions>
+                                            </Item>
+                                        </div>
+                                        <div v-else class="text-center py-8 text-muted-foreground">
+                                            No completed activities found
+                                        </div>
+                                        <PaginationComponent v-if="completedActivities && completedActivities.data.length > 0"
+                                            :pagination="completedActivities" @page-change="handleCompletedPageChange" />
+                                    </div>
+                                </Deferred>
+                            </template>
+                            <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
+                                <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
+                                <span class="text-muted-foreground">Loading completed activities...</span>
                             </div>
                         </TabsContent>
 

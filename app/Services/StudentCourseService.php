@@ -87,9 +87,11 @@ class StudentCourseService
     public function queryActivities($course, array $params): array
     {
         $page = $params['page'] ?? 1;
+        $userId = Auth::id();
 
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId))
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
@@ -120,6 +122,40 @@ class StudentCourseService
                 'name' => $student->name,
                 'email' => $student->email,
             ])
+            ->toArray();
+    }
+
+    public function queryCompletedActivities($course, array $params): array
+    {
+        $page = $params['page'] ?? 1;
+        $userId = Auth::id();
+
+        return $course->activityLinks()
+            ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->whereHas('submissions', fn ($query) => $query->where('user_id', $userId))
+            ->withWhereHas('submissions', fn ($query) => $query->where('user_id', $userId)
+                ->select('id', 'activity_link_id', 'score', 'created_at')
+                ->latest()
+                ->limit(1)
+            )
+            ->latest()
+            ->paginate(5, ['*'], 'page', $page)
+            ->withQueryString()
+            ->through(function ($link) {
+                $submission = $link->submissions->first();
+
+                return [
+                    'id' => $link->id,
+                    'activity_id' => $link->activity_id,
+                    'activity_title' => $link->activity->title ?? 'N/A',
+                    'activity_language' => $link->activity->language ?? 'N/A',
+                    'token' => $link->token,
+                    'submission_id' => $submission?->id,
+                    'score' => $submission?->score,
+                    'total_score' => $link->activity?->testCases()->sum('score'),
+                    'submitted_at' => $submission?->created_at,
+                ];
+            })
             ->toArray();
     }
 }
