@@ -15,7 +15,8 @@
       "Bash(npx shadcn-vue@latest add:*)",
       "Bash(curl:*)",
       "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=SubmissionScoringTest)",
-      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=StudentCourseShowTest)"
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=StudentCourseShowTest)",
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" vendor/bin/pint --dirty)"
     ]
   },
   "enabledMcpjsonServers": [
