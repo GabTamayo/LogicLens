@@ -91,6 +91,7 @@ class StudentCourseService
 
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->where('is_open', true)
             ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId))
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
@@ -132,12 +133,15 @@ class StudentCourseService
 
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
-            ->whereHas('submissions', fn ($query) => $query->where('user_id', $userId))
-            ->withWhereHas('submissions', fn ($query) => $query->where('user_id', $userId)
+            ->where(function ($query) use ($userId) {
+                $query->whereHas('submissions', fn ($q) => $q->where('user_id', $userId))
+                    ->orWhere('is_open', false);
+            })
+            ->with(['submissions' => fn ($query) => $query->where('user_id', $userId)
                 ->select('id', 'activity_link_id', 'score', 'created_at')
                 ->latest()
-                ->limit(1)
-            )
+                ->limit(1),
+            ])
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
@@ -150,6 +154,7 @@ class StudentCourseService
                     'activity_title' => $link->activity->title ?? 'N/A',
                     'activity_language' => $link->activity->language ?? 'N/A',
                     'token' => $link->token,
+                    'is_open' => $link->is_open,
                     'submission_id' => $submission?->id,
                     'score' => $submission?->score,
                     'total_score' => $link->activity?->testCases()->sum('score'),

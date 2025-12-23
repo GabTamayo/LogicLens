@@ -1,35 +1,21 @@
 <script setup lang="ts">
-import StudentAppLayout from "@/layouts/StudentAppLayout.vue";
-import type { BreadcrumbItem, StudentCourseShowProps } from "@/types";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import {
-    Item,
-    ItemActions,
-    ItemContent,
-    ItemDescription,
-    ItemMedia,
-    ItemTitle,
-} from "@/components/ui/item";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Deferred, router, Link, Head } from "@inertiajs/vue3";
-import { LoaderCircle, Play, Eye, Calendar, CalendarCheck } from "lucide-vue-next";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import { ref, watch, computed } from "vue";
-import DataTable from "@/components/DataTable.vue";
-import { columns as studentColumns } from "@/components/students(student)/columns";
-import PaginationComponent from "@/components/Pagination.vue";
-import { useLanguage } from "@/composables/useLanguage";
-import { useScore } from "@/composables/useScore";
+import DataTable from '@/components/DataTable.vue';
+import PaginationComponent from '@/components/Pagination.vue';
+import { columns as studentColumns } from '@/components/students(student)/columns';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from '@/components/ui/item';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useLanguage } from '@/composables/useLanguage';
+import { useScore } from '@/composables/useScore';
+import StudentAppLayout from '@/layouts/StudentAppLayout.vue';
+import type { BreadcrumbItem, StudentCourseShowProps } from '@/types';
+import { Deferred, Head, Link, router } from '@inertiajs/vue3';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { Calendar, CalendarCheck, Eye, LoaderCircle, Play } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 
 dayjs.extend(relativeTime);
 
@@ -39,15 +25,15 @@ const { getScoreDisplay, getScoreBackgroundClass } = useScore();
 const props = defineProps<StudentCourseShowProps>();
 
 const isInitialLoadDone = ref(false);
-const activeTab = ref(props.activeTab || "activities");
+const activeTab = ref(props.activeTab || 'activities');
 const activitiesPage = ref(1);
 const completedPage = ref(1);
 const studentsPage = ref(1);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: "Courses",
-        href: "/student/courses",
+        title: 'Courses',
+        href: '/student/courses',
     },
     {
         title: props.course.name,
@@ -56,52 +42,52 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 watch(activeTab, (newTab) => {
-    const page = newTab === "students" ? studentsPage.value :
-                 newTab === "completed" ? completedPage.value :
-                 activitiesPage.value;
+    const page = newTab === 'students' ? studentsPage.value : newTab === 'completed' ? completedPage.value : activitiesPage.value;
     router.visit(`/student/courses/${props.course.id}`, {
         data: { tab: newTab, page },
         preserveScroll: true,
         preserveState: true,
-        only: newTab === "students" ? ["students", "activeTab"] :
-              newTab === "completed" ? ["completedActivities", "activeTab"] :
-              ["activities", "activeTab"],
+        only:
+            newTab === 'students'
+                ? ['students', 'activeTab']
+                : newTab === 'completed'
+                  ? ['completedActivities', 'activeTab']
+                  : ['activities', 'activeTab'],
     });
 });
 
 const handleActivitiesPageChange = (page: number) => {
     activitiesPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: "activities" },
+        data: { page, tab: 'activities' },
         preserveScroll: true,
         preserveState: true,
-        only: ["activities"],
+        only: ['activities'],
     });
 };
 
 const handleCompletedPageChange = (page: number) => {
     completedPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: "completed" },
+        data: { page, tab: 'completed' },
         preserveScroll: true,
         preserveState: true,
-        only: ["completedActivities"],
+        only: ['completedActivities'],
     });
 };
 
 const handleStudentsPageChange = (page: number) => {
     studentsPage.value = page;
     router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: "students" },
+        data: { page, tab: 'students' },
         preserveScroll: true,
         preserveState: true,
-        only: ["students"],
+        only: ['students'],
     });
 };
 </script>
 
 <template>
-
     <Head :title="`${course.name}`" />
 
     <StudentAppLayout :breadcrumbs="breadcrumbs">
@@ -128,16 +114,22 @@ const handleStudentsPageChange = (page: number) => {
                     <Tabs v-model="activeTab" class="w-full">
                         <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
-                                <TabsTrigger value="activities"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="activities"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Activities
                                 </TabsTrigger>
-                                <TabsTrigger value="completed"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="completed"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Completed
                                 </TabsTrigger>
-                                <TabsTrigger value="students"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="students"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Students
                                 </TabsTrigger>
                             </TabsList>
@@ -154,38 +146,31 @@ const handleStudentsPageChange = (page: number) => {
                                     </template>
                                     <div class="space-y-4">
                                         <div v-if="activities?.data.length" class="space-y-4">
-                                            <Item variant="outline" v-for="activity in activities.data"
-                                                :key="activity.id">
+                                            <Item variant="outline" v-for="activity in activities.data" :key="activity.id">
                                                 <ItemContent>
-                                                    <ItemTitle class="capitalize text-xl font-bold">{{
-                                                        activity.activity_title
-                                                    }}</ItemTitle>
+                                                    <ItemTitle class="text-xl font-bold capitalize">{{ activity.activity_title }}</ItemTitle>
                                                     <ItemDescription>
-                                                        <span :class="getLanguageColor(activity.activity_language)"
-                                                            class="inline-flex items-center mb-2 gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border">
-                                                            <img v-if="getLanguageLogo(activity.activity_language)"
+                                                        <span
+                                                            :class="getLanguageColor(activity.activity_language)"
+                                                            class="mb-2 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
+                                                        >
+                                                            <img
+                                                                v-if="getLanguageLogo(activity.activity_language)"
                                                                 :src="getLanguageLogo(activity.activity_language)!"
                                                                 :alt="activity.activity_language"
-                                                                class="h-4 w-4 object-contain" />
+                                                                class="h-4 w-4 object-contain"
+                                                            />
                                                             {{ activity.activity_language }}
                                                         </span>
                                                         <span class="flex items-center gap-1.5">
-                                                            <Calendar
-                                                                class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                            {{
-                                                                dayjs(activity.created_at).format("MMM D, YYYY h:mm A")
-                                                            }}
+                                                            <Calendar class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                            {{ dayjs(activity.created_at).format('MMM D, YYYY h:mm A') }}
                                                         </span>
-                                                        <span v-if="activity.expires_at"
-                                                            class="flex items-center gap-1.5">
-                                                            <Calendar
-                                                                class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                                                            {{
-                                                                dayjs(activity.expires_at).format("MMM D, YYYY h:mm A")
-                                                            }}
+                                                        <span v-if="activity.expires_at" class="flex items-center gap-1.5">
+                                                            <Calendar class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                                            {{ dayjs(activity.expires_at).format('MMM D, YYYY h:mm A') }}
                                                         </span>
-                                                        <span v-else
-                                                            class="flex items-center gap-1.5 text-muted-foreground">
+                                                        <span v-else class="flex items-center gap-1.5 text-muted-foreground">
                                                             <Calendar class="h-3.5 w-3.5" />
                                                             No deadline
                                                         </span>
@@ -207,11 +192,12 @@ const handleStudentsPageChange = (page: number) => {
                                                 </ItemActions>
                                             </Item>
                                         </div>
-                                        <div v-else class="text-center py-8 text-muted-foreground">
-                                            No activities found
-                                        </div>
-                                        <PaginationComponent v-if="activities && activities.data.length > 0"
-                                            :pagination="activities" @page-change="handleActivitiesPageChange" />
+                                        <div v-else class="py-8 text-center text-muted-foreground">No activities found</div>
+                                        <PaginationComponent
+                                            v-if="activities && activities.data.length > 0"
+                                            :pagination="activities"
+                                            @page-change="handleActivitiesPageChange"
+                                        />
                                     </div>
                                 </Deferred>
                             </template>
@@ -232,55 +218,101 @@ const handleStudentsPageChange = (page: number) => {
                                     </template>
                                     <div class="space-y-4">
                                         <div v-if="completedActivities?.data.length" class="space-y-4">
-                                            <Item variant="outline" v-for="activity in completedActivities.data"
+                                            <Item
+                                                variant="outline"
+                                                v-for="activity in completedActivities.data"
                                                 :key="activity.id"
-                                                :class="getScoreBackgroundClass(activity.score, activity.total_score)"
-                                                class="shadow-md hover:shadow-lg transition-shadow duration-200">
-                                                <ItemContent>
-                                                    <ItemTitle class="capitalize text-xl font-bold text-white">
+                                                :class="[
+                                                    activity.submitted_at
+                                                        ? getScoreBackgroundClass(activity.score, activity.total_score)
+                                                        : 'bg-slate-500 dark:bg-slate-700',
+                                                    !activity.is_open ? 'relative' : ''
+                                                ]"
+                                                class="shadow-md transition-shadow duration-200 hover:shadow-lg"
+                                            >
+                                                <div v-if="!activity.is_open" class="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/50 rounded-lg pointer-events-none"></div>
+                                                <ItemContent :class="!activity.is_open ? 'relative z-10 opacity-80' : ''">
+                                                    <ItemTitle class="text-xl font-bold text-white capitalize">
                                                         {{ activity.activity_title }}
                                                     </ItemTitle>
                                                     <ItemDescription>
-                                                        <span class="inline-flex items-center mb-2 gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-white/20 backdrop-blur-sm border border-white/30 text-white">
-                                                            <img v-if="getLanguageLogo(activity.activity_language)"
+                                                        <span
+                                                            class="mb-2 inline-flex items-center gap-1.5 rounded-md border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
+                                                        >
+                                                            <img
+                                                                v-if="getLanguageLogo(activity.activity_language)"
                                                                 :src="getLanguageLogo(activity.activity_language)!"
                                                                 :alt="activity.activity_language"
-                                                                class="h-4 w-4 object-contain" />
+                                                                class="h-4 w-4 object-contain"
+                                                            />
                                                             {{ activity.activity_language }}
                                                         </span>
-                                                        <span class="flex items-center gap-1.5 text-white/90">
-                                                            <Calendar class="h-3.5 w-3.5" />
-                                                            Submitted: {{ dayjs(activity.submitted_at).format("MMM D, YYYY h:mm A") }}
-                                                        </span>
+
+                                                        <div class="flex items-center gap-3">
+                                                            <span
+                                                                v-if="!activity.is_open"
+                                                                class="text-xs sm:text-md flex items-center gap-1.5 font-semibold text-white/90"
+                                                            >
+                                                                <CalendarCheck class="h-3.5 w-3.5" />
+                                                                Closed
+                                                            </span>
+                                                            <div class="hidden md:block">
+                                                            <span v-if="activity.submitted_at" class="text-xs sm:text-md flex items-center gap-1.5 text-white/90">
+                                                                <Calendar class="h-3.5 w-3.5" />
+                                                                Submitted: {{ dayjs(activity.submitted_at).format('MMM D, YYYY h:mm A') }}
+                                                            </span>
+                                                            </div>
+                                                        </div>
                                                     </ItemDescription>
                                                 </ItemContent>
-                                                <ItemActions class="flex items-center gap-4">
+                                                <ItemActions :class="!activity.is_open ? 'relative z-10 opacity-80 flex items-center gap-4' : 'flex items-center gap-4'">
                                                     <div class="flex flex-col items-end gap-1">
-                                                        <span class="text-xs font-medium text-white/70 uppercase tracking-wider">Score</span>
-                                                        <span class="text-2xl font-bold text-white">
+                                                        <span class="text-xs font-medium tracking-wider text-white/70 uppercase">Score</span>
+                                                        <span v-if="activity.submitted_at" class="text-lg sm:text-2xl font-bold text-white">
                                                             {{ getScoreDisplay(activity.score, activity.total_score).text }}
+                                                        </span>
+                                                        <span v-else class="text-sm font-semibold italic text-white/70">
+                                                            Not Submitted
                                                         </span>
                                                     </div>
                                                     <TooltipProvider>
                                                         <Tooltip>
                                                             <TooltipTrigger as-child>
-                                                                <Link :href="`/student/submit/${activity.token}`">
-                                                                    <Button size="icon-lg" variant="secondary" class="rounded-full bg-white/20 hover:bg-white/30 border-white/30 text-white backdrop-blur-sm">
+                                                                <div>
+                                                                    <Link v-if="activity.is_open" :href="`/student/submit/${activity.token}`">
+                                                                        <Button
+                                                                            size="icon-lg"
+                                                                            variant="secondary"
+                                                                            class="rounded-full border-white/30 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30"
+                                                                        >
+                                                                            <Eye class="size-5" />
+                                                                        </Button>
+                                                                    </Link>
+                                                                    <Button
+                                                                        v-else
+                                                                        size="icon-lg"
+                                                                        variant="secondary"
+                                                                        disabled
+                                                                        class="cursor-not-allowed rounded-full border-white/20 bg-white/10 text-white/50 backdrop-blur-sm"
+                                                                    >
                                                                         <Eye class="size-5" />
                                                                     </Button>
-                                                                </Link>
+                                                                </div>
                                                             </TooltipTrigger>
-                                                            <TooltipContent> View Submission </TooltipContent>
+                                                            <TooltipContent>
+                                                                {{ activity.is_open ? 'View Submission' : 'Activity Closed' }}
+                                                            </TooltipContent>
                                                         </Tooltip>
                                                     </TooltipProvider>
                                                 </ItemActions>
                                             </Item>
                                         </div>
-                                        <div v-else class="text-center py-8 text-muted-foreground">
-                                            No completed activities found
-                                        </div>
-                                        <PaginationComponent v-if="completedActivities && completedActivities.data.length > 0"
-                                            :pagination="completedActivities" @page-change="handleCompletedPageChange" />
+                                        <div v-else class="py-8 text-center text-muted-foreground">No completed activities found</div>
+                                        <PaginationComponent
+                                            v-if="completedActivities && completedActivities.data.length > 0"
+                                            :pagination="completedActivities"
+                                            @page-change="handleCompletedPageChange"
+                                        />
                                     </div>
                                 </Deferred>
                             </template>
@@ -299,8 +331,12 @@ const handleStudentsPageChange = (page: number) => {
                                             <span class="text-muted-foreground">Loading students...</span>
                                         </div>
                                     </template>
-                                    <DataTable :columns="studentColumns" :data="students.data"
-                                        :pagination="students as any" @page-change="handleStudentsPageChange" />
+                                    <DataTable
+                                        :columns="studentColumns"
+                                        :data="students.data"
+                                        :pagination="students as any"
+                                        @page-change="handleStudentsPageChange"
+                                    />
                                 </Deferred>
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">

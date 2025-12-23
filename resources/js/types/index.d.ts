@@ -361,10 +361,11 @@ export interface StudentCourseShowProps {
             activity_title: string;
             activity_language: string;
             token: string;
-            submission_id: string;
+            is_open: boolean;
+            submission_id?: string;
             score: number | null;
             total_score: number;
-            submitted_at: string;
+            submitted_at?: string;
         }>;
         current_page: number;
         last_page: number;
