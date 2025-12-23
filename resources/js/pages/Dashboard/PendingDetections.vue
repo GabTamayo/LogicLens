@@ -83,7 +83,7 @@ const groupedByDate = computed(() => {
                 <div>
                     <h1 class="text-sm sm:text-lg font-bold">Pending Detections</h1>
                     <span class="text-xs sm:text-sm text-muted-foreground">
-                        Activity links awaiting plagiarism detection
+                        Activity links awaiting similarity detection
                     </span>
                 </div>
             </div>

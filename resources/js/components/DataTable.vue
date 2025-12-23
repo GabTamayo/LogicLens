@@ -116,7 +116,7 @@ onMounted(() => {
                 <Button :disabled="isDetecting" @click="$emit('detect-submission')">
                     <LoaderCircle v-if="isDetecting" class="animate-spin" />
                     <FileScan v-else />
-                    {{ isDetecting ? 'Detecting...' : 'Detect Submission' }}
+                    {{ isDetecting ? 'Detecting...' : 'Detect Submissions' }}
                 </Button>
                 <ButtonGroupSeparator />
                 <DropdownMenu>

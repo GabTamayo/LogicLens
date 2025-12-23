@@ -35,8 +35,8 @@ return [
         ],
     ],
 
-    'plagiarism_detector' => [
-        'url' => env('PLAGIARISM_DETECTOR_URL'),
+    'similarity_detector' => [
+        'url' => env('SIMILARITY_DETECTOR_API_URL', 'http://localhost:8001'),
     ],
 
     'piston' => [

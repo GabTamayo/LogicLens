@@ -92,7 +92,7 @@ const handleDetectSubmission = () => {
                 toast.success(page.props.successMessage)
             } else {
                 toast.success('Detection complete', {
-                    description: 'Plagiarism detection has been completed successfully.',
+                    description: 'Similarity detection has been completed successfully.',
                 })
             }
             isDetecting.value = false

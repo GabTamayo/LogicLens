@@ -114,7 +114,7 @@ return [
 
     'socialite' => [
         'drivers' => [
-            'plagiarism_detector',
+            'similarity_detector',
         ]
     ]
 ];

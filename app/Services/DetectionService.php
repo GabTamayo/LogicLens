@@ -18,7 +18,7 @@ class DetectionService
 
     public function __construct()
     {
-        $this->fastApiUrl = config('services.plagiarism_detector.url');
+        $this->fastApiUrl = config('services.similarity_detector.url');
     }
 
     public function validateForDetection(Activity $activity, $linkId): array
