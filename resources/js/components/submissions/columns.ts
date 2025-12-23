@@ -1,6 +1,7 @@
 import { h } from 'vue'
 import type { ColumnDef } from '@tanstack/vue-table'
 import DropdownAction from './data-table.dropdown.vue'
+import { useScore } from '@/composables/useScore'
 
 export interface SubmissionRow {
     id: string
@@ -9,6 +10,8 @@ export interface SubmissionRow {
     code_content: string
     language: string
     created_at: string
+    score: number | null
+    total_score: number | null
 }
 
 export const columns: ColumnDef<SubmissionRow>[] = [
@@ -23,6 +26,23 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         label: 'Email',
         header: () => h('div', { class: '' }, 'Student Email'),
         cell: ({ row }) => h('div', { class: '' }, row.getValue('student_email')),
+    },
+    {
+        accessorKey: 'score',
+        label: 'Score',
+        header: () => h('div', { class: 'text-center' }, 'Score'),
+        cell: ({ row }) => {
+            const score = row.getValue('score') as number | null
+            const totalScore = row.original.total_score
+            const { getScoreDisplay } = useScore()
+            const scoreDisplay = getScoreDisplay(score, totalScore)
+
+            if (score === null || totalScore === null) {
+                return h('div', { class: 'text-center text-xs text-muted-foreground' }, scoreDisplay.text)
+            }
+
+            return h('div', { class: `text-center font-medium ${scoreDisplay.colorClass}` }, scoreDisplay.text)
+        },
     },
     {
         accessorKey: 'created_at',

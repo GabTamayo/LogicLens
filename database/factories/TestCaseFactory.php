@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Activity>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\TestCase>
  */
-class ActivityFactory extends Factory
+class TestCaseFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +18,10 @@ class ActivityFactory extends Factory
     {
         return [
             'title' => fake()->sentence(3),
-            'user_id' => 1,
-            'language' => 'java',
+            'input' => fake()->sentence(),
+            'output' => fake()->sentence(),
+            'score' => fake()->numberBetween(5, 20),
+            'order' => fake()->numberBetween(1, 10),
         ];
     }
 }

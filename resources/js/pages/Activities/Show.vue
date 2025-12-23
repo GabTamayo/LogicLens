@@ -1,36 +1,64 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import { ActivityDetail, type BreadcrumbItem } from '@/types';
-import PaginationComponent from '@/components/Pagination.vue';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog"
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from "@/components/ui/drawer"
-import { createReusableTemplate, useMediaQuery } from "@vueuse/core"
-import { ref, computed } from "vue"
-import { Separator } from '@/components/ui/separator'
-import { Badge } from '@/components/ui/badge';
-import { Head, useForm, Link, router, Deferred, usePoll } from '@inertiajs/vue3';
-import { Input } from '@/components/ui/input';
-import { Switch } from "@/components/ui/switch"
-import { Circle, Copy, MoreHorizontal, Eye, Delete, CalendarCog, Code2, Loader, Pencil, Save, X, FileText, Link2, Clock } from 'lucide-vue-next';
 import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
-import { Toaster } from '@/components/ui/sonner';
-import { toast } from 'vue-sonner';
-import 'vue-sonner/style.css';
 import DateTimePicker from '@/components/DateTimePicker.vue';
 import DateTimePickerDialog from '@/components/DateTimePickerDialog.vue';
+import InputError from '@/components/InputError.vue';
+import PaginationComponent from '@/components/Pagination.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput } from '@/components/ui/number-field';
+import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SelectLabel from '@/components/ui/select/SelectLabel.vue';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import { Switch } from '@/components/ui/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDeadline } from '@/composables/useDeadline';
 import { useLanguage } from '@/composables/useLanguage';
-import SelectLabel from '@/components/ui/select/SelectLabel.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { ActivityDetail, type BreadcrumbItem } from '@/types';
+import { Deferred, Head, Link, router, useForm, usePoll } from '@inertiajs/vue3';
+import { createReusableTemplate, useMediaQuery } from '@vueuse/core';
+import {
+    CalendarCog,
+    Circle,
+    Clock,
+    Code2,
+    Copy,
+    Delete,
+    Eye,
+    FileText,
+    Link2,
+    Loader,
+    MoreHorizontal,
+    Pencil,
+    Plus,
+    Save,
+    Trash2,
+    X,
+} from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
+import 'vue-sonner/style.css';
 
-const props = defineProps<ActivityDetail>()
+const props = defineProps<ActivityDetail>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
@@ -76,6 +104,70 @@ const saveContent = () => {
     });
 };
 
+// Test Cases Management
+interface TestCase {
+    title: string;
+    input: string;
+    output: string;
+    score: number;
+}
+
+const isTestCasesEmpty = computed(() => {
+    return !props.test_cases || props.test_cases.length === 0;
+});
+
+const isEditingTestCases = ref(false);
+const testCasesForm = useForm({
+    test_cases: props.test_cases.map((tc) => ({
+        title: tc.title,
+        input: tc.input,
+        output: tc.output,
+        score: tc.score,
+    })) as TestCase[],
+});
+
+const toggleEditTestCases = () => {
+    if (isEditingTestCases.value) {
+        testCasesForm.test_cases = props.test_cases.map((tc) => ({
+            title: tc.title,
+            input: tc.input,
+            output: tc.output,
+            score: tc.score,
+        }));
+    }
+    isEditingTestCases.value = !isEditingTestCases.value;
+};
+
+const addTestCase = () => {
+    testCasesForm.test_cases.unshift({
+        title: '',
+        input: '',
+        output: '',
+        score: 0,
+    });
+};
+
+const removeTestCase = (index: number) => {
+    testCasesForm.test_cases.splice(index, 1);
+};
+
+const saveTestCases = () => {
+    testCasesForm.patch(`/activities/${props.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditingTestCases.value = false;
+            toast.success('Test cases updated', {
+                description: 'The test cases have been saved successfully.',
+            });
+        },
+        onError: () => {
+            toast.error('Failed to update test cases', {
+                description: 'An error occurred while saving test cases.',
+            });
+        },
+    });
+};
+
 // Link Generation Form
 const form = useForm({
     course_id: '',
@@ -89,7 +181,7 @@ const submit = () => {
 
     form.transform((data) => ({
         course_id: data.course_id,
-        expires_at: data.expires_at ? formatToServerDateTime(data.expires_at as Date) : null
+        expires_at: data.expires_at ? formatToServerDateTime(data.expires_at as Date) : null,
     })).post(`/activities/${props.id}/links`, {
         onSuccess: () => {
             form.reset('course_id', 'expires_at');
@@ -102,8 +194,8 @@ const submit = () => {
                 description: form.errors.course_id || form.errors.expires_at || 'An error occurred.',
             });
         },
-    })
-}
+    });
+};
 
 // Link Status Management
 const updateStatus = (id: number, name: string, value: boolean) => {
@@ -119,10 +211,10 @@ const updateStatus = (id: number, name: string, value: boolean) => {
             const errorMessage = (linkStatusForm.errors as any).expires_at || 'Failed to update link status. Please try again.';
             toast.error('Cannot update link status', {
                 description: errorMessage,
-            })
-        }
-    })
-}
+            });
+        },
+    });
+};
 
 // Deadline Management
 const removeDeadline = (linkId: number) => {
@@ -139,110 +231,107 @@ const removeDeadline = (linkId: number) => {
             });
         },
     });
-}
+};
 
 // Pagination
 const handlePageChange = (page: number) => {
-    router.get(`/activities/${props.id}`,
+    router.get(
+        `/activities/${props.id}`,
         { page },
         {
             preserveScroll: true,
-            only: ['links']
-        }
-    )
-}
+            only: ['links'],
+        },
+    );
+};
 
-// Copy to Clipboard
 function copy(text: string) {
-    navigator.clipboard.writeText(text)
+    navigator.clipboard.writeText(text);
     toast('Link copied to clipboard', {
         description: 'The submission link has been copied.',
-    })
+    });
 }
 
-// Deadline Dialog Management
-const [UseTemplate, GridForm] = createReusableTemplate()
-const isDesktop = useMediaQuery("(min-width: 420px)")
-const isOpen = ref(false)
-const selectedLinkId = ref<number | null>(null)
-const deadlineDate = ref<Date | null>(null)
+const [UseTemplate, GridForm] = createReusableTemplate();
+const isDesktop = useMediaQuery('(min-width: 420px)');
+const isOpen = ref(false);
+const selectedLinkId = ref<number | null>(null);
+const deadlineDate = ref<Date | null>(null);
 
 const openDeadlineDialog = (linkId: number, currentDeadline: string | null) => {
-    selectedLinkId.value = linkId
-    deadlineDate.value = currentDeadline ? new Date(currentDeadline) : null
-    isOpen.value = true
-}
+    selectedLinkId.value = linkId;
+    deadlineDate.value = currentDeadline ? new Date(currentDeadline) : null;
+    isOpen.value = true;
+};
 
-const handleSaveDeadline = (payload: { linkId: string, date: Date }) => {
+const handleSaveDeadline = (payload: { linkId: string; date: Date }) => {
     const deadlineForm = useForm({
         is_open: true,
-        expires_at: payload.date.toISOString()
-    })
+        expires_at: payload.date.toISOString(),
+    });
     deadlineForm.patch(`/activities/${props.id}/links/${payload.linkId}`, {
         preserveScroll: true,
         onSuccess: () => {
-            isOpen.value = false
-            selectedLinkId.value = null
-            deadlineDate.value = null
+            isOpen.value = false;
+            selectedLinkId.value = null;
+            deadlineDate.value = null;
             toast.success('Deadline updated', {
                 description: 'The deadline has been set successfully.',
-            })
-            router.reload({ only: ['links'] })
+            });
+            router.reload({ only: ['links'] });
         },
         onError: () => {
             const errorMessage = (deadlineForm.errors as any).expires_at || 'An error occurred while setting the deadline.';
             toast.error('Failed to set deadline', {
                 description: errorMessage,
-            })
-        }
-    })
-}
+            });
+        },
+    });
+};
 
 // Loading State
-const isInitialLoadDone = ref(false)
+const isInitialLoadDone = ref(false);
 
 // Poll for updates every 30 seconds
 usePoll(30000, {
     only: ['links'],
-})
+});
 
-// Language utilities
-const { getLanguageColor, getLanguageLogo } = useLanguage()
+const { getLanguageColor, getLanguageLogo } = useLanguage();
 </script>
 
 <template>
-
     <Head :title="`${props.title}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${props.id}`" type="activity" buttonText="Delete Activity"
-                :itemName="props.title" />
+            <AlertDialogDelete :endpoint="`/activities/${props.id}`" type="activity" buttonText="Delete Activity" :itemName="props.title" />
         </template>
 
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <div>
+                <h1 class="cursor-default text-lg font-bold tracking-tight sm:text-2xl">{{ props.title }}</h1>
+            </div>
             <Card>
                 <CardHeader>
                     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex flex-col gap-2">
                             <div class="flex flex-wrap items-center gap-3">
                                 <CardTitle>Assign Activity to Course</CardTitle>
-                                <Badge :class="[
-                                    'px-2.5 py-1 text-xs font-medium',
-                                    getLanguageColor(props.language_text)
-                                ]">
+                                <Badge :class="['px-2.5 py-1 text-xs font-medium', getLanguageColor(props.language_text)]">
                                     <div class="flex items-center gap-1.5">
-                                        <img v-if="getLanguageLogo(props.language_text)"
+                                        <img
+                                            v-if="getLanguageLogo(props.language_text)"
                                             :src="getLanguageLogo(props.language_text)!"
-                                            :alt="`${props.language_text} logo`" class="h-4 w-4 object-contain" />
+                                            :alt="`${props.language_text} logo`"
+                                            class="h-4 w-4 object-contain"
+                                        />
                                         <Code2 v-else class="h-4 w-4" />
                                         <span>{{ props.language_text }}</span>
                                     </div>
                                 </Badge>
                             </div>
-                            <CardDescription>
-                                Collect student submissions for review and analysis.
-                            </CardDescription>
+                            <CardDescription> Collect student submissions for review and analysis. </CardDescription>
                         </div>
                     </div>
                 </CardHeader>
@@ -260,22 +349,16 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                             <SelectContent>
                                                 <SelectGroup>
                                                     <SelectLabel>
-                                                        {{ props.courses.length === 0
-                                                            ? 'No course to be assigned.'
-                                                            : 'Courses'
-                                                        }}
+                                                        {{ props.courses.length === 0 ? 'No course to be assigned.' : 'Courses' }}
                                                     </SelectLabel>
-                                                    <SelectItem v-for="course in props.courses" :key="course.id"
-                                                        :value="course.id">
+                                                    <SelectItem v-for="course in props.courses" :key="course.id" :value="course.id">
                                                         {{ course.name }}
                                                     </SelectItem>
                                                 </SelectGroup>
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
-                                    <FormDescription class="text-xs">
-                                        Select the course for this submission link.
-                                    </FormDescription>
+                                    <FormDescription class="text-xs"> Select the course for this submission link. </FormDescription>
                                 </FormItem>
                             </FormField>
 
@@ -288,9 +371,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                     <FormControl>
                                         <DateTimePicker v-model="form.expires_at" :disabled="form.processing" />
                                     </FormControl>
-                                    <FormDescription class="text-xs">
-                                        Set when submissions should close automatically.
-                                    </FormDescription>
+                                    <FormDescription class="text-xs"> Set when submissions should close automatically. </FormDescription>
                                 </FormItem>
                             </FormField>
                         </div>
@@ -306,8 +387,8 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
             </Card>
 
             <!-- Content Section -->
-            <Card>
-                <CardHeader>
+            <Card class="flex flex-col">
+                <CardHeader class="flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <div>
                             <CardTitle>Activity Content</CardTitle>
@@ -331,30 +412,179 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div v-if="!isEditing" class="min-h-[200px] border">
-                        <div v-if="isContentEmpty" class="flex flex-col items-center justify-center p-12 text-center">
-                            <div class="mb-4 rounded-full bg-muted p-3">
-                                <FileText class="h-6 w-6 text-muted-foreground" />
+                <ScrollArea class="max-h-[600px]">
+                    <CardContent>
+                        <div v-if="!isEditing" class="min-h-[200px] border">
+                            <div v-if="isContentEmpty" class="flex flex-col items-center justify-center p-12 text-center">
+                                <div class="mb-4 rounded-full bg-muted p-3">
+                                    <FileText class="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <h3 class="mb-1 text-lg font-semibold">No content added yet</h3>
+                                <p class="mb-4 max-w-sm text-sm text-muted-foreground">
+                                    Add instructions, requirements, or details for this activity
+                                </p>
+                                <Button variant="outline" size="sm" @click="toggleEdit">
+                                    <Pencil class="mr-2 h-4 w-4" />
+                                    Add Content
+                                </Button>
                             </div>
-                            <h3 class="mb-1 font-semibold text-lg">No content added yet</h3>
-                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">
-                                Add instructions, requirements, or details for this activity
-                            </p>
-                            <Button variant="outline" size="sm" @click="toggleEdit">
+
+                            <div v-else class="prose max-w-none p-4 dark:prose-invert" v-html="props.content"></div>
+                        </div>
+
+                        <div v-else>
+                            <RichTextEditor v-model="editForm.content" />
+                        </div>
+                    </CardContent>
+                </ScrollArea>
+            </Card>
+
+            <!-- Test Cases Section -->
+            <Card class="flex flex-col">
+                <CardHeader class="flex-shrink-0">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Test Cases</CardTitle>
+                            <CardDescription>Define test cases to automatically grade student submissions</CardDescription>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <template v-if="isEditingTestCases">
+                                <Button variant="outline" size="sm" @click="toggleEditTestCases" :disabled="testCasesForm.processing">
+                                    <X class="mr-2 h-4 w-4" />
+                                    Cancel
+                                </Button>
+                                <Button size="sm" @click="saveTestCases" :disabled="testCasesForm.processing">
+                                    <Save class="mr-2 h-4 w-4" />
+                                    {{ testCasesForm.processing ? 'Saving...' : 'Save' }}
+                                </Button>
+                            </template>
+                            <Button v-else-if="!isTestCasesEmpty" variant="outline" size="sm" @click="toggleEditTestCases">
                                 <Pencil class="mr-2 h-4 w-4" />
-                                Add Content
+                                Edit
                             </Button>
                         </div>
+                    </div>
+                </CardHeader>
+                <ScrollArea class="max-h-[600px]">
+                    <CardContent>
+                        <div v-if="!isEditingTestCases">
+                            <div v-if="isTestCasesEmpty" class="flex min-h-[200px] flex-col items-center justify-center border p-12 text-center">
+                                <div class="mb-4 rounded-full bg-muted p-3">
+                                    <FileText class="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <h3 class="mb-1 text-lg font-semibold">No test cases added yet</h3>
+                                <p class="mb-4 max-w-sm text-sm text-muted-foreground">
+                                    Add test cases to automatically evaluate student submissions
+                                </p>
+                                <Button variant="outline" size="sm" @click="toggleEditTestCases">
+                                    <Pencil class="mr-2 h-4 w-4" />
+                                    Add Test Cases
+                                </Button>
+                            </div>
 
-                        <div v-else class="prose dark:prose-invert max-w-none p-4" v-html="props.content">
+                            <div v-else class="space-y-4">
+                                <div v-for="(testCase, index) in props.test_cases" :key="index" class="space-y-3 rounded-lg border bg-muted/10 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <Badge>{{ testCase.score }} pts</Badge>
+                                            <h4 class="font-medium">{{ testCase.title || `Test Case ${index + 1}` }}</h4>
+                                        </div>
+                                    </div>
+                                    <div v-if="testCase.input" class="space-y-1">
+                                        <p class="text-sm font-medium text-muted-foreground">Input:</p>
+                                        <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.input }}</pre>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-medium text-muted-foreground">Expected Output:</p>
+                                        <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.output }}</pre>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
 
-                    <div v-else>
-                        <RichTextEditor v-model="editForm.content" />
-                    </div>
-                </CardContent>
+                        <div v-else class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">
+                                        {{ testCasesForm.test_cases.length }} test case{{ testCasesForm.test_cases.length !== 1 ? 's' : '' }}
+                                    </p>
+                                </div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button class="rounded-full" type="button" variant="outline" @click="addTestCase">
+                                                <Plus class="h-4 w-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Add a new test case</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
+
+                            <div v-if="testCasesForm.test_cases.length > 0" class="space-y-4">
+                                <div
+                                    v-for="(testCase, index) in testCasesForm.test_cases"
+                                    :key="index"
+                                    class="space-y-3 rounded-lg border bg-muted/10 p-4"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div class="space-y-2">
+                                            <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                Score
+                                                <span class="font-light text-muted-foreground">(Points)</span>
+                                            </label>
+                                            <NumberField
+                                                v-model="testCase.score"
+                                                :step="0.5"
+                                                :format-options="{
+                                                    signDisplay: 'exceptZero',
+                                                    minimumFractionDigits: 1,
+                                                }"
+                                            >
+                                                <NumberFieldContent>
+                                                    <NumberFieldDecrement />
+                                                    <NumberFieldInput />
+                                                    <NumberFieldIncrement />
+                                                </NumberFieldContent>
+                                            </NumberField>
+                                            <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.score`]" />
+                                        </div>
+                                        <Button type="button" variant="destructive" size="icon" @click="removeTestCase(index)">
+                                            <Trash2 class="h-4 w-4" />
+                                        </Button>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Title
+                                        </label>
+                                        <Input type="text" v-model="testCase.title" placeholder="e.g., Basic Addition" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.title`]" />
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Input
+                                            <span class="font-light text-muted-foreground">(Optional)</span>
+                                        </label>
+                                        <Textarea v-model="testCase.input" placeholder="Input for the test case" :rows="2" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.input`]" />
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Expected Output
+                                        </label>
+                                        <Textarea v-model="testCase.output" placeholder="Expected output for the test case" :rows="2" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.output`]" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </ScrollArea>
             </Card>
 
             <Separator />
@@ -363,9 +593,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
             <div>
                 <div class="mb-4">
                     <h4 class="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">Manage Link Submissions</h4>
-                    <p class="text-sm text-muted-foreground">
-                        Review existing submission links, update their status, and manage deadlines.
-                    </p>
+                    <p class="text-sm text-muted-foreground">Review existing submission links, update their status, and manage deadlines.</p>
                 </div>
 
                 <Deferred data="links" @resolve="isInitialLoadDone = true">
@@ -399,35 +627,41 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                             <div class="flex flex-col gap-2">
                                                 <div class="flex items-center gap-2">
                                                     <Badge variant="outline" class="h-6 w-18">
-                                                        <Circle class="size-4" :class="link.is_open
-                                                            ? 'fill-green-500 text-green-500'
-                                                            : 'fill-red-500 text-red-500'" />
+                                                        <Circle
+                                                            class="size-4"
+                                                            :class="link.is_open ? 'fill-green-500 text-green-500' : 'fill-red-500 text-red-500'"
+                                                        />
                                                         {{ link.is_open ? 'Open' : 'Closed' }}
                                                     </Badge>
-                                                    <Switch v-model="link.is_open"
-                                                        @update:modelValue="updateStatus(link.id, link.course?.name ?? 'Link', $event)" />
+                                                    <Switch
+                                                        v-model="link.is_open"
+                                                        @update:modelValue="updateStatus(link.id, link.course?.name ?? 'Link', $event)"
+                                                    />
                                                 </div>
                                                 <TooltipProvider v-if="link.expires_at">
                                                     <Tooltip>
                                                         <TooltipTrigger as-child>
-                                                            <div class="flex items-center gap-1.5 cursor-default">
+                                                            <div class="flex cursor-default items-center gap-1.5">
                                                                 <component
                                                                     :is="getDeadlineStatus(link.expires_at)?.icon"
-                                                                    :class="['h-3.5 w-3.5 shrink-0', getDeadlineStatus(link.expires_at)?.class]" />
+                                                                    :class="['h-3.5 w-3.5 shrink-0', getDeadlineStatus(link.expires_at)?.class]"
+                                                                />
                                                                 <span
-                                                                    :class="['text-xs font-medium truncate', getDeadlineStatus(link.expires_at)?.class]">
+                                                                    :class="[
+                                                                        'truncate text-xs font-medium',
+                                                                        getDeadlineStatus(link.expires_at)?.class,
+                                                                    ]"
+                                                                >
                                                                     {{ formatRelativeDeadline(link.expires_at) }}
                                                                 </span>
                                                             </div>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            <p class="font-medium">{{ formatExpiresAt(link.expires_at)
-                                                            }}</p>
+                                                            <p class="font-medium">{{ formatExpiresAt(link.expires_at) }}</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                 </TooltipProvider>
-                                                <div v-else
-                                                    class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <div v-else class="flex items-center gap-1.5 text-xs text-muted-foreground">
                                                     <Clock class="h-3.5 w-3.5" />
                                                     <span>No deadline</span>
                                                 </div>
@@ -436,18 +670,22 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                         <TableCell>
                                             <div class="flex items-center gap-2">
                                                 <code
-                                                    class="relative max-w-[200px] truncate rounded bg-muted px-2 py-1 font-mono text-xs md:max-w-full">
+                                                    class="relative max-w-[200px] truncate rounded bg-muted px-2 py-1 font-mono text-xs md:max-w-full"
+                                                >
                                                     {{ props.appUrl }}/student/submit/{{ link.token }}
                                                 </code>
-                                                <Button variant="ghost" size="icon"
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
                                                     @click="copy(`${props.appUrl}/student/submit/${link.token}`)"
-                                                    aria-label="Copy link">
+                                                    aria-label="Copy link"
+                                                >
                                                     <Copy class="h-4 w-4" />
                                                 </Button>
                                             </div>
                                         </TableCell>
                                         <TableCell class="text-center">
-                                            <Badge class="h-[25px] w-[30px] overflow-hidden text-ellipsis rounded-full">
+                                            <Badge class="h-[25px] w-[30px] overflow-hidden rounded-full text-ellipsis">
                                                 <span class="font-mono font-semibold">
                                                     {{ link.submissions_count }}
                                                 </span>
@@ -456,16 +694,14 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                         <TableCell class="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger as-child>
-                                                    <Button variant="ghost" size="icon"
-                                                        class="h-8 w-8 cursor-pointer p-0" aria-label="Open menu">
+                                                    <Button variant="ghost" size="icon" class="h-8 w-8 cursor-pointer p-0" aria-label="Open menu">
                                                         <span class="sr-only">Open menu</span>
                                                         <MoreHorizontal class="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <Link :href="`/activities/${props.id}/links/${link.id}`"
-                                                        prefetch='mount'>
+                                                    <Link :href="`/activities/${props.id}/links/${link.id}`" prefetch="mount">
                                                         <DropdownMenuItem>
                                                             <Eye class="mr-2 h-4 w-4" />
                                                             View Submissions
@@ -474,8 +710,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                                     <DropdownMenuSeparator />
                                                     <Dialog v-if="isDesktop" v-model:open="isOpen">
                                                         <DialogTrigger as-child>
-                                                            <DropdownMenuItem
-                                                                @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
+                                                            <DropdownMenuItem @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
                                                                 <CalendarCog class="mr-2 h-4 w-4" />
                                                                 Set Deadline
                                                             </DropdownMenuItem>
@@ -483,34 +718,31 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                                         <DialogContent class="sm:max-w-[425px]">
                                                             <DialogHeader>
                                                                 <DialogTitle>Set Deadline</DialogTitle>
-                                                                <DialogDescription>
-                                                                    Set the date and time for the deadline.
-                                                                </DialogDescription>
+                                                                <DialogDescription> Set the date and time for the deadline. </DialogDescription>
                                                             </DialogHeader>
                                                             <GridForm />
                                                         </DialogContent>
                                                     </Dialog>
                                                     <Drawer v-else v-model:open="isOpen">
                                                         <DrawerTrigger as-child>
-                                                            <DropdownMenuItem
-                                                                @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
+                                                            <DropdownMenuItem @select.prevent="openDeadlineDialog(link.id, link.expires_at)">
                                                                 <CalendarCog class="mr-2 h-4 w-4" />
                                                                 Set Deadline
                                                             </DropdownMenuItem>
                                                             <DrawerContent>
                                                                 <DrawerHeader>
                                                                     <DrawerTitle>Set Deadline</DrawerTitle>
-                                                                    <DrawerDescription>
-                                                                        Set the date and time for the deadline.
-                                                                    </DrawerDescription>
+                                                                    <DrawerDescription> Set the date and time for the deadline. </DrawerDescription>
                                                                 </DrawerHeader>
                                                                 <GridForm />
                                                             </DrawerContent>
                                                         </DrawerTrigger>
                                                     </Drawer>
-                                                    <DropdownMenuItem class="text-red-600 dark:text-red-400"
+                                                    <DropdownMenuItem
+                                                        class="text-red-600 dark:text-red-400"
                                                         :disabled="!link.expires_at"
-                                                        @click="link.expires_at && removeDeadline(link.id)">
+                                                        @click="link.expires_at && removeDeadline(link.id)"
+                                                    >
                                                         <Delete class="mr-2 h-4 w-4" />
                                                         Remove Deadline
                                                     </DropdownMenuItem>
@@ -524,9 +756,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                                         <TableCell colspan="5" class="h-32 text-center">
                                             <div class="flex flex-col items-center justify-center gap-2">
                                                 <Link2 class="h-8 w-8 text-muted-foreground" />
-                                                <p class="text-sm text-muted-foreground">
-                                                    No submission links generated yet.
-                                                </p>
+                                                <p class="text-sm text-muted-foreground">No submission links generated yet.</p>
                                                 <p class="text-xs text-muted-foreground">
                                                     Create your first link above to start collecting submissions.
                                                 </p>
@@ -539,15 +769,18 @@ const { getLanguageColor, getLanguageLogo } = useLanguage()
                     </div>
                 </Deferred>
 
-                <PaginationComponent v-if="props.links && props.links.data.length > 0" class="mt-4"
-                    :pagination="props.links" @page-change="handlePageChange" />
+                <PaginationComponent
+                    v-if="props.links && props.links.data.length > 0"
+                    class="mt-4"
+                    :pagination="props.links"
+                    @page-change="handlePageChange"
+                />
             </div>
         </div>
     </AppLayout>
     <Toaster rich-colors />
 
     <UseTemplate>
-        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId ? selectedLinkId.toString() : ''"
-            @save="handleSaveDeadline" />
+        <DateTimePickerDialog v-model="deadlineDate" :link-id="selectedLinkId ? selectedLinkId.toString() : ''" @save="handleSaveDeadline" />
     </UseTemplate>
 </template>

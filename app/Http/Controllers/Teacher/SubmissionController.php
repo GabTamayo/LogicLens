@@ -12,9 +12,6 @@ use Inertia\Inertia;
 
 class SubmissionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function create($token, SubmissionService $service)
     {
         $activityLink = ActivityLink::with(['activity', 'course'])->where('token', $token)->firstOrFail();

@@ -73,6 +73,13 @@ export interface ActivityDetail {
     links: {
         data: ActivityLink[];
     } & PaginationData;
+    test_cases: Array<{
+        id: number;
+        title: string;
+        input: string;
+        output: string;
+        score: number;
+    }>;
 }
 
 export interface Course {
@@ -154,6 +161,13 @@ export interface SubmissionPageProps {
     studentName: string;
     studentEmail: string;
     hasSubmitted: boolean;
+    testCases: Array<{
+        id: string;
+        title: string;
+        input: string;
+        output: string;
+        order: number;
+    }>;
 }
 
 export type Submission = {
@@ -335,6 +349,24 @@ export interface StudentCourseShowProps {
     course: Course;
     activities?: {
         data: CourseActivityLink[];
+        current_page: number;
+        last_page: number;
+        per_page: number;
+        total: number;
+    };
+    completedActivities?: {
+        data: Array<{
+            id: number;
+            activity_id: number;
+            activity_title: string;
+            activity_language: string;
+            token: string;
+            is_open: boolean;
+            submission_id?: string;
+            score: number | null;
+            total_score: number;
+            submitted_at?: string;
+        }>;
         current_page: number;
         last_page: number;
         per_page: number;

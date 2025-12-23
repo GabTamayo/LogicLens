@@ -50,9 +50,23 @@ class StudentCourseController extends Controller
             'activeTab' => $activeTab,
         ];
 
-        $tabData = $activeTab === 'students'
-            ? ['students' => Inertia::defer(fn() => $service->queryStudents($course, $request->only(['page']))), 'activities' => null]
-            : ['activities' => Inertia::defer(fn() => $service->queryActivities($course, $request->only(['page']))), 'students' => null];
+        $tabData = match ($activeTab) {
+            'students' => [
+                'students' => Inertia::defer(fn () => $service->queryStudents($course, $request->only(['page']))),
+                'activities' => null,
+                'completedActivities' => null,
+            ],
+            'completed' => [
+                'completedActivities' => Inertia::scroll(fn () => $service->queryCompletedActivities($course, $request->only(['page']))),
+                'activities' => null,
+                'students' => null,
+            ],
+            default => [
+                'activities' => Inertia::scroll(fn () => $service->queryActivities($course, $request->only(['page']))),
+                'students' => null,
+                'completedActivities' => null,
+            ],
+        };
 
         return Inertia::render('Student/courses/show', [
             ...$baseData,

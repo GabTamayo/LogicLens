@@ -84,12 +84,15 @@ class StudentCourseService
             ->findOrFail($courseId);
     }
 
-    public function queryActivities($course, array $params): array
+    public function queryActivities($course, array $params)
     {
         $page = $params['page'] ?? 1;
+        $userId = Auth::id();
 
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->where('is_open', true)
+            ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId))
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
@@ -102,8 +105,7 @@ class StudentCourseService
                 'is_open' => $link->is_open,
                 'expires_at' => $link->expires_at,
                 'created_at' => $link->created_at,
-            ])
-            ->toArray();
+            ]);
     }
 
     public function queryStudents($course, array $params): array
@@ -121,5 +123,42 @@ class StudentCourseService
                 'email' => $student->email,
             ])
             ->toArray();
+    }
+
+    public function queryCompletedActivities($course, array $params)
+    {
+        $page = $params['page'] ?? 1;
+        $userId = Auth::id();
+
+        return $course->activityLinks()
+            ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->where(function ($query) use ($userId) {
+                $query->whereHas('submissions', fn ($q) => $q->where('user_id', $userId))
+                    ->orWhere('is_open', false);
+            })
+            ->with(['submissions' => fn ($query) => $query->where('user_id', $userId)
+                ->select('id', 'activity_link_id', 'score', 'created_at')
+                ->latest()
+                ->limit(1),
+            ])
+            ->latest()
+            ->paginate(5, ['*'], 'page', $page)
+            ->withQueryString()
+            ->through(function ($link) {
+                $submission = $link->submissions->first();
+
+                return [
+                    'id' => $link->id,
+                    'activity_id' => $link->activity_id,
+                    'activity_title' => $link->activity->title ?? 'N/A',
+                    'activity_language' => $link->activity->language ?? 'N/A',
+                    'token' => $link->token,
+                    'is_open' => $link->is_open,
+                    'submission_id' => $submission?->id,
+                    'score' => $submission?->score,
+                    'total_score' => $link->activity?->testCases()->sum('score'),
+                    'submitted_at' => $submission?->created_at,
+                ];
+            });
     }
 }

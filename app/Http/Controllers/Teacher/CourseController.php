@@ -64,4 +64,12 @@ class CourseController extends Controller
 
         return back();
     }
+
+    public function destroy(string $courseId)
+    {
+        $course = Auth::user()->courses()->findOrFail($courseId);
+        $course->delete();
+
+        return redirect()->route('courses.index');
+    }
 }
