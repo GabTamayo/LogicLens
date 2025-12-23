@@ -84,7 +84,7 @@ class StudentCourseService
             ->findOrFail($courseId);
     }
 
-    public function queryActivities($course, array $params): array
+    public function queryActivities($course, array $params)
     {
         $page = $params['page'] ?? 1;
         $userId = Auth::id();
@@ -105,8 +105,7 @@ class StudentCourseService
                 'is_open' => $link->is_open,
                 'expires_at' => $link->expires_at,
                 'created_at' => $link->created_at,
-            ])
-            ->toArray();
+            ]);
     }
 
     public function queryStudents($course, array $params): array
@@ -126,7 +125,7 @@ class StudentCourseService
             ->toArray();
     }
 
-    public function queryCompletedActivities($course, array $params): array
+    public function queryCompletedActivities($course, array $params)
     {
         $page = $params['page'] ?? 1;
         $userId = Auth::id();
@@ -160,7 +159,6 @@ class StudentCourseService
                     'total_score' => $link->activity?->testCases()->sum('score'),
                     'submitted_at' => $submission?->created_at,
                 ];
-            })
-            ->toArray();
+            });
     }
 }

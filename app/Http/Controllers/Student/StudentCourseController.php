@@ -57,12 +57,12 @@ class StudentCourseController extends Controller
                 'completedActivities' => null,
             ],
             'completed' => [
-                'completedActivities' => Inertia::defer(fn () => $service->queryCompletedActivities($course, $request->only(['page']))),
+                'completedActivities' => Inertia::scroll(fn () => $service->queryCompletedActivities($course, $request->only(['page']))),
                 'activities' => null,
                 'students' => null,
             ],
             default => [
-                'activities' => Inertia::defer(fn () => $service->queryActivities($course, $request->only(['page']))),
+                'activities' => Inertia::scroll(fn () => $service->queryActivities($course, $request->only(['page']))),
                 'students' => null,
                 'completedActivities' => null,
             ],

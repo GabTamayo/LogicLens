@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import DataTable from '@/components/DataTable.vue';
-import PaginationComponent from '@/components/Pagination.vue';
 import { columns as studentColumns } from '@/components/students(student)/columns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { useLanguage } from '@/composables/useLanguage';
 import { useScore } from '@/composables/useScore';
 import StudentAppLayout from '@/layouts/StudentAppLayout.vue';
 import type { BreadcrumbItem, StudentCourseShowProps } from '@/types';
-import { Deferred, Head, Link, router } from '@inertiajs/vue3';
+import { Deferred, Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Calendar, CalendarCheck, Eye, LoaderCircle, Play } from 'lucide-vue-next';
@@ -26,8 +25,6 @@ const props = defineProps<StudentCourseShowProps>();
 
 const isInitialLoadDone = ref(false);
 const activeTab = ref(props.activeTab || 'activities');
-const activitiesPage = ref(1);
-const completedPage = ref(1);
 const studentsPage = ref(1);
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -42,10 +39,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 watch(activeTab, (newTab) => {
-    const page = newTab === 'students' ? studentsPage.value : newTab === 'completed' ? completedPage.value : activitiesPage.value;
+    const page = newTab === 'students' ? studentsPage.value : 1;
     router.visit(`/student/courses/${props.course.id}`, {
         data: { tab: newTab, page },
-        preserveScroll: true,
+        preserveScroll: false,
         preserveState: true,
         only:
             newTab === 'students'
@@ -53,28 +50,9 @@ watch(activeTab, (newTab) => {
                 : newTab === 'completed'
                   ? ['completedActivities', 'activeTab']
                   : ['activities', 'activeTab'],
+        reset: newTab === 'students' ? [] : newTab === 'completed' ? ['completedActivities'] : ['activities'],
     });
 });
-
-const handleActivitiesPageChange = (page: number) => {
-    activitiesPage.value = page;
-    router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: 'activities' },
-        preserveScroll: true,
-        preserveState: true,
-        only: ['activities'],
-    });
-};
-
-const handleCompletedPageChange = (page: number) => {
-    completedPage.value = page;
-    router.visit(`/student/courses/${props.course.id}`, {
-        data: { page, tab: 'completed' },
-        preserveScroll: true,
-        preserveState: true,
-        only: ['completedActivities'],
-    });
-};
 
 const handleStudentsPageChange = (page: number) => {
     studentsPage.value = page;
@@ -144,60 +122,71 @@ const handleStudentsPageChange = (page: number) => {
                                             <span class="text-muted-foreground">Loading activities...</span>
                                         </div>
                                     </template>
-                                    <div class="space-y-4">
-                                        <div v-if="activities?.data.length" class="space-y-4">
-                                            <Item variant="outline" v-for="activity in activities.data" :key="activity.id">
-                                                <ItemContent>
-                                                    <ItemTitle class="text-xl font-bold capitalize">{{ activity.activity_title }}</ItemTitle>
-                                                    <ItemDescription>
-                                                        <span
-                                                            :class="getLanguageColor(activity.activity_language)"
-                                                            class="mb-2 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
-                                                        >
-                                                            <img
-                                                                v-if="getLanguageLogo(activity.activity_language)"
-                                                                :src="getLanguageLogo(activity.activity_language)!"
-                                                                :alt="activity.activity_language"
-                                                                class="h-4 w-4 object-contain"
-                                                            />
-                                                            {{ activity.activity_language }}
-                                                        </span>
-                                                        <span class="flex items-center gap-1.5">
-                                                            <Calendar class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
-                                                            {{ dayjs(activity.created_at).format('MMM D, YYYY h:mm A') }}
-                                                        </span>
-                                                        <span v-if="activity.expires_at" class="flex items-center gap-1.5">
-                                                            <Calendar class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
-                                                            {{ dayjs(activity.expires_at).format('MMM D, YYYY h:mm A') }}
-                                                        </span>
-                                                        <span v-else class="flex items-center gap-1.5 text-muted-foreground">
-                                                            <Calendar class="h-3.5 w-3.5" />
-                                                            No deadline
-                                                        </span>
-                                                    </ItemDescription>
-                                                </ItemContent>
-                                                <ItemActions>
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger as-child>
-                                                                <Link :href="`/student/submit/${activity.token}`">
-                                                                    <Button size="icon-lg" class="rounded-full">
-                                                                        <Play class="size-5 fill-white stroke-none" />
-                                                                    </Button>
-                                                                </Link>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent> Start </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                </ItemActions>
-                                            </Item>
+                                    <div>
+                                        <div v-if="activities?.data.length">
+                                            <InfiniteScroll data="activities" class="space-y-4">
+                                                <Item
+                                                    variant="outline"
+                                                    v-for="activity in activities.data"
+                                                    :key="activity.id"
+                                                    class="p-6 shadow-md transition-shadow duration-200 hover:shadow-lg"
+                                                >
+                                                    <ItemContent>
+                                                        <ItemTitle class="line-clamp-1 text-xl font-bold capitalize">{{
+                                                            activity.activity_title
+                                                        }}</ItemTitle>
+                                                        <ItemDescription>
+                                                            <span
+                                                                :class="getLanguageColor(activity.activity_language)"
+                                                                class="mb-2 inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
+                                                            >
+                                                                <img
+                                                                    v-if="getLanguageLogo(activity.activity_language)"
+                                                                    :src="getLanguageLogo(activity.activity_language)!"
+                                                                    :alt="activity.activity_language"
+                                                                    class="h-4 w-4 object-contain"
+                                                                />
+                                                                {{ activity.activity_language }}
+                                                            </span>
+                                                            <span class="flex items-center gap-1.5">
+                                                                <Calendar class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                                                                {{ dayjs(activity.created_at).format('MMM D, YYYY h:mm A') }}
+                                                            </span>
+                                                            <span v-if="activity.expires_at" class="flex items-center gap-1.5">
+                                                                <Calendar class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                                                                {{ dayjs(activity.expires_at).format('MMM D, YYYY h:mm A') }}
+                                                            </span>
+                                                            <span v-else class="flex items-center gap-1.5 text-muted-foreground">
+                                                                <Calendar class="h-3.5 w-3.5" />
+                                                                No deadline
+                                                            </span>
+                                                        </ItemDescription>
+                                                    </ItemContent>
+                                                    <ItemActions>
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger as-child>
+                                                                    <Link :href="`/student/submit/${activity.token}`">
+                                                                        <Button size="icon-xl" class="button-3d rounded-full">
+                                                                            <Play class="size-5 fill-white stroke-none" />
+                                                                        </Button>
+                                                                    </Link>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent> Start </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                    </ItemActions>
+                                                </Item>
+
+                                                <template #loading>
+                                                    <div class="mt-10 flex items-center justify-center gap-2 text-muted-foreground">
+                                                        <LoaderCircle class="h-6 w-6 animate-spin" />
+                                                        <div class="text-md font-semibold sm:text-lg">Loading more activities...</div>
+                                                    </div>
+                                                </template>
+                                            </InfiniteScroll>
                                         </div>
                                         <div v-else class="py-8 text-center text-muted-foreground">No activities found</div>
-                                        <PaginationComponent
-                                            v-if="activities && activities.data.length > 0"
-                                            :pagination="activities"
-                                            @page-change="handleActivitiesPageChange"
-                                        />
                                     </div>
                                 </Deferred>
                             </template>
@@ -216,103 +205,116 @@ const handleStudentsPageChange = (page: number) => {
                                             <span class="text-muted-foreground">Loading completed activities...</span>
                                         </div>
                                     </template>
-                                    <div class="space-y-4">
-                                        <div v-if="completedActivities?.data.length" class="space-y-4">
-                                            <Item
-                                                variant="outline"
-                                                v-for="activity in completedActivities.data"
-                                                :key="activity.id"
-                                                :class="[
-                                                    activity.submitted_at
-                                                        ? getScoreBackgroundClass(activity.score, activity.total_score)
-                                                        : 'bg-slate-500 dark:bg-slate-700',
-                                                    !activity.is_open ? 'relative' : ''
-                                                ]"
-                                                class="shadow-md transition-shadow duration-200 hover:shadow-lg"
-                                            >
-                                                <div v-if="!activity.is_open" class="absolute inset-0 bg-slate-900/40 dark:bg-slate-950/50 rounded-lg pointer-events-none"></div>
-                                                <ItemContent :class="!activity.is_open ? 'relative z-10 opacity-80' : ''">
-                                                    <ItemTitle class="text-xl font-bold text-white capitalize">
-                                                        {{ activity.activity_title }}
-                                                    </ItemTitle>
-                                                    <ItemDescription>
-                                                        <span
-                                                            class="mb-2 inline-flex items-center gap-1.5 rounded-md border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
-                                                        >
-                                                            <img
-                                                                v-if="getLanguageLogo(activity.activity_language)"
-                                                                :src="getLanguageLogo(activity.activity_language)!"
-                                                                :alt="activity.activity_language"
-                                                                class="h-4 w-4 object-contain"
-                                                            />
-                                                            {{ activity.activity_language }}
-                                                        </span>
-
-                                                        <div class="flex items-center gap-3">
+                                    <div>
+                                        <div v-if="completedActivities?.data.length">
+                                            <InfiniteScroll data="completedActivities" class="space-y-4">
+                                                <Item
+                                                    v-for="activity in completedActivities.data"
+                                                    :key="activity.id"
+                                                    :class="[
+                                                        activity.submitted_at
+                                                            ? getScoreBackgroundClass(activity.score, activity.total_score)
+                                                            : 'bg-slate-400 dark:bg-slate-600',
+                                                        !activity.is_open ? 'relative' : '',
+                                                    ]"
+                                                    class="p-6 shadow-md transition-shadow duration-200 hover:shadow-lg"
+                                                >
+                                                    <div
+                                                        v-if="!activity.is_open"
+                                                        class="pointer-events-none absolute inset-0 rounded-lg bg-slate-900/40 dark:bg-slate-950/50"
+                                                    ></div>
+                                                    <ItemContent :class="!activity.is_open ? 'relative z-10 opacity-80' : ''">
+                                                        <ItemTitle class="line-clamp-1 text-xl font-bold text-white capitalize">
+                                                            {{ activity.activity_title }}
+                                                        </ItemTitle>
+                                                        <ItemDescription>
                                                             <span
-                                                                v-if="!activity.is_open"
-                                                                class="text-xs sm:text-md flex items-center gap-1.5 font-semibold text-white/90"
+                                                                class="mb-2 inline-flex items-center gap-1.5 rounded-md border border-white/30 bg-white/20 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm"
                                                             >
-                                                                <CalendarCheck class="h-3.5 w-3.5" />
-                                                                Closed
+                                                                <img
+                                                                    v-if="getLanguageLogo(activity.activity_language)"
+                                                                    :src="getLanguageLogo(activity.activity_language)!"
+                                                                    :alt="activity.activity_language"
+                                                                    class="h-4 w-4 object-contain"
+                                                                />
+                                                                {{ activity.activity_language }}
                                                             </span>
-                                                            <div class="hidden md:block">
-                                                            <span v-if="activity.submitted_at" class="text-xs sm:text-md flex items-center gap-1.5 text-white/90">
-                                                                <Calendar class="h-3.5 w-3.5" />
-                                                                Submitted: {{ dayjs(activity.submitted_at).format('MMM D, YYYY h:mm A') }}
-                                                            </span>
+
+                                                            <div class="flex items-center gap-3">
+                                                                <span
+                                                                    v-if="!activity.is_open"
+                                                                    class="sm:text-md flex items-center gap-1.5 text-xs font-semibold text-white/90"
+                                                                >
+                                                                    <CalendarCheck class="h-3.5 w-3.5" />
+                                                                    Closed
+                                                                </span>
+                                                                <div class="hidden md:block">
+                                                                    <span
+                                                                        v-if="activity.submitted_at"
+                                                                        class="sm:text-md flex items-center gap-1.5 text-xs text-white/90"
+                                                                    >
+                                                                        <Calendar class="h-3.5 w-3.5" />
+                                                                        Submitted: {{ dayjs(activity.submitted_at).format('MMM D, YYYY h:mm A') }}
+                                                                    </span>
+                                                                </div>
                                                             </div>
+                                                        </ItemDescription>
+                                                    </ItemContent>
+                                                    <ItemActions
+                                                        :class="
+                                                            !activity.is_open
+                                                                ? 'relative z-10 flex items-center gap-4 opacity-80'
+                                                                : 'flex items-center gap-4'
+                                                        "
+                                                    >
+                                                        <div class="flex flex-col items-end gap-1">
+                                                            <span class="text-xs font-medium tracking-wider text-white/70 uppercase">Score</span>
+                                                            <span v-if="activity.submitted_at" class="text-lg font-bold text-white sm:text-2xl">
+                                                                {{ getScoreDisplay(activity.score, activity.total_score).text }}
+                                                            </span>
+                                                            <span v-else class="text-sm font-semibold text-white/70 italic"> Not Submitted </span>
                                                         </div>
-                                                    </ItemDescription>
-                                                </ItemContent>
-                                                <ItemActions :class="!activity.is_open ? 'relative z-10 opacity-80 flex items-center gap-4' : 'flex items-center gap-4'">
-                                                    <div class="flex flex-col items-end gap-1">
-                                                        <span class="text-xs font-medium tracking-wider text-white/70 uppercase">Score</span>
-                                                        <span v-if="activity.submitted_at" class="text-lg sm:text-2xl font-bold text-white">
-                                                            {{ getScoreDisplay(activity.score, activity.total_score).text }}
-                                                        </span>
-                                                        <span v-else class="text-sm font-semibold italic text-white/70">
-                                                            Not Submitted
-                                                        </span>
-                                                    </div>
-                                                    <TooltipProvider>
-                                                        <Tooltip>
-                                                            <TooltipTrigger as-child>
-                                                                <div>
-                                                                    <Link v-if="activity.is_open" :href="`/student/submit/${activity.token}`">
+                                                        <TooltipProvider>
+                                                            <Tooltip>
+                                                                <TooltipTrigger as-child>
+                                                                    <div>
+                                                                        <Link v-if="activity.is_open" :href="`/student/submit/${activity.token}`">
+                                                                            <Button
+                                                                                size="icon-xl"
+                                                                                variant="secondary"
+                                                                                class="button-3d-secondary rounded-full border-white/30 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30"
+                                                                            >
+                                                                                <Eye class="size-5" />
+                                                                            </Button>
+                                                                        </Link>
                                                                         <Button
-                                                                            size="icon-lg"
+                                                                            v-else
+                                                                            size="icon-xl"
                                                                             variant="secondary"
-                                                                            class="rounded-full border-white/30 bg-white/20 text-white backdrop-blur-sm hover:bg-white/30"
+                                                                            disabled
+                                                                            class="cursor-not-allowed rounded-full border-white/20 bg-white/10 text-white/50 backdrop-blur-sm"
                                                                         >
                                                                             <Eye class="size-5" />
                                                                         </Button>
-                                                                    </Link>
-                                                                    <Button
-                                                                        v-else
-                                                                        size="icon-lg"
-                                                                        variant="secondary"
-                                                                        disabled
-                                                                        class="cursor-not-allowed rounded-full border-white/20 bg-white/10 text-white/50 backdrop-blur-sm"
-                                                                    >
-                                                                        <Eye class="size-5" />
-                                                                    </Button>
-                                                                </div>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                {{ activity.is_open ? 'View Submission' : 'Activity Closed' }}
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </TooltipProvider>
-                                                </ItemActions>
-                                            </Item>
+                                                                    </div>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    {{ activity.is_open ? 'View Submission' : 'Activity Closed' }}
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
+                                                    </ItemActions>
+                                                </Item>
+
+                                                <template #loading>
+                                                    <div class="mt-10 flex items-center justify-center gap-2 text-muted-foreground">
+                                                        <LoaderCircle class="h-6 w-6 animate-spin" />
+                                                        <div class="text-md font-semibold sm:text-lg">Loading more activities...</div>
+                                                    </div>
+                                                </template>
+                                            </InfiniteScroll>
                                         </div>
                                         <div v-else class="py-8 text-center text-muted-foreground">No completed activities found</div>
-                                        <PaginationComponent
-                                            v-if="completedActivities && completedActivities.data.length > 0"
-                                            :pagination="completedActivities"
-                                            @page-change="handleCompletedPageChange"
-                                        />
                                     </div>
                                 </Deferred>
                             </template>
@@ -350,3 +352,52 @@ const handleStudentsPageChange = (page: number) => {
         </div>
     </StudentAppLayout>
 </template>
+
+<style scoped>
+/* Cartoonish 3D Button for Primary Button (Play button) */
+.button-3d {
+    position: relative;
+    transform: translateY(-4px);
+    box-shadow: 0 5px 0 0 rgb(0, 3, 153) !important;
+    transition: all 0.1s ease !important;
+}
+
+.button-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 0 0 rgb(0, 3, 153) !important;
+}
+
+.button-3d:active {
+    transform: translateY(0px);
+    box-shadow: 0 0px 0 0 rgb(0, 3, 153) !important;
+}
+
+/* Cartoonish 3D Button for Secondary Button (Eye button) */
+.button-3d-secondary {
+    position: relative;
+    transform: translateY(-4px);
+    box-shadow: 0 5px 0 0 rgba(0, 0, 0, 0.438);
+    transition: all 0.1s ease;
+}
+
+.button-3d-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.438);
+}
+
+.button-3d-secondary:active {
+    transform: translateY(0px);
+    box-shadow: 0 0px 0 0 rgba(0, 0, 0, 0.438);
+}
+
+/* Ensure smooth transitions for icon inside buttons */
+.button-3d:hover svg,
+.button-3d-secondary:hover svg {
+    transition: transform 0.1s ease;
+}
+
+.button-3d:active svg,
+.button-3d-secondary:active svg {
+    transform: scale(0.95);
+}
+</style>
