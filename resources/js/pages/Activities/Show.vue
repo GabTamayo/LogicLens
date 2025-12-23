@@ -21,6 +21,7 @@ import {
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { NumberField, NumberFieldContent, NumberFieldDecrement, NumberFieldIncrement, NumberFieldInput } from '@/components/ui/number-field';
+import ScrollArea from '@/components/ui/scroll-area/ScrollArea.vue';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import SelectLabel from '@/components/ui/select/SelectLabel.vue';
 import { Separator } from '@/components/ui/separator';
@@ -244,7 +245,6 @@ const handlePageChange = (page: number) => {
     );
 };
 
-// Copy to Clipboard
 function copy(text: string) {
     navigator.clipboard.writeText(text);
     toast('Link copied to clipboard', {
@@ -252,7 +252,6 @@ function copy(text: string) {
     });
 }
 
-// Deadline Dialog Management
 const [UseTemplate, GridForm] = createReusableTemplate();
 const isDesktop = useMediaQuery('(min-width: 420px)');
 const isOpen = ref(false);
@@ -298,7 +297,6 @@ usePoll(30000, {
     only: ['links'],
 });
 
-// Language utilities
 const { getLanguageColor, getLanguageLogo } = useLanguage();
 </script>
 
@@ -389,8 +387,8 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
             </Card>
 
             <!-- Content Section -->
-            <Card>
-                <CardHeader>
+            <Card class="flex flex-col">
+                <CardHeader class="flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <div>
                             <CardTitle>Activity Content</CardTitle>
@@ -414,32 +412,36 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div v-if="!isEditing" class="min-h-[200px] border">
-                        <div v-if="isContentEmpty" class="flex flex-col items-center justify-center p-12 text-center">
-                            <div class="mb-4 rounded-full bg-muted p-3">
-                                <FileText class="h-6 w-6 text-muted-foreground" />
+                <ScrollArea class="max-h-[600px]">
+                    <CardContent>
+                        <div v-if="!isEditing" class="min-h-[200px] border">
+                            <div v-if="isContentEmpty" class="flex flex-col items-center justify-center p-12 text-center">
+                                <div class="mb-4 rounded-full bg-muted p-3">
+                                    <FileText class="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <h3 class="mb-1 text-lg font-semibold">No content added yet</h3>
+                                <p class="mb-4 max-w-sm text-sm text-muted-foreground">
+                                    Add instructions, requirements, or details for this activity
+                                </p>
+                                <Button variant="outline" size="sm" @click="toggleEdit">
+                                    <Pencil class="mr-2 h-4 w-4" />
+                                    Add Content
+                                </Button>
                             </div>
-                            <h3 class="mb-1 text-lg font-semibold">No content added yet</h3>
-                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">Add instructions, requirements, or details for this activity</p>
-                            <Button variant="outline" size="sm" @click="toggleEdit">
-                                <Pencil class="mr-2 h-4 w-4" />
-                                Add Content
-                            </Button>
+
+                            <div v-else class="prose max-w-none p-4 dark:prose-invert" v-html="props.content"></div>
                         </div>
 
-                        <div v-else class="prose max-w-none p-4 dark:prose-invert" v-html="props.content"></div>
-                    </div>
-
-                    <div v-else>
-                        <RichTextEditor v-model="editForm.content" />
-                    </div>
-                </CardContent>
+                        <div v-else>
+                            <RichTextEditor v-model="editForm.content" />
+                        </div>
+                    </CardContent>
+                </ScrollArea>
             </Card>
 
             <!-- Test Cases Section -->
-            <Card>
-                <CardHeader>
+            <Card class="flex flex-col">
+                <CardHeader class="flex-shrink-0">
                     <div class="flex items-center justify-between">
                         <div>
                             <CardTitle>Test Cases</CardTitle>
@@ -463,122 +465,126 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent>
-                    <div v-if="!isEditingTestCases">
-                        <div v-if="isTestCasesEmpty" class="flex min-h-[200px] flex-col items-center justify-center border p-12 text-center">
-                            <div class="mb-4 rounded-full bg-muted p-3">
-                                <FileText class="h-6 w-6 text-muted-foreground" />
+                <ScrollArea class="max-h-[600px]">
+                    <CardContent>
+                        <div v-if="!isEditingTestCases">
+                            <div v-if="isTestCasesEmpty" class="flex min-h-[200px] flex-col items-center justify-center border p-12 text-center">
+                                <div class="mb-4 rounded-full bg-muted p-3">
+                                    <FileText class="h-6 w-6 text-muted-foreground" />
+                                </div>
+                                <h3 class="mb-1 text-lg font-semibold">No test cases added yet</h3>
+                                <p class="mb-4 max-w-sm text-sm text-muted-foreground">
+                                    Add test cases to automatically evaluate student submissions
+                                </p>
+                                <Button variant="outline" size="sm" @click="toggleEditTestCases">
+                                    <Pencil class="mr-2 h-4 w-4" />
+                                    Add Test Cases
+                                </Button>
                             </div>
-                            <h3 class="mb-1 text-lg font-semibold">No test cases added yet</h3>
-                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">Add test cases to automatically evaluate student submissions</p>
-                            <Button variant="outline" size="sm" @click="toggleEditTestCases">
-                                <Pencil class="mr-2 h-4 w-4" />
-                                Add Test Cases
-                            </Button>
+
+                            <div v-else class="space-y-4">
+                                <div v-for="(testCase, index) in props.test_cases" :key="index" class="space-y-3 rounded-lg border bg-muted/10 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <Badge>{{ testCase.score }} pts</Badge>
+                                            <h4 class="font-medium">{{ testCase.title || `Test Case ${index + 1}` }}</h4>
+                                        </div>
+                                    </div>
+                                    <div v-if="testCase.input" class="space-y-1">
+                                        <p class="text-sm font-medium text-muted-foreground">Input:</p>
+                                        <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.input }}</pre>
+                                    </div>
+                                    <div class="space-y-1">
+                                        <p class="text-sm font-medium text-muted-foreground">Expected Output:</p>
+                                        <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.output }}</pre>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div v-else class="space-y-4">
-                            <div v-for="(testCase, index) in props.test_cases" :key="index" class="space-y-3 rounded-lg border bg-muted/10 p-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <Badge>{{ testCase.score }} pts</Badge>
-                                        <h4 class="font-medium">{{ testCase.title || `Test Case ${index + 1}` }}</h4>
-                                    </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-muted-foreground">
+                                        {{ testCasesForm.test_cases.length }} test case{{ testCasesForm.test_cases.length !== 1 ? 's' : '' }}
+                                    </p>
                                 </div>
-                                <div v-if="testCase.input" class="space-y-1">
-                                    <p class="text-sm font-medium text-muted-foreground">Input:</p>
-                                    <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.input }}</pre>
-                                </div>
-                                <div class="space-y-1">
-                                    <p class="text-sm font-medium text-muted-foreground">Expected Output:</p>
-                                    <pre class="rounded-md bg-muted p-3 text-sm">{{ testCase.output }}</pre>
-                                </div>
+                                <TooltipProvider>
+                                    <Tooltip>
+                                        <TooltipTrigger as-child>
+                                            <Button class="rounded-full" type="button" variant="outline" @click="addTestCase">
+                                                <Plus class="h-4 w-4" />
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Add a new test case</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
                             </div>
-                        </div>
-                    </div>
 
-                    <div v-else class="space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm text-muted-foreground">
-                                    {{ testCasesForm.test_cases.length }} test case{{ testCasesForm.test_cases.length !== 1 ? 's' : '' }}
-                                </p>
-                            </div>
-                            <TooltipProvider>
-                                <Tooltip>
-                                    <TooltipTrigger as-child>
-                                        <Button class="rounded-full" type="button" variant="outline" @click="addTestCase">
-                                            <Plus class="h-4 w-4" />
+                            <div v-if="testCasesForm.test_cases.length > 0" class="space-y-4">
+                                <div
+                                    v-for="(testCase, index) in testCasesForm.test_cases"
+                                    :key="index"
+                                    class="space-y-3 rounded-lg border bg-muted/10 p-4"
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <div class="space-y-2">
+                                            <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                Score
+                                                <span class="font-light text-muted-foreground">(Points)</span>
+                                            </label>
+                                            <NumberField
+                                                v-model="testCase.score"
+                                                :step="0.5"
+                                                :format-options="{
+                                                    signDisplay: 'exceptZero',
+                                                    minimumFractionDigits: 1,
+                                                }"
+                                            >
+                                                <NumberFieldContent>
+                                                    <NumberFieldDecrement />
+                                                    <NumberFieldInput />
+                                                    <NumberFieldIncrement />
+                                                </NumberFieldContent>
+                                            </NumberField>
+                                            <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.score`]" />
+                                        </div>
+                                        <Button type="button" variant="destructive" size="icon" @click="removeTestCase(index)">
+                                            <Trash2 class="h-4 w-4" />
                                         </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                        <p>Add a new test case</p>
-                                    </TooltipContent>
-                                </Tooltip>
-                            </TooltipProvider>
-                        </div>
+                                    </div>
 
-                        <div v-if="testCasesForm.test_cases.length > 0" class="space-y-4">
-                            <div
-                                v-for="(testCase, index) in testCasesForm.test_cases"
-                                :key="index"
-                                class="space-y-3 rounded-lg border bg-muted/10 p-4"
-                            >
-                                <div class="flex items-center justify-between">
                                     <div class="space-y-2">
                                         <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Score
-                                            <span class="font-light text-muted-foreground">(Points)</span>
+                                            Title
                                         </label>
-                                        <NumberField
-                                            v-model="testCase.score"
-                                            :step="0.5"
-                                            :format-options="{
-                                                signDisplay: 'exceptZero',
-                                                minimumFractionDigits: 1,
-                                            }"
-                                        >
-                                            <NumberFieldContent>
-                                                <NumberFieldDecrement />
-                                                <NumberFieldInput />
-                                                <NumberFieldIncrement />
-                                            </NumberFieldContent>
-                                        </NumberField>
-                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.score`]" />
+                                        <Input type="text" v-model="testCase.title" placeholder="e.g., Basic Addition" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.title`]" />
                                     </div>
-                                    <Button type="button" variant="destructive" size="icon" @click="removeTestCase(index)">
-                                        <Trash2 class="h-4 w-4" />
-                                    </Button>
-                                </div>
 
-                                <div class="space-y-2">
-                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Title
-                                    </label>
-                                    <Input type="text" v-model="testCase.title" placeholder="e.g., Basic Addition" />
-                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.title`]" />
-                                </div>
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Input
+                                            <span class="font-light text-muted-foreground">(Optional)</span>
+                                        </label>
+                                        <Textarea v-model="testCase.input" placeholder="Input for the test case" :rows="2" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.input`]" />
+                                    </div>
 
-                                <div class="space-y-2">
-                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Input
-                                        <span class="font-light text-muted-foreground">(Optional)</span>
-                                    </label>
-                                    <Textarea v-model="testCase.input" placeholder="Input for the test case" :rows="2" />
-                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.input`]" />
-                                </div>
-
-                                <div class="space-y-2">
-                                    <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Expected Output
-                                    </label>
-                                    <Textarea v-model="testCase.output" placeholder="Expected output for the test case" :rows="2" />
-                                    <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.output`]" />
+                                    <div class="space-y-2">
+                                        <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            Expected Output
+                                        </label>
+                                        <Textarea v-model="testCase.output" placeholder="Expected output for the test case" :rows="2" />
+                                        <InputError :message="(testCasesForm.errors as any)[`test_cases.${index}.output`]" />
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </CardContent>
+                    </CardContent>
+                </ScrollArea>
             </Card>
 
             <Separator />

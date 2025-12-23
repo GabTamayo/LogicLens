@@ -20,7 +20,6 @@ class ActivityLinkFactory extends Factory
         return [
             'activity_id' => Activity::factory(), // Creates a real activity
             'token' => bin2hex(random_bytes(16)), // Matches your GenerateActivityLink format
-            'name' => fake()->words(3, true), // e.g., "submission link one"
             'is_open' => true,
             'expires_at' => null,
         ];
@@ -31,7 +30,7 @@ class ActivityLinkFactory extends Factory
      */
     public function expired(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'expires_at' => now()->subDay(),
         ]);
     }
@@ -41,7 +40,7 @@ class ActivityLinkFactory extends Factory
      */
     public function withExpiration(int $days = 7): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'expires_at' => now()->addDays($days),
         ]);
     }
@@ -51,7 +50,7 @@ class ActivityLinkFactory extends Factory
      */
     public function closed(): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'is_open' => false,
         ]);
     }

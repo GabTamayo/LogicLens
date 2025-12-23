@@ -67,8 +67,12 @@ const updateViewport = () => {
 const STORAGE_KEY = `submission_${props.token}`;
 let backendSaveTimeout: ReturnType<typeof setTimeout> | null = null;
 
-const form = useForm({
+const form = useForm<{
+    code_content: string;
+    test_results: { test_case_id: string; passed: boolean }[];
+}>({
     code_content: '',
+    test_results: [],
 });
 
 const getDefaultCodeTemplate = (): string => {
@@ -175,6 +179,14 @@ watch(
 );
 
 const submit = () => {
+    // Collect test results
+    const testResults = Object.entries(testCaseResults.value).map(([testCaseId, result]) => ({
+        test_case_id: testCaseId,
+        passed: result.passed,
+    }));
+
+    form.test_results = testResults;
+
     form.post(`/student/submit/${props.token}`, {
         onSuccess: () => {
             form.reset();

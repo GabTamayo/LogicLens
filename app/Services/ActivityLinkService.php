@@ -34,6 +34,8 @@ class ActivityLinkService
                 'student_email' => $submission->user->email,
                 'code_content' => $submission->code_content,
                 'language' => $submission->language,
+                'score' => $submission->score,
+                'total_score' => $submission->total_score, // Computed from activity test cases
                 'created_at' => $submission->created_at,
             ];
         });

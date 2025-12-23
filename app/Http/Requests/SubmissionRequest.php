@@ -18,6 +18,9 @@ class SubmissionRequest extends FormRequest
     {
         return [
             'code_content' => ['required', 'string', 'min:10'],
+            'test_results' => ['nullable', 'array'],
+            'test_results.*.test_case_id' => ['required', 'string', 'exists:test_cases,id'],
+            'test_results.*.passed' => ['required', 'boolean'],
         ];
     }
 

@@ -25,15 +25,29 @@ class Submission extends Model
         'draft_code',
         'draft_stdin',
         'draft_saved_at',
+        'score',
     ];
 
     protected $casts = [
         'draft_saved_at' => 'datetime',
+        'score' => 'decimal:2',
     ];
+
+    protected $appends = ['total_score'];
 
     public function activityLink(): BelongsTo
     {
         return $this->belongsTo(ActivityLink::class);
+    }
+
+    public function getTotalScoreAttribute(): string
+    {
+        return number_format(
+            $this->activityLink?->activity?->testCases()->sum('score') ?? 0,
+            2,
+            '.',
+            ''
+        );
     }
 
     public function user(): BelongsTo
@@ -63,7 +77,7 @@ class Submission extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'code_content', 'language', 'created_at');
+        return $query->select('id', 'user_id', 'code_content', 'language', 'score', 'activity_link_id', 'created_at');
     }
 
     public function scopeFilterByStudent($query, ?string $name = null)
