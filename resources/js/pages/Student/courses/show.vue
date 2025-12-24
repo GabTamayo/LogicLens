@@ -14,7 +14,7 @@ import { Deferred, Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { Calendar, CalendarCheck, Eye, LoaderCircle, Play } from 'lucide-vue-next';
-import { ref, watch } from 'vue';
+import { onMounted, onUnmounted, ref, watch } from 'vue';
 
 dayjs.extend(relativeTime);
 
@@ -26,6 +26,7 @@ const props = defineProps<StudentCourseShowProps>();
 const isInitialLoadDone = ref(false);
 const activeTab = ref(props.activeTab || 'activities');
 const studentsPage = ref(1);
+const scrollOffset = ref(0);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -63,6 +64,19 @@ const handleStudentsPageChange = (page: number) => {
         only: ['students'],
     });
 };
+
+// Handle scroll animation
+const handleScroll = () => {
+    scrollOffset.value = window.scrollY;
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
@@ -192,7 +206,7 @@ const handleStudentsPageChange = (page: number) => {
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
-                                <span class="text-muted-foreground">Loading activities...</span>
+                                <span class="text-md font-semibold sm:text-lg  text-muted-foreground">Loading activities...</span>
                             </div>
                         </TabsContent>
 
@@ -214,16 +228,23 @@ const handleStudentsPageChange = (page: number) => {
                                                     :class="[
                                                         activity.submitted_at
                                                             ? getScoreBackgroundClass(activity.score, activity.total_score)
-                                                            : 'bg-slate-400 dark:bg-slate-600',
-                                                        !activity.is_open ? 'relative' : '',
+                                                            : 'bg-slate-300 dark:bg-slate-600',
+                                                        'relative',
                                                     ]"
-                                                    class="p-6 shadow-md transition-shadow duration-200 hover:shadow-lg"
+                                                    class="overflow-hidden p-6"
                                                 >
+                                                    <!-- Diagonal stripe overlay for submitted items with scroll animation -->
+                                                    <div
+                                                        v-if="activity.submitted_at"
+                                                        class="submitted-overlay-stripes"
+                                                        :style="{ backgroundPosition: `${scrollOffset * 0.5}px 0` }"
+                                                    ></div>
+
                                                     <div
                                                         v-if="!activity.is_open"
-                                                        class="pointer-events-none absolute inset-0 rounded-lg bg-slate-900/40 dark:bg-slate-950/50"
+                                                        class="pointer-events-none absolute inset-0 z-20 rounded-lg bg-slate-900/40 dark:bg-slate-950/50"
                                                     ></div>
-                                                    <ItemContent :class="!activity.is_open ? 'relative z-10 opacity-80' : ''">
+                                                    <ItemContent :class="!activity.is_open ? 'relative z-30 opacity-80' : 'relative z-10'">
                                                         <ItemTitle class="line-clamp-1 text-xl font-bold text-white capitalize">
                                                             {{ activity.activity_title }}
                                                         </ItemTitle>
@@ -263,8 +284,8 @@ const handleStudentsPageChange = (page: number) => {
                                                     <ItemActions
                                                         :class="
                                                             !activity.is_open
-                                                                ? 'relative z-10 flex items-center gap-4 opacity-80'
-                                                                : 'flex items-center gap-4'
+                                                                ? 'relative z-30 flex items-center gap-4 opacity-80'
+                                                                : 'relative z-10 flex items-center gap-4'
                                                         "
                                                     >
                                                         <div class="flex flex-col items-end gap-1">
@@ -320,7 +341,7 @@ const handleStudentsPageChange = (page: number) => {
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
-                                <span class="text-muted-foreground">Loading completed activities...</span>
+                                <span class="text-md font-semibold sm:text-lg text-muted-foreground">Loading completed activities...</span>
                             </div>
                         </TabsContent>
 
@@ -343,7 +364,7 @@ const handleStudentsPageChange = (page: number) => {
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">
                                 <LoaderCircle class="h-6 w-6 animate-spin text-muted-foreground" />
-                                <span class="text-muted-foreground">Loading students...</span>
+                                <span class="text-md font-semibold sm:text-lg  text-muted-foreground">Loading students...</span>
                             </div>
                         </TabsContent>
                     </Tabs>
@@ -354,6 +375,21 @@ const handleStudentsPageChange = (page: number) => {
 </template>
 
 <style scoped>
+/* Diagonal stripe overlay for submitted items */
+.submitted-overlay-stripes {
+    position: absolute;
+    top: -100%;
+    left: -100%;
+    right: -100%;
+    bottom: -100%;
+    background: repeating-linear-gradient(45deg, transparent, transparent 120px, rgba(255, 255, 255, 0.08) 120px, rgba(255, 255, 255, 0.08) 240px);
+    background-size: 339px 339px; /* sqrt(240^2 + 240^2) for seamless 45deg pattern */
+    pointer-events: none;
+    z-index: 1;
+    border-radius: inherit;
+    transition: background-position 0.5s ease-out;
+}
+
 /* Cartoonish 3D Button for Primary Button (Play button) */
 .button-3d {
     position: relative;
@@ -364,7 +400,7 @@ const handleStudentsPageChange = (page: number) => {
 
 .button-3d:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 0 0 rgb(0, 3, 153) !important;
+    box-shadow: 0 4px 0 0 rgb(0, 3, 153) !important;
 }
 
 .button-3d:active {
@@ -382,7 +418,7 @@ const handleStudentsPageChange = (page: number) => {
 
 .button-3d-secondary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.438);
+    box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.438);
 }
 
 .button-3d-secondary:active {
