@@ -213,7 +213,7 @@ const updateDetectionFilter = (column: string, value: string) => {
         <template #header-actions>
             <AlertDialogDelete
                 :endpoint="`/activities/${props.activityId}/links/${props.link.id}`"
-                type="link"
+                type="submissions"
                 buttonText="Delete Link"
                 :item-name="props.link.course?.name || 'this link'"
             />

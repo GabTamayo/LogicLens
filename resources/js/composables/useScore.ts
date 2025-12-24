@@ -38,7 +38,7 @@ export function useScore() {
         const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0;
         return percentage >= 70 ? 'bg-green-600 dark:bg-green-700' :
                percentage >= 50 ? 'bg-yellow-600 dark:bg-yellow-700' :
-               'bg-red-900 dark:bg-red-800';
+               'bg-red-700 dark:bg-red-800';
     };
 
     return {

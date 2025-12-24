@@ -107,7 +107,6 @@ watch(activeTab, (newTab) => {
     const page = newTab === 'students' ? studentsPage.value : 1;
     router.visit(`/student/courses/${props.course.id}`, {
         data: { tab: newTab, page },
-        preserveScroll: false,
         preserveState: true,
         only:
             newTab === 'students'
