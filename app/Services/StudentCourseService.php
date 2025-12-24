@@ -158,6 +158,7 @@ class StudentCourseService
                     'score' => $submission?->score,
                     'total_score' => $link->activity?->testCases()->sum('score'),
                     'submitted_at' => $submission?->created_at,
+                    'created_at' => $link->created_at,
                 ];
             });
     }

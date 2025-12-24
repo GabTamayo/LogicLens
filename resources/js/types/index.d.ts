@@ -365,6 +365,7 @@ export interface StudentCourseShowProps {
             submission_id?: string;
             score: number | null;
             total_score: number;
+            created_at: string;
             submitted_at?: string;
         }>;
         current_page: number;
