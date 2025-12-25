@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DataTable from '@/components/DataTable.vue';
 import { columns as studentColumns } from '@/components/students(student)/columns';
+import AspectRatio from '@/components/ui/aspect-ratio/AspectRatio.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -150,6 +151,11 @@ onUnmounted(() => {
             <!-- Header Card -->
             <Card>
                 <CardHeader>
+                    <AspectRatio :ratio="16 / 4" class="rounded-lg bg-muted">
+                        <img :src="`/images/cover-photos/${course.cover_photo}`" alt="Course cover" class="h-full w-full rounded-lg object-cover" />
+                    </AspectRatio>
+                </CardHeader>
+                <CardContent>
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-3">
                             <div class="flex flex-wrap items-center">
@@ -160,7 +166,7 @@ onUnmounted(() => {
                             </CardDescription>
                         </div>
                     </div>
-                </CardHeader>
+                </CardContent>
             </Card>
 
             <!-- Tabs Section -->

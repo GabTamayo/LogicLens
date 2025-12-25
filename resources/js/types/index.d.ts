@@ -86,6 +86,7 @@ export interface Course {
     id: string;
     name: string;
     access_code: string;
+    cover_photo: string;
     is_active: boolean;
     created_at: string;
     enrolled_at?: string;

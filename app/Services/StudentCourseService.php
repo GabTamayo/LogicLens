@@ -17,7 +17,7 @@ class StudentCourseService
                 ->when($search, function ($query) use ($search) {
                     $query->where('courses.name', 'like', '%'.$search.'%');
                 })
-                ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.created_at')
+                ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.cover_photo')
                 ->when($sort, function ($query) use ($sort) {
                     match ($sort) {
                         'name_asc' => $query->orderBy('courses.name', 'asc'),
@@ -35,6 +35,7 @@ class StudentCourseService
                     'user_id' => $course->user_id,
                     'name' => $course->name,
                     'enrolled_at' => $course->pivot->enrolled_at,
+                    'cover_photo' => $course->cover_photo,
                     'user' => $course->user,
                 ]),
             'filters' => [
@@ -79,7 +80,7 @@ class StudentCourseService
     public function getEnrolledCourse(string $courseId)
     {
         return Auth::user()->enrolledCourses()
-            ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.created_at')
+            ->select('courses.id', 'courses.user_id', 'courses.name', 'courses.cover_photo', 'courses.created_at')
             ->with('user:id,name')
             ->findOrFail($courseId);
     }

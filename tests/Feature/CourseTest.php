@@ -8,7 +8,7 @@ uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 it('has fillable attributes', function () {
     $course = new Course;
 
-    expect($course->getFillable())->toBe(['name', 'access_code', 'is_active']);
+    expect($course->getFillable())->toBe(['name', 'access_code', 'cover_photo', 'is_active']);
 });
 
 it('can be created with valid attributes', function () {
