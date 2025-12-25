@@ -11,8 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import FilePondImageUpload from '@/components/FilePondImageUpload.vue';
 
 const props = defineProps<{
     modelValue: string;
@@ -23,8 +22,8 @@ const emit = defineEmits<{
 }>();
 
 const isImageDialogOpen = ref(false);
-const imageFile = ref<File | null>(null);
 const imagePreview = ref<string>('');
+const filePondRef = ref<InstanceType<typeof FilePondImageUpload> | null>(null);
 
 const editor = useEditor({
     editorProps: {
@@ -77,28 +76,12 @@ const openImageDialog = (): void => {
     isImageDialogOpen.value = true;
 };
 
-const handleFileSelect = (event: Event): void => {
-    const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
+const handleFileProcessed = (file: File, base64: string): void => {
+    imagePreview.value = base64;
+};
 
-    if (!file) {
-        return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
-        return;
-    }
-
-    imageFile.value = file;
-
-    // Convert to base64 for preview and insertion
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const result = e.target?.result as string;
-        imagePreview.value = result;
-    };
-    reader.readAsDataURL(file);
+const handleFileRemoved = (): void => {
+    imagePreview.value = '';
 };
 
 const insertImage = (): void => {
@@ -112,7 +95,7 @@ const insertImage = (): void => {
     }).run();
 
     // Reset and close dialog
-    imageFile.value = null;
+    filePondRef.value?.clear();
     imagePreview.value = '';
     isImageDialogOpen.value = false;
 };
@@ -493,30 +476,15 @@ onBeforeUnmount(() => {
                 <DialogHeader>
                     <DialogTitle>Insert Image</DialogTitle>
                     <DialogDescription>
-                        Upload an image file or enter an image URL.
+                        Upload an image file to insert into your content.
                     </DialogDescription>
                 </DialogHeader>
-                <div class="space-y-4 py-4">
-                    <div class="space-y-2">
-                        <Label for="image-file">Upload Image</Label>
-                        <Input
-                            id="image-file"
-                            type="file"
-                            accept="image/*"
-                            @change="handleFileSelect"
-                        />
-                    </div>
-
-                    <div v-if="imagePreview" class="space-y-2">
-                        <Label>Preview</Label>
-                        <img
-                            :src="imagePreview"
-                            alt="Image preview"
-                            class="max-w-full h-auto max-h-48 rounded border"
-                        />
-                    </div>
-
-
+                <div class="py-4">
+                    <FilePondImageUpload
+                        ref="filePondRef"
+                        @file-processed="handleFileProcessed"
+                        @file-removed="handleFileRemoved"
+                    />
                 </div>
                 <DialogFooter>
                     <Button type="button" variant="outline" @click="isImageDialogOpen = false">

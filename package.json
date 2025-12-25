@@ -56,6 +56,13 @@
         "date-fns": "^4.1.0",
         "dayjs": "^1.11.18",
         "embla-carousel-vue": "^8.6.0",
+        "filepond": "^4.32.10",
+        "filepond-plugin-file-validate-type": "^1.2.9",
+        "filepond-plugin-image-crop": "^2.0.6",
+        "filepond-plugin-image-edit": "^1.6.3",
+        "filepond-plugin-image-preview": "^4.6.12",
+        "filepond-plugin-image-resize": "^2.0.10",
+        "filepond-plugin-image-transform": "^3.8.7",
         "happy-dom": "^20.0.10",
         "laravel-vite-plugin": "^2.0.0",
         "lucide-vue-next": "^0.556.0",
@@ -70,6 +77,7 @@
         "vee-validate": "^4.15.1",
         "vitest": "^4.0.8",
         "vue": "^3.5.13",
+        "vue-filepond": "^7.0.4",
         "vue-sonner": "^2.0.9"
     },
     "optionalDependencies": {
