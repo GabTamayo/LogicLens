@@ -40,9 +40,10 @@ class ActivityController extends Controller
             'title' => $validated['title'],
             'language' => $validated['language'],
             'content' => $validated['content'] ?? null,
+            'timer' => $validated['timer'] ?? null,
         ]);
 
-        if (!empty($validated['test_cases'])) {
+        if (! empty($validated['test_cases'])) {
             foreach ($validated['test_cases'] as $index => $testCase) {
                 $activity->testCases()->create([
                     'title' => $testCase['title'],
@@ -73,8 +74,18 @@ class ActivityController extends Controller
     {
         $validated = $request->validated();
 
+        $updateData = [];
+
         if (isset($validated['content'])) {
-            $activity->update(['content' => $validated['content']]);
+            $updateData['content'] = $validated['content'];
+        }
+
+        if (isset($validated['timer'])) {
+            $updateData['timer'] = $validated['timer'];
+        }
+
+        if (! empty($updateData)) {
+            $activity->update($updateData);
         }
 
         if (isset($validated['test_cases'])) {

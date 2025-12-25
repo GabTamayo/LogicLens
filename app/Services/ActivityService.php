@@ -13,17 +13,17 @@ class ActivityService
     public function getActivitiesList(?string $language = null, ?string $search = null, ?string $sort = null): array
     {
         return [
-            'activities' => fn() => Activity::where('user_id', Auth::id())
+            'activities' => fn () => Activity::where('user_id', Auth::id())
                 ->when($language && $language !== 'all', function ($query) use ($language) {
                     $query->where('language', ProgrammingLanguage::request(ProgrammingLanguage::response($language)));
                 })
                 ->when($search, function ($query) use ($search) {
-                    $query->where('title', 'like', '%' . $search . '%');
+                    $query->where('title', 'like', '%'.$search.'%');
                 })
                 ->selectedAttributes()
                 ->withCount([
-                    'activityLinks as open_links_count' => fn($q) => $q->where('is_open', true),
-                    'activityLinks as closed_links_count' => fn($q) => $q->where('is_open', false),
+                    'activityLinks as open_links_count' => fn ($q) => $q->where('is_open', true),
+                    'activityLinks as closed_links_count' => fn ($q) => $q->where('is_open', false),
                 ])
                 ->when($sort, function ($query) use ($sort) {
                     match ($sort) {
@@ -55,6 +55,7 @@ class ActivityService
             'title' => $activity->title,
             'language_text' => $activity->language_text,
             'content' => $activity->content,
+            'timer' => $activity->timer,
             'appUrl' => config('app.url'),
             'courses' => Course::where('user_id', Auth::id())
                 ->where('is_active', true)
@@ -65,7 +66,7 @@ class ActivityService
             'test_cases' => $activity->testCases()
                 ->orderBy('order')
                 ->get()
-                ->map(fn($testCase) => [
+                ->map(fn ($testCase) => [
                     'id' => $testCase->id,
                     'title' => $testCase->title,
                     'input' => $testCase->input,
@@ -73,7 +74,7 @@ class ActivityService
                     'score' => $testCase->score,
                 ]),
             'links' => Inertia::defer(
-                fn() => $activity->activityLinks()
+                fn () => $activity->activityLinks()
                     ->selectedAttributes()
                     ->with('course:id,name')
                     ->withCount('submissions')

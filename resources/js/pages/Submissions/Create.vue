@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PistonService } from '@/services/piston';
 import { SubmissionPageProps } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useCountdown } from '@vueuse/core';
 import { ArrowLeft, BookOpen, Check, CheckCircle2, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -40,6 +41,28 @@ const lastSaved = ref<string>('');
 const isSavingToBackend = ref(false);
 const showSubmitDialog = ref(false);
 const testCaseResults = ref<Record<string, { output: string; passed: boolean; isRunning: boolean }>>({});
+const initialCountdown = ref((props.timer ?? 0) * 60); // Convert minutes to SECONDS
+
+const { remaining } = useCountdown(initialCountdown, {
+    immediate: props.timer ? true : false, // Only start countdown if timer is set
+    onComplete() {
+        if (props.timer && !submitted.value && !props.hasSubmitted) {
+            toast.warning('Time is up!', {
+                description: 'Auto-submitting your work...',
+            });
+
+            setTimeout(() => {
+                submit();
+            }, 1000);
+        }
+    },
+});
+
+const formattedTime = computed(() => {
+    const minutes = Math.floor(remaining.value / 60);
+    const seconds = remaining.value % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+});
 
 const windowWidth = ref(window.innerWidth);
 const windowHeight = ref(window.innerHeight);
@@ -341,6 +364,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                             </div>
                         </Alert>
                     </div>
+                    <div v-else-if="props.timer" class="text-sm font-semibold">
+                        Time Remaining:
+                        <span class="ml-1 rounded bg-destructive/25 p-1 font-mono text-lg text-destructive"> {{ formattedTime }} </span>
+                    </div>
 
                     <div class="flex items-center gap-4">
                         <div class="text-right text-sm">
@@ -368,6 +395,11 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 </div>
                 <div v-if="props.hasSubmitted && !submitted" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-600">
                     <Check class="h-3.5 w-3.5 text-white" />
+                </div>
+
+                <div v-else-if="props.timer" class="text-xs font-semibold">
+                    Time Remaining:
+                    <span class="ml-1 rounded bg-destructive/25 p-1 font-mono text-md text-destructive"> {{ formattedTime }} </span>
                 </div>
             </div>
         </div>
@@ -438,8 +470,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                             <DialogHeader>
                                                                 <DialogTitle>Ready to submit?</DialogTitle>
                                                                 <DialogDescription>
-                                                                    Please double-check your work. You will not be able to edit your code after this
-                                                                    submission.
+                                                                    Review your work carefully. You won't be able to make any changes once submitted.
                                                                 </DialogDescription>
                                                             </DialogHeader>
                                                             <DialogFooter>
@@ -489,7 +520,11 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                         <ScrollArea class="flex-1 p-4">
                                             <div v-if="props.testCases && props.testCases.length > 0">
                                                 <Accordion type="single" collapsible class="w-full">
-                                                    <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
+                                                    <AccordionItem
+                                                        v-for="(testCase, index) in props.testCases"
+                                                        :key="testCase.id"
+                                                        :value="`test-${testCase.id}`"
+                                                    >
                                                         <AccordionTrigger>
                                                             <div class="flex items-center gap-2">
                                                                 <LoaderCircle
@@ -501,8 +536,11 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     class="h-2 w-2 rounded-full"
                                                                     :class="{
                                                                         'bg-green-500': testCaseResults[testCase.id]?.passed,
-                                                                        'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
-                                                                        'bg-yellow-500': !testCaseResults[testCase.id]
+                                                                        'bg-red-500':
+                                                                            testCaseResults[testCase.id] &&
+                                                                            !testCaseResults[testCase.id]?.passed &&
+                                                                            !testCaseResults[testCase.id]?.isRunning,
+                                                                        'bg-yellow-500': !testCaseResults[testCase.id],
                                                                     }"
                                                                 ></div>
                                                                 <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
@@ -512,11 +550,15 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                             <div class="space-y-3 text-sm">
                                                                 <div>
                                                                     <p class="font-medium">Input:</p>
-                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{
+                                                                        testCase.input
+                                                                    }}</code>
                                                                 </div>
                                                                 <div>
                                                                     <p class="font-medium">Expected Output:</p>
-                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{
+                                                                        testCase.output
+                                                                    }}</code>
                                                                 </div>
                                                                 <div v-if="testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.isRunning">
                                                                     <div class="flex items-center justify-between">
@@ -524,8 +566,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                         <span
                                                                             class="text-xs font-semibold"
                                                                             :class="{
-                                                                                'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
-                                                                                'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                                                'text-green-600 dark:text-green-500':
+                                                                                    testCaseResults[testCase.id]?.passed,
+                                                                                'text-red-600 dark:text-red-500':
+                                                                                    !testCaseResults[testCase.id]?.passed,
                                                                             }"
                                                                         >
                                                                             {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
@@ -534,10 +578,13 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     <code
                                                                         class="block rounded p-2 font-mono whitespace-pre-wrap"
                                                                         :class="{
-                                                                            'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
-                                                                            'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                                            'border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20':
+                                                                                testCaseResults[testCase.id]?.passed,
+                                                                            'border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20':
+                                                                                !testCaseResults[testCase.id]?.passed,
                                                                         }"
-                                                                    >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                                                        >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code
+                                                                    >
                                                                 </div>
                                                                 <Button
                                                                     size="sm"
@@ -546,7 +593,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     :disabled="!form.code_content || testCaseResults[testCase.id]?.isRunning"
                                                                     class="w-full gap-2"
                                                                 >
-                                                                    <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-4 w-4 animate-spin" />
+                                                                    <LoaderCircle
+                                                                        v-if="testCaseResults[testCase.id]?.isRunning"
+                                                                        class="h-4 w-4 animate-spin"
+                                                                    />
                                                                     <Play v-else class="h-4 w-4 fill-current stroke-none" />
                                                                     {{ testCaseResults[testCase.id]?.isRunning ? 'Running...' : 'Run This Test' }}
                                                                 </Button>
@@ -712,13 +762,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 <!-- Test Cases Section (Mobile) -->
                 <div v-else-if="showTestCases" class="flex flex-1 flex-col overflow-hidden">
                     <div v-if="props.testCases && props.testCases.length > 0" class="border-b bg-muted/40 px-4 py-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            @click="runAllTestCases"
-                            :disabled="!form.code_content || isRunning"
-                            class="w-full gap-2"
-                        >
+                        <Button size="sm" variant="outline" @click="runAllTestCases" :disabled="!form.code_content || isRunning" class="w-full gap-2">
                             <Play class="h-3 w-3 fill-current stroke-none" />
                             Run All Tests
                         </Button>
@@ -729,17 +773,17 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                 <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
                                     <AccordionTrigger>
                                         <div class="flex items-center gap-2">
-                                            <LoaderCircle
-                                                v-if="testCaseResults[testCase.id]?.isRunning"
-                                                class="h-3 w-3 animate-spin text-blue-500"
-                                            />
+                                            <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-3 w-3 animate-spin text-blue-500" />
                                             <div
                                                 v-else
                                                 class="h-2 w-2 rounded-full"
                                                 :class="{
                                                     'bg-green-500': testCaseResults[testCase.id]?.passed,
-                                                    'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
-                                                    'bg-yellow-500': !testCaseResults[testCase.id]
+                                                    'bg-red-500':
+                                                        testCaseResults[testCase.id] &&
+                                                        !testCaseResults[testCase.id]?.passed &&
+                                                        !testCaseResults[testCase.id]?.isRunning,
+                                                    'bg-yellow-500': !testCaseResults[testCase.id],
                                                 }"
                                             ></div>
                                             <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
@@ -762,7 +806,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                         class="text-xs font-semibold"
                                                         :class="{
                                                             'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
-                                                            'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                            'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed,
                                                         }"
                                                     >
                                                         {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
@@ -771,10 +815,13 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                 <code
                                                     class="block rounded p-2 font-mono whitespace-pre-wrap"
                                                     :class="{
-                                                        'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
-                                                        'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                        'border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20':
+                                                            testCaseResults[testCase.id]?.passed,
+                                                        'border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20':
+                                                            !testCaseResults[testCase.id]?.passed,
                                                     }"
-                                                >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                                    >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code
+                                                >
                                             </div>
                                             <Button
                                                 size="sm"

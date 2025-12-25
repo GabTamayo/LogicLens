@@ -32,7 +32,7 @@ export function useScore() {
 
     const getScoreBackgroundClass = (score: number | null, totalScore: number | null): string => {
         if (score === null || totalScore === null) {
-            return 'bg-muted border-muted';
+            return 'bg-slate-500 dark:bg-slate-600';
         }
 
         const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0;

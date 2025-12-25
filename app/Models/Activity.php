@@ -23,6 +23,7 @@ class Activity extends Model
         'title',
         'language',
         'content',
+        'timer',
     ];
 
     protected $casts = [
@@ -48,7 +49,7 @@ class Activity extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'title', 'language', 'content', 'created_at');
+        return $query->select('id', 'user_id', 'title', 'language', 'content', 'timer', 'created_at');
     }
 
     protected static function booted()

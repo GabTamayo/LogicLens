@@ -27,6 +27,7 @@ const form = useForm({
     title: '',
     language: '',
     content: '',
+    timer: null as number | null,
     test_cases: [] as TestCase[],
 });
 
@@ -44,7 +45,10 @@ function removeTestCase(index: number) {
 }
 
 function submit(close: () => void) {
-    form.post('/activities', {
+    form.transform((data) => ({
+        ...data,
+        timer: data.timer === 0 ? null : data.timer,
+    })).post('/activities', {
         onSuccess: () => {
             toast.success('Activity created successfully!');
             close();
@@ -60,7 +64,7 @@ function submit(close: () => void) {
     <Modal max-width="7xl" position="top" v-slot="{ close }" panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <div class="flex h-[85vh] flex-col">
             <!-- Fixed Header -->
-            <div class="mb-6 flex-shrink-0">
+            <div class="mb-6">
                 <h1 class="cursor-default text-lg font-bold">Add Activity</h1>
                 <p class="text-[0.8rem] text-muted-foreground">Add an activity to generate submission links. Click Save once you're done.</p>
             </div>
@@ -96,6 +100,24 @@ function submit(close: () => void) {
                                 </Select>
                             </FormControl>
                             <InputError :message="form.errors.language" />
+                        </FormItem>
+                    </FormField>
+                    <FormField name="timer">
+                        <FormItem>
+                            <FormLabel>
+                                Timer (Minutes)
+                                <span class="font-light text-muted-foreground">(Optional)</span>
+                            </FormLabel>
+                            <FormControl>
+                                <NumberField v-model="form.timer" :min="1" :step="1">
+                                    <NumberFieldContent class="w-fit">
+                                        <NumberFieldDecrement />
+                                        <NumberFieldInput placeholder="Enter minutes"/>
+                                        <NumberFieldIncrement />
+                                    </NumberFieldContent>
+                                </NumberField>
+                            </FormControl>
+                            <InputError :message="form.errors.timer" />
                         </FormItem>
                     </FormField>
                     <FormField name="content">
