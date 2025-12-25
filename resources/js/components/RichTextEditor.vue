@@ -23,7 +23,7 @@ const emit = defineEmits<{
 
 const isImageDialogOpen = ref(false);
 const imagePreview = ref<string>('');
-const filePondRef = ref<InstanceType<typeof FilePondImageUpload> | null>(null);
+const filePondRef = ref<any>(null);
 
 const editor = useEditor({
     editorProps: {

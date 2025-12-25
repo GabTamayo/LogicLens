@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import vueFilePond from 'vue-filepond';
 import 'filepond/dist/filepond.min.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
@@ -29,7 +29,7 @@ interface Props {
     labelIdle?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     acceptedFileTypes: () => ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'],
     maxFileSize: '5MB',
     allowImageCrop: false,
@@ -45,17 +45,17 @@ const emit = defineEmits<{
     fileRemoved: [];
 }>();
 
-const pond = ref<InstanceType<typeof FilePond> | null>(null);
+const pond = ref<any>(null);
 
-const handleProcessFile = (error: any, file: any) => {
+const handleAddFile = (error: any, file: any) => {
     if (error) {
-        console.error('FilePond processing error:', error);
+        console.error('FilePond add file error:', error);
         return;
     }
 
     const actualFile = file.file as File;
 
-    // Get the base64 data from FilePond's file object
+    // Get the base64 data from the file
     const reader = new FileReader();
     reader.onload = (e) => {
         const base64 = e.target?.result as string;
@@ -92,8 +92,9 @@ defineExpose({
             :image-resize-target-height="imageResizeTargetHeight"
             :label-idle="labelIdle"
             :allow-multiple="false"
+            :server="null"
             credits="false"
-            @processfile="handleProcessFile"
+            @addfile="handleAddFile"
             @removefile="handleRemoveFile"
         />
     </div>
