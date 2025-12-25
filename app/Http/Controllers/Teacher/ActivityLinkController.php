@@ -28,7 +28,7 @@ class ActivityLinkController extends Controller
         $link = $activity->activityLinks()->findOrFail($linkId);
         $link->update($request->validated());
 
-        return redirect()->route('activities.show', $activity);
+        return back();
     }
 
     public function show(Activity $activity, $linkId, Request $request, ActivityLinkService $activityLinkService, DetectionService $detectionService)

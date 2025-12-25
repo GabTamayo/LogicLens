@@ -20,7 +20,9 @@ Route::middleware(['auth', 'verified', 'role:'.RoleName::TEACHER->value])->group
     // Course Routes
     Route::get('courses', [CourseController::class, 'index'])->name('courses.index');
     Route::get('courses/create', [CourseController::class, 'create'])->name('courses.create');
+    Route::get('/courses/{course}/edit', [CourseController::class, 'edit'])->name('courses.edit');
     Route::post('courses', [CourseController::class, 'store'])->name('courses.store');
+    Route::put('/courses/{course}', [CourseController::class, 'update'])->name('courses.update');
     Route::get('courses/{course}', [CourseController::class, 'show'])->name('courses.show');
     Route::delete('courses/{course}', [CourseController::class, 'destroy'])->name('courses.destroy')->middleware('password.confirm');
     Route::delete('/courses/{course}/students/{student}', [CourseController::class, 'removeStudent'])->name('courses.students.destroy');

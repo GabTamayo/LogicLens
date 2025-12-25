@@ -28,6 +28,7 @@ class SubmissionService
             'studentName' => $user->name,
             'studentEmail' => $user->email,
             'hasSubmitted' => $hasSubmitted,
+            'timer' => $activityLink->activity->timer,
             'testCases' => $activityLink->activity->testCases()->select('id', 'title', 'input', 'output', 'score', 'order')->get(),
         ];
     }

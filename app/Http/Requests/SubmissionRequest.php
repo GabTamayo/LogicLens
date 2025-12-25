@@ -17,7 +17,7 @@ class SubmissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code_content' => ['required', 'string', 'min:10'],
+            'code_content' => ['required', 'string'],
         ];
     }
 

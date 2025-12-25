@@ -1,37 +1,33 @@
 <script setup lang="ts">
-import AppLayout from "@/layouts/AppLayout.vue";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Separator } from "@/components/ui/separator";
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger,
-} from "@/components/ui/sheet";
-import DataTable from "@/components/DataTable.vue";
-import { columns as studentColumns } from "@/components/students/columns";
-import ActivitySidebar from "@/components/activities/ActivitySidebar.vue";
-import ActivityContent from "@/components/activities/ActivityContent.vue";
-import AlertDialogDelete from "@/components/AlertDialogDelete.vue";
-import type { BreadcrumbItem, CourseShowProps } from "@/types";
-import { computed, ref, watch } from "vue";
-import { CalendarCheck, Copy, LoaderCircle, Menu } from "lucide-vue-next";
-import { Deferred, Head, router } from "@inertiajs/vue3";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import ActivityContent from '@/components/activities/ActivityContent.vue';
+import ActivitySidebar from '@/components/activities/ActivitySidebar.vue';
+import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
+import DataTable from '@/components/DataTable.vue';
+import { columns as studentColumns } from '@/components/students/columns';
+import AspectRatio from '@/components/ui/aspect-ratio/AspectRatio.vue';
+import Button from '@/components/ui/button/Button.vue';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Toaster } from '@/components/ui/sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AppLayout from '@/layouts/AppLayout.vue';
+import type { BreadcrumbItem, CourseShowProps } from '@/types';
+import { Deferred, Head, router } from '@inertiajs/vue3';
+import { ModalLink } from '@inertiaui/modal-vue';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import { CalendarCheck, Copy, Loader, LoaderCircle, Menu, Pencil } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
-import Button from "@/components/ui/button/Button.vue";
 
 dayjs.extend(relativeTime);
 
 const props = defineProps<CourseShowProps>();
 
 const breadcrumbs = computed<BreadcrumbItem[]>(() => [
-    { title: "Courses", href: "/courses" },
+    { title: 'Courses', href: '/courses' },
     { title: props.course.name, href: `/courses/${props.course.id}` },
 ]);
 
@@ -39,7 +35,7 @@ const formattedDate = computed(() => {
     return new Date(props.course.created_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
     });
 });
 
@@ -51,9 +47,8 @@ const selectedActivity = ref(props.activities?.data[0] || null);
 const mobileSheetOpen = ref(false);
 
 function copy(text: string) {
-    navigator.clipboard.writeText(text)
-    toast('Copied to clipboard', {
-    })
+    navigator.clipboard.writeText(text);
+    toast('Copied to clipboard', {});
 }
 
 function handleActivitySelect(activity: any) {
@@ -72,17 +67,6 @@ watch(activeTab, (newTab) => {
     });
 });
 
-// Pagination handlers
-const handleActivitiesPageChange = (page: number) => {
-    activitiesPage.value = page;
-    router.visit(`/courses/${props.course.id}`, {
-        data: { page, tab: 'activities' },
-        preserveScroll: true,
-        preserveState: true,
-        only: ['activities'],
-    });
-};
-
 const handleStudentsPageChange = (page: number) => {
     studentsPage.value = page;
     router.visit(`/courses/${props.course.id}`, {
@@ -95,7 +79,6 @@ const handleStudentsPageChange = (page: number) => {
 </script>
 
 <template>
-
     <Head :title="`${course.name}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
@@ -106,6 +89,24 @@ const handleStudentsPageChange = (page: number) => {
             <!-- Header Card -->
             <Card>
                 <CardHeader>
+                    <AspectRatio :ratio="6 / 1.5" class="rounded-lg bg-muted">
+                        <img
+                            :src="`/images/cover-photos/${course.cover_photo}`"
+                            alt="Course cover"
+                            class="h-full w-full rounded-lg object-cover"
+                        />
+                    </AspectRatio>
+                </CardHeader>
+                <CardContent>
+                    <CardAction class="absolute m-6">
+                        <ModalLink :href="`/courses/${course.id}/edit`" #default="{ loading }" :close-explicitly="true">
+                            <Button variant="secondary" size="lg" :disabled="loading">
+                                <Loader v-if="loading" class="h-4 w-4 animate-spin" />
+                                <Pencil v-else class="mr-1 size-4" />
+                                Edit course
+                            </Button>
+                        </ModalLink>
+                    </CardAction>
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-3">
                             <div class="flex flex-wrap items-center">
@@ -120,8 +121,7 @@ const handleStudentsPageChange = (page: number) => {
                                 </span>
                                 <Separator orientation="vertical" class="h-4" />
                                 <div class="flex items-center gap-1">
-                                    <Button variant="outline" size="icon-sm" @click.stop="copy(course.access_code)"
-                                        aria-label="Copy access-code">
+                                    <Button variant="outline" size="icon-sm" @click.stop="copy(course.access_code)" aria-label="Copy access-code">
                                         <Copy class="size-4" />
                                     </Button>
                                     <span>{{ course.access_code }}</span>
@@ -129,7 +129,7 @@ const handleStudentsPageChange = (page: number) => {
                             </CardDescription>
                         </div>
                     </div>
-                </CardHeader>
+                </CardContent>
             </Card>
 
             <!-- Tabs Section -->
@@ -138,12 +138,16 @@ const handleStudentsPageChange = (page: number) => {
                     <Tabs v-model="activeTab" class="w-full">
                         <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
-                                <TabsTrigger value="activities"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="activities"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Activities
                                 </TabsTrigger>
-                                <TabsTrigger value="students"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="students"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Students
                                 </TabsTrigger>
                             </TabsList>
@@ -218,8 +222,12 @@ const handleStudentsPageChange = (page: number) => {
                                             <span class="text-muted-foreground">Loading students...</span>
                                         </div>
                                     </template>
-                                    <DataTable :columns="studentColumns" :data="props.students.data"
-                                        :pagination="props.students as any" @page-change="handleStudentsPageChange" />
+                                    <DataTable
+                                        :columns="studentColumns"
+                                        :data="props.students.data"
+                                        :pagination="props.students as any"
+                                        @page-change="handleStudentsPageChange"
+                                    />
                                 </Deferred>
                             </template>
                             <div v-else class="flex items-center justify-center gap-2 rounded-md p-12">

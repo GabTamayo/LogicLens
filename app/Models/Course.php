@@ -21,6 +21,7 @@ class Course extends Model
     protected $fillable = [
         'name',
         'access_code',
+        'cover_photo',
         'is_active',
     ];
 
@@ -43,6 +44,26 @@ class Course extends Model
 
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'name', 'access_code', 'created_at');
+        return $query->select('id', 'user_id', 'name', 'access_code', 'cover_photo', 'created_at');
+    }
+
+    public static function getAvailableCoverPhotos(): array
+    {
+        $coverPhotosPath = public_path('images/cover-photos');
+
+        if (! is_dir($coverPhotosPath)) {
+            return [];
+        }
+
+        $files = array_diff(scandir($coverPhotosPath), ['.', '..']);
+
+        return collect($files)
+            ->filter(fn ($file) => in_array(pathinfo($file, PATHINFO_EXTENSION), ['jpg', 'jpeg', 'png', 'webp']))
+            ->map(fn ($file) => [
+                'name' => $file,
+                'path' => '/images/cover-photos/'.$file,
+            ])
+            ->values()
+            ->toArray();
     }
 }

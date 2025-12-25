@@ -32,13 +32,13 @@ export function useScore() {
 
     const getScoreBackgroundClass = (score: number | null, totalScore: number | null): string => {
         if (score === null || totalScore === null) {
-            return 'bg-muted border-muted';
+            return 'bg-slate-500 dark:bg-slate-600';
         }
 
         const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0;
         return percentage >= 70 ? 'bg-green-600 dark:bg-green-700' :
                percentage >= 50 ? 'bg-yellow-600 dark:bg-yellow-700' :
-               'bg-red-900 dark:bg-red-800';
+               'bg-red-700 dark:bg-red-800';
     };
 
     return {

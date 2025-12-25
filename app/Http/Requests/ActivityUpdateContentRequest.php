@@ -24,6 +24,7 @@ class ActivityUpdateContentRequest extends FormRequest
     {
         return [
             'content' => ['nullable', 'string'],
+            'timer' => ['nullable', 'integer', 'min:1'],
             'test_cases' => ['nullable', 'array'],
             'test_cases.*.title' => ['required', 'string', 'max:255'],
             'test_cases.*.input' => ['nullable', 'string'],

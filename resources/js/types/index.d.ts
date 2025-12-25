@@ -65,6 +65,7 @@ export interface ActivityDetail {
     title: string;
     language_text: string;
     content: string;
+    timer: number | null;
     appUrl: string;
     courses: Array<{
         id: string;
@@ -86,6 +87,7 @@ export interface Course {
     id: string;
     name: string;
     access_code: string;
+    cover_photo: string;
     is_active: boolean;
     created_at: string;
     enrolled_at?: string;
@@ -161,6 +163,7 @@ export interface SubmissionPageProps {
     studentName: string;
     studentEmail: string;
     hasSubmitted: boolean;
+    timer: number | null;
     testCases: Array<{
         id: string;
         title: string;
@@ -365,6 +368,7 @@ export interface StudentCourseShowProps {
             submission_id?: string;
             score: number | null;
             total_score: number;
+            created_at: string;
             submitted_at?: string;
         }>;
         current_page: number;

@@ -116,7 +116,7 @@ const deadlineStatus = computed(() => {
                             <CardAction>
                                 <Link :href="`/activities/${activity.activity_id}/links/${activity.id}`"
                                     prefetch="mount">
-                                    <Button class="w-fit" size="sm" variant="link">
+                                    <Button class="w-fit" size="sm">
                                         <span class="block md:hidden lg:hidden xl:block">View Submissions</span>
                                     </Button>
                                 </Link>

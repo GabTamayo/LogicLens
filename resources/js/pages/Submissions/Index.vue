@@ -1,111 +1,140 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue'
-import { Deferred, Link } from '@inertiajs/vue3'
-import { Head, router, useRemember } from '@inertiajs/vue3'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
-import { type BreadcrumbItem, type ActivityLink, Submission, DetectionPageProps } from '@/types'
-import AlertDialogDelete from '@/components/AlertDialogDelete.vue'
-import Badge from '@/components/ui/badge/Badge.vue'
-import DataTable from '@/components/DataTable.vue'
-import { columns as submissionColumns } from '@/components/submissions/columns'
-import { columns as detectionColumns } from '@/components/detections/columns'
-import { useDebounceFn } from '@vueuse/core'
-import { LoaderCircle, Circle, CalendarCheck, FileText, Shield, ArrowUpDown } from 'lucide-vue-next'
-import { Toaster } from '@/components/ui/sonner'
-import { toast } from 'vue-sonner'
-import 'vue-sonner/style.css'
-import { ref, watch, computed } from 'vue'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useDeadline } from '@/composables/useDeadline'
-import Button from '@/components/ui/button/Button.vue'
+import AlertDialogDelete from '@/components/AlertDialogDelete.vue';
+import DataTable from '@/components/DataTable.vue';
+import { columns as detectionColumns } from '@/components/detections/columns';
+import { columns as submissionColumns } from '@/components/submissions/columns';
+import Badge from '@/components/ui/badge/Badge.vue';
+import Button from '@/components/ui/button/Button.vue';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Toaster } from '@/components/ui/sonner';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useDeadline } from '@/composables/useDeadline';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { type ActivityLink, type BreadcrumbItem, DetectionPageProps, Submission } from '@/types';
+import { Deferred, Head, Link, router, useForm, useRemember } from '@inertiajs/vue3';
+import { useDebounceFn } from '@vueuse/core';
+import { ArrowUpDown, CalendarCheck, Circle, LoaderCircle } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
+import { toast } from 'vue-sonner';
+import 'vue-sonner/style.css';
 
 interface TabbedPageProps {
-    activityId: number
-    activityTitle: string
-    link: ActivityLink & { created_at: string }
-    filters: Record<string, string>
-    submissions?: Submission['submissions'] & { data: any[], path: string }
-    detections?: DetectionPageProps['detections']
-    activeTab: string
+    activityId: number;
+    activityTitle: string;
+    link: ActivityLink & { created_at: string };
+    filters: Record<string, string>;
+    submissions?: Submission['submissions'] & { data: any[]; path: string };
+    detections?: DetectionPageProps['detections'];
+    activeTab: string;
 }
 
-const props = defineProps<TabbedPageProps>()
+const props = defineProps<TabbedPageProps>();
 
 // Deadline utilities
-const { formatRelativeDeadline, formatExpiresAt, getDeadlineStatus } = useDeadline()
+const { formatRelativeDeadline, formatExpiresAt, getDeadlineStatus } = useDeadline();
 
 // State management
-const isDetecting = ref(false)
-const activeTab = ref(props.activeTab || 'submission')
-const submissionPage = ref(1)
-const detectionPage = ref(1)
-const isInitialLoadDone = ref(false)
+const isDetecting = ref(false);
+const activeTab = ref(props.activeTab || 'submission');
+const submissionPage = ref(1);
+const detectionPage = ref(1);
+const isInitialLoadDone = ref(false);
 
 // Computed properties
-const hasDeadline = computed(() => !!props.link.expires_at)
+const hasDeadline = computed(() => !!props.link.expires_at);
 
 // Breadcrumbs
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Activities', href: '/activities' },
     { title: props.activityTitle, href: `/activities/${props.activityId}` },
-    { title: props.link.course?.name || 'Course', href: `/activities/${props.activityId}/links/${props.link.id}` }
-]
+    { title: props.link.course?.name || 'Course', href: `/activities/${props.activityId}/links/${props.link.id}` },
+];
+
+// Link Status Management
+const updateStatus = (value: boolean) => {
+    const linkStatusForm = useForm({ is_open: value });
+    linkStatusForm.patch(`/activities/${props.activityId}/links/${props.link.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Link status updated', {
+                description: `${props.link.course?.name || 'Link'} is now ${value ? 'open' : 'closed'}.`,
+            });
+        },
+        onError: () => {
+            const errorMessage = (linkStatusForm.errors as any).expires_at || 'Failed to update link status. Please try again.';
+            toast.error('Cannot update link status', {
+                description: errorMessage,
+            });
+        },
+    });
+};
 
 // Filters
-const submissionFilters = useRemember({
-    student_name: props.filters?.student_name || '',
-}, 'submissions-filters')
+const submissionFilters = useRemember(
+    {
+        student_name: props.filters?.student_name || '',
+    },
+    'submissions-filters',
+);
 
-const detectionFilters = useRemember({
-    student_name_a: props.filters?.student_name_a || '',
-    student_name_b: props.filters?.student_name_b || '',
-}, 'detection-filters')
+const detectionFilters = useRemember(
+    {
+        student_name_a: props.filters?.student_name_a || '',
+        student_name_b: props.filters?.student_name_b || '',
+    },
+    'detection-filters',
+);
 
 // Sort
-const submissionSort = ref(props.filters?.sort || 'newest')
-const detectionSort = ref(props.filters?.sort || 'score_desc')
+const submissionSort = ref(props.filters?.sort || 'newest');
+const detectionSort = ref(props.filters?.sort || 'score_desc');
 
 // Tab change handler
 watch(activeTab, (newTab) => {
-    const page = newTab === 'detection' ? detectionPage.value : submissionPage.value
+    const page = newTab === 'detection' ? detectionPage.value : submissionPage.value;
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
         data: { tab: newTab, page },
         preserveScroll: true,
         preserveState: true,
         only: newTab === 'detection' ? ['detections', 'activeTab'] : ['submissions', 'activeTab'],
-    })
-})
+    });
+});
 
 // Detection handler
 const handleDetectSubmission = () => {
-    if (isDetecting.value) return
+    if (isDetecting.value) return;
 
-    isDetecting.value = true
+    isDetecting.value = true;
 
-    router.post(`/activities/${props.activityId}/links/${props.link.id}/detect`, {}, {
-        preserveScroll: true,
-        onSuccess: (page) => {
-            if (page.props.successMessage) {
-                toast.success(page.props.successMessage)
-            } else {
-                toast.success('Detection complete', {
-                    description: 'Similarity detection has been completed successfully.',
-                })
-            }
-            isDetecting.value = false
+    router.post(
+        `/activities/${props.activityId}/links/${props.link.id}/detect`,
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: (page) => {
+                if (page.props.successMessage) {
+                    toast.success(page.props.successMessage);
+                } else {
+                    toast.success('Detection complete', {
+                        description: 'Similarity detection has been completed successfully.',
+                    });
+                }
+                isDetecting.value = false;
+            },
+            onError: (errors) => {
+                const errorMessage = (Object.values(errors)[0] as string) || 'Detection failed';
+                toast.error('Unable to run detection', {
+                    description: errorMessage,
+                });
+                isDetecting.value = false;
+            },
         },
-        onError: (errors) => {
-            const errorMessage = Object.values(errors)[0] as string || 'Detection failed'
-            toast.error('Unable to run detection', {
-                description: errorMessage
-            })
-            isDetecting.value = false
-        },
-    })
-}
+    );
+};
 
 // Sort handlers
 watch(submissionSort, () => {
@@ -114,8 +143,8 @@ watch(submissionSort, () => {
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
-    })
-})
+    });
+});
 
 watch(detectionSort, () => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
@@ -123,29 +152,29 @@ watch(detectionSort, () => {
         preserveScroll: true,
         preserveState: true,
         only: ['detections'],
-    })
-})
+    });
+});
 
 // Pagination handlers
 const handleSubmissionPageChange = (page: number) => {
-    submissionPage.value = page
+    submissionPage.value = page;
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
         data: { ...submissionFilters.value, sort: submissionSort.value, page, tab: 'submission' },
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
-    })
-}
+    });
+};
 
 const handleDetectionPageChange = (page: number) => {
-    detectionPage.value = page
+    detectionPage.value = page;
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
         data: { ...detectionFilters.value, sort: detectionSort.value, page, tab: 'detection' },
         preserveScroll: true,
         preserveState: true,
         only: ['detections'],
-    })
-}
+    });
+};
 
 // Filter change handlers
 const handleSubmissionFilterChange = useDebounceFn(() => {
@@ -154,8 +183,8 @@ const handleSubmissionFilterChange = useDebounceFn(() => {
         preserveScroll: true,
         preserveState: true,
         only: ['submissions'],
-    })
-}, 300)
+    });
+}, 300);
 
 const handleDetectionFilterChange = useDebounceFn(() => {
     router.visit(`/activities/${props.activityId}/links/${props.link.id}`, {
@@ -163,28 +192,31 @@ const handleDetectionFilterChange = useDebounceFn(() => {
         preserveScroll: true,
         preserveState: true,
         only: ['detections'],
-    })
-}, 300)
+    });
+}, 300);
 
 const updateSubmissionFilter = (column: string, value: string) => {
-    submissionFilters.value[column] = value
-    handleSubmissionFilterChange()
-}
+    submissionFilters.value[column] = value;
+    handleSubmissionFilterChange();
+};
 
 const updateDetectionFilter = (column: string, value: string) => {
-    detectionFilters.value[column] = value
-    handleDetectionFilterChange()
-}
+    detectionFilters.value[column] = value;
+    handleDetectionFilterChange();
+};
 </script>
 
 <template>
-
     <Head :title="`Submissions for ${props.link.course?.name || 'Course'}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <template #header-actions>
-            <AlertDialogDelete :endpoint="`/activities/${props.activityId}/links/${props.link.id}`" type="link"
-                buttonText="Delete Link" :item-name="props.link.course?.name || 'this link'" />
+            <AlertDialogDelete
+                :endpoint="`/activities/${props.activityId}/links/${props.link.id}`"
+                type="submissions"
+                buttonText="Delete Link"
+                :item-name="props.link.course?.name || 'this link'"
+            />
         </template>
 
         <div class="flex h-full flex-col gap-6 overflow-x-auto rounded-xl p-4">
@@ -193,39 +225,44 @@ const updateDetectionFilter = (column: string, value: string) => {
                 <CardHeader>
                     <div class="flex flex-col gap-4">
                         <div class="flex flex-col gap-3">
-                            <div class="flex flex-wrap items-center gap-3 mb-1.5">
-                                <Button variant="link" class="p-0 h-auto text-start" as-child>
+                            <div class="mb-1.5 flex flex-wrap items-center gap-3">
+                                <Button variant="link" class="h-auto p-0 text-start" as-child>
                                     <Link :href="`/courses/${props.link.course?.id}`" prefetch="mount">
                                         <CardTitle class="text-2xl">{{ props.link.course?.name || 'Course' }}</CardTitle>
                                     </Link>
                                 </Button>
                                 <Badge variant="outline" class="h-6">
-                                    <Circle class="mr-1.5 size-4" :class="link.is_open
-                                        ? 'fill-green-500 text-green-500'
-                                        : 'fill-red-500 text-red-500'" />
+                                    <Circle
+                                        class="mr-1.5 size-4"
+                                        :class="link.is_open ? 'fill-green-500 text-green-500' : 'fill-red-500 text-red-500'"
+                                    />
                                     {{ link.is_open ? 'Open' : 'Closed' }}
                                 </Badge>
+                                <Switch v-model="link.is_open" @update:modelValue="updateStatus($event)" />
                             </div>
                             <CardDescription class="flex flex-wrap items-center gap-2 pb-1.5">
                                 <span>{{ props.activityTitle }}</span>
                                 <Separator orientation="vertical" class="h-4" />
                                 <span class="flex items-center gap-1.5">
                                     <CalendarCheck class="h-3.5 w-3.5" />
-                                    {{ new Date(props.link.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    }) }}
+                                    {{
+                                        new Date(props.link.created_at).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                        })
+                                    }}
                                 </span>
                                 <template v-if="hasDeadline">
                                     <Separator orientation="vertical" class="h-4" />
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger as-child>
-                                                <span class="flex items-center gap-1.5 cursor-default"
-                                                    :class="getDeadlineStatus(link.expires_at)?.class">
-                                                    <component :is="getDeadlineStatus(link.expires_at)?.icon"
-                                                        class="h-3.5 w-3.5" />
+                                                <span
+                                                    class="flex cursor-default items-center gap-1.5"
+                                                    :class="getDeadlineStatus(link.expires_at)?.class"
+                                                >
+                                                    <component :is="getDeadlineStatus(link.expires_at)?.icon" class="h-3.5 w-3.5" />
                                                     {{ formatRelativeDeadline(link.expires_at) }}
                                                 </span>
                                             </TooltipTrigger>
@@ -238,9 +275,7 @@ const updateDetectionFilter = (column: string, value: string) => {
 
                                 <template v-else>
                                     <Separator orientation="vertical" class="h-4" />
-                                    <span class="text-muted-foreground">
-                                        No Deadline
-                                    </span>
+                                    <span class="text-muted-foreground"> No Deadline </span>
                                 </template>
                             </CardDescription>
                         </div>
@@ -254,12 +289,16 @@ const updateDetectionFilter = (column: string, value: string) => {
                     <Tabs v-model="activeTab" class="w-full">
                         <div class="border-b px-6">
                             <TabsList class="h-auto rounded-none border-b-0 bg-transparent p-0">
-                                <TabsTrigger value="submission"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="submission"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Submissions
                                 </TabsTrigger>
-                                <TabsTrigger value="detection"
-                                    class="relative rounded-none border-b-2 border-transparent px-4 pb-3 pt-2 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none">
+                                <TabsTrigger
+                                    value="detection"
+                                    class="relative rounded-none border-b-2 border-transparent px-4 pt-2 pb-3 font-semibold shadow-none transition-none data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none"
+                                >
                                     Detections
                                 </TabsTrigger>
                             </TabsList>
@@ -278,7 +317,7 @@ const updateDetectionFilter = (column: string, value: string) => {
                                         <div class="flex items-center gap-2">
                                             <Select v-model="submissionSort" aria-label="Sort submissions">
                                                 <SelectTrigger class="w-[200px]">
-                                                    <ArrowUpDown class="h-4 w-4 mr-2" />
+                                                    <ArrowUpDown class="mr-2 h-4 w-4" />
                                                     <SelectValue placeholder="Sort by" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -292,13 +331,18 @@ const updateDetectionFilter = (column: string, value: string) => {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <DataTable :columns="submissionColumns" :data="props.submissions.data"
-                                            :pagination="props.submissions as any" :filter-config="[
-                                                { column: 'student_name', placeholder: 'Filter by Student Name' },
-                                            ]" :filter-values="submissionFilters"
+                                        <DataTable
+                                            :columns="submissionColumns"
+                                            :data="props.submissions.data"
+                                            :pagination="props.submissions as any"
+                                            :filter-config="[{ column: 'student_name', placeholder: 'Filter by Student Name' }]"
+                                            :filter-values="submissionFilters"
                                             @page-change="handleSubmissionPageChange"
-                                            @filter-change="updateSubmissionFilter" :is-detecting="isDetecting"
-                                            @detect-submission="handleDetectSubmission" :show-detect-button="true" />
+                                            @filter-change="updateSubmissionFilter"
+                                            :is-detecting="isDetecting"
+                                            @detect-submission="handleDetectSubmission"
+                                            :show-detect-button="true"
+                                        />
                                     </div>
                                 </Deferred>
                             </template>
@@ -322,7 +366,7 @@ const updateDetectionFilter = (column: string, value: string) => {
                                         <div class="flex items-center gap-2">
                                             <Select v-model="detectionSort" aria-label="Sort detections">
                                                 <SelectTrigger class="w-[200px]">
-                                                    <ArrowUpDown class="h-4 w-4 mr-2" />
+                                                    <ArrowUpDown class="mr-2 h-4 w-4" />
                                                     <SelectValue placeholder="Sort by Score" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -334,14 +378,19 @@ const updateDetectionFilter = (column: string, value: string) => {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        <DataTable :columns="detectionColumns"
+                                        <DataTable
+                                            :columns="detectionColumns"
                                             :data="(props.detections?.data as any) || []"
-                                            :pagination="props.detections as any" :filter-config="[
+                                            :pagination="props.detections as any"
+                                            :filter-config="[
                                                 { column: 'student_name_a', placeholder: 'Filter by Student A Name' },
                                                 { column: 'student_name_b', placeholder: 'Filter by Student B Name' },
-                                            ]" :filter-values="detectionFilters"
+                                            ]"
+                                            :filter-values="detectionFilters"
                                             @page-change="handleDetectionPageChange"
-                                            @filter-change="updateDetectionFilter" :show-detect-button="false" />
+                                            @filter-change="updateDetectionFilter"
+                                            :show-detect-button="false"
+                                        />
                                     </div>
                                 </Deferred>
                             </template>

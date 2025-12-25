@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Teacher;
 
-use App\Http\Requests\CourseRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest;
+use App\Models\Course;
 use App\Services\CourseService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,9 @@ class CourseController extends Controller
 
     public function create()
     {
-        return Inertia::render('Courses/Create');
+        return Inertia::modal('Courses/Create', [
+            'coverPhotos' => Course::getAvailableCoverPhotos(),
+        ]);
     }
 
     public function store(CourseRequest $request)
@@ -48,13 +51,31 @@ class CourseController extends Controller
         ];
 
         $tabData = $activeTab === 'students'
-            ? ['students' => Inertia::defer(fn() => $courseService->queryStudents($course, $request->only(['page']))), 'activities' => null]
-            : ['activities' => Inertia::defer(fn() => $courseService->queryActivities($course, $request->only(['page']))), 'students' => null];
+            ? ['students' => Inertia::defer(fn () => $courseService->queryStudents($course, $request->only(['page']))), 'activities' => null]
+            : ['activities' => Inertia::defer(fn () => $courseService->queryActivities($course, $request->only(['page']))), 'students' => null];
 
         return Inertia::render('Courses/Show', [
             ...$baseData,
             ...$tabData,
         ]);
+    }
+
+    public function edit(string $courseId)
+    {
+        $course = Auth::user()->courses()->findOrFail($courseId);
+
+        return Inertia::modal('Courses/Edit', [
+            'course' => $course->only(['id', 'name', 'access_code', 'cover_photo']),
+            'coverPhotos' => Course::getAvailableCoverPhotos(),
+        ]);
+    }
+
+    public function update(CourseRequest $request, string $courseId)
+    {
+        $course = Auth::user()->courses()->findOrFail($courseId);
+        $course->update($request->validated());
+
+        return redirect()->back();
     }
 
     public function removeStudent(string $courseId, int $studentId)
