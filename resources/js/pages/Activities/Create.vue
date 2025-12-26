@@ -27,7 +27,6 @@ const form = useForm({
     title: '',
     language: '',
     content: '',
-    timer: null as number | null,
     test_cases: [] as TestCase[],
 });
 
@@ -45,10 +44,7 @@ function removeTestCase(index: number) {
 }
 
 function submit(close: () => void) {
-    form.transform((data) => ({
-        ...data,
-        timer: data.timer === 0 ? null : data.timer,
-    })).post('/activities', {
+    form.post('/activities', {
         onSuccess: () => {
             toast.success('Activity created successfully!');
             close();
@@ -100,24 +96,6 @@ function submit(close: () => void) {
                                 </Select>
                             </FormControl>
                             <InputError :message="form.errors.language" />
-                        </FormItem>
-                    </FormField>
-                    <FormField name="timer">
-                        <FormItem>
-                            <FormLabel>
-                                Timer (Minutes)
-                                <span class="font-light text-muted-foreground">(Optional)</span>
-                            </FormLabel>
-                            <FormControl>
-                                <NumberField v-model="form.timer" :min="1" :step="1">
-                                    <NumberFieldContent class="w-fit">
-                                        <NumberFieldDecrement />
-                                        <NumberFieldInput placeholder="Enter minutes"/>
-                                        <NumberFieldIncrement />
-                                    </NumberFieldContent>
-                                </NumberField>
-                            </FormControl>
-                            <InputError :message="form.errors.timer" />
                         </FormItem>
                     </FormField>
                     <FormField name="content">

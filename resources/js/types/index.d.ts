@@ -65,7 +65,6 @@ export interface ActivityDetail {
     title: string;
     language_text: string;
     content: string;
-    timer: number | null;
     appUrl: string;
     courses: Array<{
         id: string;
@@ -163,7 +162,6 @@ export interface SubmissionPageProps {
     studentName: string;
     studentEmail: string;
     hasSubmitted: boolean;
-    timer: number | null;
     testCases: Array<{
         id: string;
         title: string;

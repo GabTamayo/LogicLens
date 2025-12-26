@@ -104,38 +104,6 @@ const saveContent = () => {
     });
 };
 
-// Timer Management
-const isEditingTimer = ref(false);
-const timerForm = useForm({
-    timer: props.timer,
-});
-
-const toggleEditTimer = () => {
-    if (isEditingTimer.value) {
-        timerForm.timer = props.timer;
-    }
-    isEditingTimer.value = !isEditingTimer.value;
-};
-
-const saveTimer = () => {
-    timerForm.transform((data) => ({
-        timer: data.timer === 0 ? null : data.timer,
-    })).patch(`/activities/${props.id}`, {
-        preserveScroll: true,
-        onSuccess: () => {
-            isEditingTimer.value = false;
-            toast.success('Timer updated', {
-                description: 'The activity timer has been saved successfully.',
-            });
-        },
-        onError: () => {
-            toast.error('Failed to update timer', {
-                description: timerForm.errors.timer || 'An error occurred while saving.',
-            });
-        },
-    });
-};
-
 // Test Cases Management
 interface TestCase {
     title: string;
@@ -415,59 +383,6 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
                             </Button>
                         </div>
                     </Form>
-                </CardContent>
-            </Card>
-
-            <!-- Timer Section -->
-            <Card>
-                <CardHeader>
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <CardTitle>Timer</CardTitle>
-                            <CardDescription>Set a time limit for this activity</CardDescription>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <template v-if="isEditingTimer">
-                                <Button variant="outline" size="sm" @click="toggleEditTimer" :disabled="timerForm.processing">
-                                    <X class="mr-2 h-4 w-4" />
-                                    Cancel
-                                </Button>
-                                <Button size="sm" @click="saveTimer" :disabled="timerForm.processing">
-                                    <Save class="mr-2 h-4 w-4" />
-                                    {{ timerForm.processing ? 'Saving...' : 'Save' }}
-                                </Button>
-                            </template>
-                            <Button v-else variant="outline" size="sm" @click="toggleEditTimer">
-                                <Pencil class="mr-2 h-4 w-4" />
-                                Edit
-                            </Button>
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div v-if="!isEditingTimer" class="flex items-center gap-3">
-                        <Clock class="h-5 w-5 text-muted-foreground" />
-                        <div>
-                            <p v-if="props.timer" class="text-sm font-medium">{{ props.timer }} minute{{ props.timer !== 1 ? 's' : '' }}</p>
-                            <p v-else class="text-sm text-muted-foreground">No time limit set</p>
-                        </div>
-                    </div>
-                    <div v-else class="space-y-4">
-                        <div class="space-y-2">
-                            <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Time Limit (minutes)
-                            </label>
-                            <NumberField v-model="timerForm.timer" :min="1" :step="1">
-                                <NumberFieldContent class="w-fit">
-                                    <NumberFieldDecrement />
-                                    <NumberFieldInput placeholder="Enter minutes" />
-                                    <NumberFieldIncrement />
-                                </NumberFieldContent>
-                            </NumberField>
-                            <InputError :message="timerForm.errors.timer" />
-                            <p class="text-xs text-muted-foreground">Set the time limit in minutes. Leave empty for no time limit.</p>
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 

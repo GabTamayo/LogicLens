@@ -55,7 +55,6 @@ class ActivityService
             'title' => $activity->title,
             'language_text' => $activity->language_text,
             'content' => $activity->content,
-            'timer' => $activity->timer,
             'appUrl' => config('app.url'),
             'courses' => Course::where('user_id', Auth::id())
                 ->where('is_active', true)
