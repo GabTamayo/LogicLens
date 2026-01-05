@@ -517,7 +517,7 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
                                             </Button>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>Add a new test case</p>
+                                            <p>Add test case</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TooltipProvider>
