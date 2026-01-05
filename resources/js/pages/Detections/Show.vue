@@ -72,7 +72,7 @@ watch(
         <Modal max-width="7xl" panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
             <div class="flex h-[90vh] flex-col">
                 <!-- Fixed Header Section -->
-                <div class="flex-shrink-0 space-y-4 p-4">
+                <div class="space-y-4 p-4">
                     <div class="flex items-center justify-between">
                         <div>
                             <h1 class="text-lg font-bold tracking-tight sm:text-2xl">Similarity Detection</h1>

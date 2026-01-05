@@ -171,7 +171,7 @@ watch(
 
         backendSaveTimeout = setTimeout(() => {
             saveToBackend();
-        }, 30000);
+        }, 3000);
     },
     { deep: true },
 );
