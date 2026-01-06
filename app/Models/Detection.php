@@ -23,6 +23,8 @@ class Detection extends Model
         'avg_score',
         'line_matches',
         'flagged',
+        'ai_explanation',
+        'explanation_generated_at',
     ];
 
     protected $casts = [
@@ -31,6 +33,7 @@ class Detection extends Model
         'avg_score' => 'float',
         'line_matches' => 'array',
         'flagged' => 'boolean',
+        'explanation_generated_at' => 'datetime',
     ];
 
     public function activityLink(): BelongsTo
