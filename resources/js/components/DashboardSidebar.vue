@@ -101,7 +101,7 @@ function handleModalLinkClick() {
                 <VisDonut
                     :value="(d) => d.value"
                     :color="(d) => activeLinksChartConfig[d.label].color"
-                    :arc-width="30"
+                :arc-width="30"
                     :central-label="props.activeLinksData.total.toLocaleString()"
                     :central-sub-label="loading ? 'Active Links...' : 'Active Links'"
                 />

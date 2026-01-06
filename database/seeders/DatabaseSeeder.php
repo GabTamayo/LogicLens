@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $teacher = User::factory()->create([
-            'name' => 'Heihachi Mishima',
+            'name' => 'Heihachi Mishimasteral',
             'email' => 'gabotamayo41@gmail.com',
             'password' => bcrypt('191423angpogiko'),
         ]);

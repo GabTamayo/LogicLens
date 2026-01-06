@@ -5,6 +5,15 @@ import laravel from 'laravel-vite-plugin';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+    server: {
+        host: '0.0.0.0', // Listen on all network interfaces
+        hmr: {
+            host: 'localhost', // Ensure the browser connects back to localhost for hot updates
+        },
+        watch: {
+            usePolling: true, // Required for file changes to be detected in WSL/Docker
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/js/app.ts'],
