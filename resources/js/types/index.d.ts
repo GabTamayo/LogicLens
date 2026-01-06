@@ -236,6 +236,8 @@ export interface DetectionShowProps {
     };
     fileA: string;
     fileB: string;
+    aiExplanation?: string | null;
+    explanationGeneratedAt?: string | null;
 }
 
 export interface ActiveLinksData {

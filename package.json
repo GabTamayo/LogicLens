@@ -66,6 +66,7 @@
         "happy-dom": "^20.0.10",
         "laravel-vite-plugin": "^2.0.0",
         "lucide-vue-next": "^0.556.0",
+        "marked": "^17.0.1",
         "monaco-editor": "^0.55.1",
         "prismjs": "^1.30.0",
         "reka-ui": "^2.6.1",

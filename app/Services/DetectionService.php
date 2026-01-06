@@ -137,6 +137,8 @@ class DetectionService
             'detection' => $this->transformDetection($detection),
             'fileA' => $detection->submissionA->code_content,
             'fileB' => $detection->submissionB->code_content,
+            'aiExplanation' => $detection->ai_explanation,
+            'explanationGeneratedAt' => $detection->explanation_generated_at?->toIso8601String(),
         ];
     }
 
@@ -231,6 +233,11 @@ class DetectionService
 
             Detection::insert($data);
             Log::info("Stored {count} detections for {$activityLinkId}", ['count' => count($data)]);
+
+            $detectionIds = collect($data)->pluck('id');
+            foreach ($detectionIds as $id) {
+                \App\Jobs\ExplainDetectionJob::dispatch($id);
+            }
         });
     }
 }
