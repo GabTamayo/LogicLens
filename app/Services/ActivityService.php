@@ -76,7 +76,7 @@ class ActivityService
                 fn () => $activity->activityLinks()
                     ->selectedAttributes()
                     ->with('course:id,name')
-                    ->withCount('submissions')
+                    ->withCount(['submissions' => fn ($query) => $query->whereNotNull('submitted_at')])
                     ->orderBy('created_at')
                     ->paginate(6)
                     ->withQueryString()

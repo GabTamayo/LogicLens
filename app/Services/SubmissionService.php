@@ -13,7 +13,15 @@ class SubmissionService
     public function getSubmissionFormData(ActivityLink $activityLink, User $user): array
     {
         $language = $activityLink->activity->language;
-        $hasSubmitted = $activityLink->submissions()->where('user_id', $user->id)->exists();
+
+        // Create submission record if it doesn't exist
+        $submission = $activityLink->submissions()
+            ->firstOrCreate(
+                ['user_id' => $user->id],
+                ['language' => $language]
+            );
+
+        $hasSubmitted = $submission->submitted_at !== null;
 
         return [
             'bgImage' => asset('images/clonewave-bg.jpg'),
@@ -28,6 +36,9 @@ class SubmissionService
             'studentName' => $user->name,
             'studentEmail' => $user->email,
             'hasSubmitted' => $hasSubmitted,
+            'draftCode' => $submission->draft_code,
+            'draftStdin' => $submission->draft_stdin,
+            'draftSavedAt' => $submission->draft_saved_at?->toIso8601String(),
             'testCases' => $activityLink->activity->testCases()->select('id', 'title', 'input', 'output', 'score', 'order')->get(),
         ];
     }
@@ -43,12 +54,15 @@ class SubmissionService
             $language
         );
 
-        return $activityLink->submissions()->create([
-            'user_id' => $user->id,
-            'code_content' => $validatedData['code_content'],
-            'language' => $language,
-            'score' => $score,
-        ]);
+        // Update existing submission with submitted code and timestamp
+        return $activityLink->submissions()
+            ->where('user_id', $user->id)
+            ->firstOrFail()
+            ->update([
+                'code_content' => $validatedData['code_content'],
+                'score' => $score,
+                'submitted_at' => now(),
+            ]);
     }
 
     private function calculateScoreByRunningTestCases(ActivityLink $activityLink, string $code, string $language): float
