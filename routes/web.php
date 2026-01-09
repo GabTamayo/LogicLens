@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CodeExecutionController;
+use App\Http\Controllers\SubmissionDraftController;
 use App\Http\Controllers\Teacher\SubmissionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -19,6 +20,9 @@ Route::middleware(['auth', 'verified'])->prefix('api/code')->group(function () {
 Route::middleware(['auth', 'verified', 'enrolled'])->prefix('student')->group(function () {
     Route::get('submit/{token}', [SubmissionController::class, 'create'])->name('submissions.create');
     Route::post('submit/{token}', [SubmissionController::class, 'store'])->name('submissions.store');
+
+    // Draft auto-save route (accessible by both students and teachers)
+    Route::post('submission/{token}/draft', [SubmissionDraftController::class, 'saveDraft'])->name('submission.draft.save');
 });
 
 require __DIR__.'/teacher.php';

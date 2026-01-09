@@ -269,7 +269,9 @@ onUnmounted(() => {
                                                                                         </Button>
                                                                                     </Link>
                                                                                 </TooltipTrigger>
-                                                                                <TooltipContent> Start </TooltipContent>
+                                                                                <TooltipContent>
+                                                                                    {{ activity.has_draft ? 'Continue' : 'Start' }}
+                                                                                </TooltipContent>
                                                                             </Tooltip>
                                                                         </TooltipProvider>
                                                                     </ItemActions>

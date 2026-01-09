@@ -9,7 +9,7 @@ export interface SubmissionRow {
     student_email: string
     code_content: string
     language: string
-    created_at: string
+    submitted_at: string
     score: number | null
     total_score: number | null
 }
@@ -45,11 +45,11 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         },
     },
     {
-        accessorKey: 'created_at',
+        accessorKey: 'submitted_at',
         label: 'Submitted At',
         header: () => h('div', { class: 'text-right' }, 'Submitted At'),
         cell: ({ row }) => {
-            const date = new Date(row.getValue('created_at'))
+            const date = new Date(row.getValue('submitted_at'))
             const formatted = date.toLocaleString('en-PH', {
                 dateStyle: 'medium',
                 timeStyle: 'short',

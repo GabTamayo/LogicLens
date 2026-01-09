@@ -25,11 +25,13 @@ class Submission extends Model
         'draft_code',
         'draft_stdin',
         'draft_saved_at',
+        'submitted_at',
         'score',
     ];
 
     protected $casts = [
         'draft_saved_at' => 'datetime',
+        'submitted_at' => 'datetime',
         'score' => 'decimal:2',
     ];
 
@@ -75,9 +77,14 @@ class Submission extends Model
         return $query->whereDoesntHave('detectionA')->whereDoesntHave('detectionB');
     }
 
+    public function scopeSubmitted($query)
+    {
+        return $query->whereNotNull('submitted_at');
+    }
+
     public function scopeSelectedAttributes($query)
     {
-        return $query->select('id', 'user_id', 'code_content', 'language', 'score', 'activity_link_id', 'created_at');
+        return $query->select('id', 'user_id', 'code_content', 'language', 'score', 'activity_link_id', 'created_at', 'submitted_at');
     }
 
     public function scopeFilterByStudent($query, ?string $name = null)

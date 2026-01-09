@@ -38,6 +38,7 @@ class SubmissionRequest extends FormRequest
     {
         if (Submission::where('activity_link_id', $activityLink->id)
             ->where('user_id', Auth::id())
+            ->whereNotNull('submitted_at')
             ->exists()
         ) {
             $validator->errors()->add(

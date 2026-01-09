@@ -20,7 +20,13 @@
       "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan make:test Student/StudentCourseShowTest --pest)",
       "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=CourseCoverPhotoTest)",
       "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan make:test Teacher/DetectionControllerTest --pest)",
-      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=DetectionControllerTest)"
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=DetectionControllerTest)",
+      "Bash(where:*)",
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=SubmissionFeature)",
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test)",
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan test --filter=SubmissionTest)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(\"C:\\\\Users\\\\gabot\\\\.config\\\\herd\\\\bin\\\\php.bat\" ./vendor/bin/pint --dirty)"
     ]
   },
   "enabledMcpjsonServers": [

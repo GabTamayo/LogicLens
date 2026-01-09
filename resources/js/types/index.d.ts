@@ -110,6 +110,7 @@ export interface CourseActivityLink {
     expires_at: string | null;
     created_at: string;
     submissions_count: number;
+    has_draft?: boolean;
 }
 
 export interface CourseShowProps {
@@ -162,6 +163,9 @@ export interface SubmissionPageProps {
     studentName: string;
     studentEmail: string;
     hasSubmitted: boolean;
+    draftCode: string | null;
+    draftStdin: string | null;
+    draftSavedAt: string | null;
     testCases: Array<{
         id: string;
         title: string;
@@ -180,7 +184,7 @@ export type Submission = {
         student_name: string;
         student_email: string;
         code_content: string;
-        created_at: string;
+        submitted_at: string;
         language: string;
     }>;
 };
@@ -369,7 +373,7 @@ export interface StudentCourseShowProps {
             score: number | null;
             total_score: number;
             created_at: string;
-            submitted_at?: string;
+            submitted_at: string | null;
         }>;
         current_page: number;
         last_page: number;

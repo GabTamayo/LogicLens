@@ -93,7 +93,12 @@ class StudentCourseService
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
             ->where('is_open', true)
-            ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId))
+            ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId)->whereNotNull('submitted_at'))
+            ->with(['submissions' => fn ($query) => $query->where('user_id', $userId)
+                ->whereNull('submitted_at')
+                ->select('id', 'activity_link_id')
+                ->limit(1),
+            ])
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
@@ -106,6 +111,7 @@ class StudentCourseService
                 'is_open' => $link->is_open,
                 'expires_at' => $link->expires_at,
                 'created_at' => $link->created_at,
+                'has_draft' => $link->submissions->isNotEmpty(),
             ]);
     }
 
@@ -134,12 +140,12 @@ class StudentCourseService
         return $course->activityLinks()
             ->with(['activity:id,title,language', 'activity.user:id,name'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('submissions', fn ($q) => $q->where('user_id', $userId))
+                $query->whereHas('submissions', fn ($q) => $q->where('user_id', $userId)->whereNotNull('submitted_at'))
                     ->orWhere('is_open', false);
             })
             ->with(['submissions' => fn ($query) => $query->where('user_id', $userId)
-                ->select('id', 'activity_link_id', 'score', 'created_at')
-                ->latest()
+                ->select('id', 'activity_link_id', 'score', 'submitted_at')
+                ->latest('submitted_at')
                 ->limit(1),
             ])
             ->latest()
@@ -158,7 +164,7 @@ class StudentCourseService
                     'submission_id' => $submission?->id,
                     'score' => $submission?->score,
                     'total_score' => $link->activity?->testCases()->sum('score'),
-                    'submitted_at' => $submission?->created_at,
+                    'submitted_at' => $submission?->submitted_at,
                     'created_at' => $link->created_at,
                 ];
             });

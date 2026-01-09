@@ -23,7 +23,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { PistonService } from '@/services/piston';
 import { SubmissionPageProps } from '@/types';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, BookOpen, Check, CheckCircle2, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -37,7 +37,6 @@ const isRunning = ref(false);
 const stdinInput = ref('');
 const showStdinInput = ref(false);
 const lastSaved = ref<string>('');
-const isSavingToBackend = ref(false);
 const showSubmitDialog = ref(false);
 const testCaseResults = ref<Record<string, { output: string; passed: boolean; isRunning: boolean }>>({});
 
@@ -64,14 +63,13 @@ const updateViewport = () => {
     }
 };
 
-const STORAGE_KEY = `submission_${props.token}`;
-let backendSaveTimeout: ReturnType<typeof setTimeout> | null = null;
-
 const form = useForm<{
     code_content: string;
 }>({
     code_content: '',
 });
+
+let draftSaveTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const getDefaultCodeTemplate = (): string => {
     if (props.language === 'java') {
@@ -87,91 +85,50 @@ const handleKeyDown = (event: KeyboardEvent) => {
     }
 };
 
-onMounted(async () => {
+onMounted(() => {
     window.addEventListener('resize', updateViewport);
     window.addEventListener('keydown', handleKeyDown);
 
-    try {
-        const response = await fetch(`/student/submission/${props.token}/draft`);
-        const data = await response.json();
-
-        if (data.has_draft && data.draft) {
-            form.code_content = data.draft.code || '';
-            stdinInput.value = data.draft.stdin || '';
-            if (data.draft.saved_at) {
-                lastSaved.value = new Date(data.draft.saved_at).toLocaleTimeString();
-            }
-            return;
+    // Load draft from backend props
+    if (props.draftCode) {
+        form.code_content = props.draftCode;
+        stdinInput.value = props.draftStdin || '';
+        if (props.draftSavedAt) {
+            lastSaved.value = new Date(props.draftSavedAt).toLocaleTimeString();
         }
-    } catch (e) {
-        console.error('Failed to load draft from backend:', e);
-    }
-
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-        try {
-            const parsed = JSON.parse(savedData);
-            form.code_content = parsed.code || '';
-            stdinInput.value = parsed.stdin || '';
-        } catch (e) {
-            console.error('Failed to load saved code from localStorage:', e);
-        }
-    }
-
-    if (!form.code_content) {
+    } else {
         form.code_content = getDefaultCodeTemplate();
     }
 });
 
-const saveToBackend = async () => {
-    if (isSavingToBackend.value) {
-        return;
-    }
-
-    isSavingToBackend.value = true;
-
-    try {
-        const response = await fetch(`/student/submission/${props.token}/draft`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+// Auto-save draft to backend
+const saveDraft = () => {
+    router.post(
+        `/student/submission/${props.token}/draft`,
+        {
+            code: form.code_content,
+            stdin: stdinInput.value,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            only: [],
+            onSuccess: () => {
+                lastSaved.value = new Date().toLocaleTimeString();
             },
-            body: JSON.stringify({
-                code: form.code_content,
-                stdin: stdinInput.value,
-            }),
-        });
-
-        const data = await response.json();
-        if (data.success && data.saved_at) {
-            lastSaved.value = new Date(data.saved_at).toLocaleTimeString();
         }
-    } catch (e) {
-        console.error('Failed to save draft to backend:', e);
-    } finally {
-        isSavingToBackend.value = false;
-    }
+    );
 };
 
-// Auto-save code to localStorage (instant) and backend (debounced)
 watch(
     [() => form.code_content, stdinInput],
     () => {
-        const dataToSave = {
-            code: form.code_content,
-            stdin: stdinInput.value,
-            timestamp: Date.now(),
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-
-        if (backendSaveTimeout) {
-            clearTimeout(backendSaveTimeout);
+        if (draftSaveTimeout) {
+            clearTimeout(draftSaveTimeout);
         }
-
-        backendSaveTimeout = setTimeout(() => {
-            saveToBackend();
-        }, 3000);
+        draftSaveTimeout = setTimeout(() => {
+            saveDraft();
+        }, 2000);
     },
     { deep: true },
 );
@@ -182,7 +139,6 @@ const submit = () => {
             form.reset();
             submitted.value = true;
             showSubmitDialog.value = false;
-            localStorage.removeItem(STORAGE_KEY);
         },
         onError: () => {
             const errorMessage = form.errors.code_content || 'Failed to submit your code.';
@@ -274,13 +230,6 @@ const runAllTestCases = async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateViewport);
     window.removeEventListener('keydown', handleKeyDown);
-
-    if (backendSaveTimeout) {
-        clearTimeout(backendSaveTimeout);
-    }
-    if (form.code_content) {
-        saveToBackend();
-    }
 });
 
 const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {

@@ -66,7 +66,7 @@ class CourseService
                 'is_open' => $link->is_open,
                 'expires_at' => $link->expires_at,
                 'created_at' => $link->created_at,
-                'submissions_count' => $link->submissions()->count(),
+                'submissions_count' => $link->submissions()->whereNotNull('submitted_at')->count(),
             ])
             ->toArray();
     }

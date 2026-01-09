@@ -23,7 +23,7 @@ class DetectionService
 
     public function validateForDetection(Activity $activity, $linkId): array
     {
-        $link = ActivityLink::with(['submissions'])->findOrFail($linkId);
+        $link = ActivityLink::with(['submissions' => fn ($query) => $query->whereNotNull('submitted_at')])->findOrFail($linkId);
 
         if ($link->is_open) {
             return [false, 'The link must be closed before running detection.', null];
