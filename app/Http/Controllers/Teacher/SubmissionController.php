@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Teacher;
 use App\Http\Requests\SubmissionRequest;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLink;
+use App\Models\ExamViolation;
 use App\Models\Submission;
 use App\Services\SubmissionService;
 use Illuminate\Support\Facades\Auth;
@@ -40,5 +41,26 @@ class SubmissionController extends Controller
         inertia()->clearHistory();
 
         return redirect()->back();
+    }
+
+    public function violations(Submission $submission)
+    {
+        $violations = ExamViolation::where('submission_id', $submission->id)
+            ->orderBy('violated_at', 'desc')
+            ->get()
+            ->map(function ($violation) {
+                return [
+                    'id' => $violation->id,
+                    'type' => $violation->violation_type,
+                    'details' => $violation->details,
+                    'timestamp' => $violation->created_at->format('M d, Y h:i:s A'),
+                    'ip_address' => $violation->ip_address,
+                ];
+            });
+
+        return response()->json([
+            'violations' => $violations,
+            'total' => $violations->count(),
+        ]);
     }
 }

@@ -21,10 +21,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import Separator from '@/components/ui/separator/Separator.vue';
 import { Toaster } from '@/components/ui/sonner';
 import { Textarea } from '@/components/ui/textarea';
+import { useExamSecurity } from '@/composables/useExamSecurity';
+import { useTimer } from '@/composables/useTimer';
 import { PistonService } from '@/services/piston';
 import { SubmissionPageProps } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { useTimer } from '@/composables/useTimer';
 import { ArrowLeft, BookOpen, Check, CheckCircle2, Clock, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -56,6 +57,14 @@ const showConsole = ref(false);
 const endingAtRef = computed(() => props.endingAt);
 const hasSubmittedRef = computed(() => props.hasSubmitted || submitted.value);
 const { formattedTimeRemaining, isTimeWarning, isTimeCritical, hasTimerExpired } = useTimer(endingAtRef, hasSubmittedRef);
+
+// Exam security monitoring
+const examSecurity = useExamSecurity({
+    token: props.token,
+    enabled: true, // Set to true to enable security monitoring
+    requireFullscreen: true, // Set to true to force fullscreen mode (RECOMMENDED for exams)
+    blockKeyboardShortcuts: true, // Block Alt+Tab, Ctrl+Tab, F12, etc.
+});
 
 // Auto-submit when timer expires
 watch(hasTimerExpired, (expired) => {
@@ -115,6 +124,11 @@ onMounted(() => {
     } else {
         form.code_content = getDefaultCodeTemplate();
     }
+
+    // Start exam security monitoring if not already submitted
+    if (!props.hasSubmitted && !submitted.value) {
+        examSecurity.startMonitoring();
+    }
 });
 
 // Auto-save draft to backend
@@ -133,7 +147,7 @@ const saveDraft = () => {
             onSuccess: () => {
                 lastSaved.value = new Date().toLocaleTimeString();
             },
-        }
+        },
     );
 };
 
@@ -156,6 +170,14 @@ const submit = () => {
             form.reset();
             submitted.value = true;
             showSubmitDialog.value = false;
+
+            // Stop exam security monitoring after successful submission
+            examSecurity.stopMonitoring();
+
+            // Exit fullscreen if active
+            if (examSecurity.isFullscreen.value) {
+                examSecurity.exitFullscreen();
+            }
         },
         onError: () => {
             const errorMessage = form.errors.code_content || 'Failed to submit your code.';
@@ -295,25 +317,45 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 </div>
 
                 <div class="inline-flex items-center gap-4">
+                    <!-- Security Status Indicator (Desktop) -->
+                    <div
+                        v-if="examSecurity.isMonitoring.value"
+                        class="flex items-center gap-2 rounded-lg border border-blue-500 bg-blue-50 px-3 py-2 dark:bg-blue-950/20"
+                    >
+                        <div class="flex h-2 w-2">
+                            <span class="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-blue-400 opacity-75"></span>
+                            <span class="relative inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                        </div>
+                        <span class="text-xs font-medium text-blue-700 dark:text-blue-400">Monitoring Active</span>
+                    </div>
+
                     <!-- Timer Display (Desktop) -->
-                    <div v-if="props.hasTimeLimit && formattedTimeRemaining" class="flex items-center gap-2 rounded-lg border px-4 py-2"
+                    <div
+                        v-if="props.hasTimeLimit && formattedTimeRemaining"
+                        class="flex items-center gap-2 rounded-lg border px-4 py-2"
                         :class="{
                             'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
                             'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
-                            'border-border bg-card': !isTimeWarning && !isTimeCritical
+                            'border-border bg-card': !isTimeWarning && !isTimeCritical,
                         }"
                     >
-                        <Clock class="h-5 w-5" :class="{
-                            'text-red-600 dark:text-red-400': isTimeCritical,
-                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-muted-foreground': !isTimeWarning && !isTimeCritical
-                        }" />
-                        <div class="text-sm">
-                            <p class="font-mono text-lg font-bold leading-none" :class="{
+                        <Clock
+                            class="h-5 w-5"
+                            :class="{
                                 'text-red-600 dark:text-red-400': isTimeCritical,
                                 'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                                'text-foreground': !isTimeWarning && !isTimeCritical
-                            }">
+                                'text-muted-foreground': !isTimeWarning && !isTimeCritical,
+                            }"
+                        />
+                        <div class="text-sm">
+                            <p
+                                class="font-mono text-lg leading-none font-bold"
+                                :class="{
+                                    'text-red-600 dark:text-red-400': isTimeCritical,
+                                    'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                                    'text-foreground': !isTimeWarning && !isTimeCritical,
+                                }"
+                            >
                                 {{ formattedTimeRemaining }}
                             </p>
                             <p class="text-xs text-muted-foreground">Time Remaining</p>
@@ -359,23 +401,31 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 </div>
                 <div class="flex items-center gap-2">
                     <!-- Timer Display (Mobile) -->
-                    <div v-if="props.hasTimeLimit && formattedTimeRemaining" class="flex items-center gap-1 rounded border px-2 py-1"
+                    <div
+                        v-if="props.hasTimeLimit && formattedTimeRemaining"
+                        class="flex items-center gap-1 rounded border px-2 py-1"
                         :class="{
                             'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
                             'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
-                            'border-border bg-card': !isTimeWarning && !isTimeCritical
+                            'border-border bg-card': !isTimeWarning && !isTimeCritical,
                         }"
                     >
-                        <Clock class="h-3.5 w-3.5" :class="{
-                            'text-red-600 dark:text-red-400': isTimeCritical,
-                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-muted-foreground': !isTimeWarning && !isTimeCritical
-                        }" />
-                        <span class="font-mono text-xs font-bold" :class="{
-                            'text-red-600 dark:text-red-400': isTimeCritical,
-                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-foreground': !isTimeWarning && !isTimeCritical
-                        }">
+                        <Clock
+                            class="h-3.5 w-3.5"
+                            :class="{
+                                'text-red-600 dark:text-red-400': isTimeCritical,
+                                'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                                'text-muted-foreground': !isTimeWarning && !isTimeCritical,
+                            }"
+                        />
+                        <span
+                            class="font-mono text-xs font-bold"
+                            :class="{
+                                'text-red-600 dark:text-red-400': isTimeCritical,
+                                'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                                'text-foreground': !isTimeWarning && !isTimeCritical,
+                            }"
+                        >
                             {{ formattedTimeRemaining }}
                         </span>
                     </div>
@@ -504,7 +554,11 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                         <ScrollArea class="flex-1 p-4">
                                             <div v-if="props.testCases && props.testCases.length > 0">
                                                 <Accordion type="single" collapsible class="w-full">
-                                                    <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
+                                                    <AccordionItem
+                                                        v-for="(testCase, index) in props.testCases"
+                                                        :key="testCase.id"
+                                                        :value="`test-${testCase.id}`"
+                                                    >
                                                         <AccordionTrigger>
                                                             <div class="flex items-center gap-2">
                                                                 <LoaderCircle
@@ -516,8 +570,11 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     class="h-2 w-2 rounded-full"
                                                                     :class="{
                                                                         'bg-green-500': testCaseResults[testCase.id]?.passed,
-                                                                        'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
-                                                                        'bg-yellow-500': !testCaseResults[testCase.id]
+                                                                        'bg-red-500':
+                                                                            testCaseResults[testCase.id] &&
+                                                                            !testCaseResults[testCase.id]?.passed &&
+                                                                            !testCaseResults[testCase.id]?.isRunning,
+                                                                        'bg-yellow-500': !testCaseResults[testCase.id],
                                                                     }"
                                                                 ></div>
                                                                 <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
@@ -527,11 +584,15 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                             <div class="space-y-3 text-sm">
                                                                 <div>
                                                                     <p class="font-medium">Input:</p>
-                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.input }}</code>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{
+                                                                        testCase.input
+                                                                    }}</code>
                                                                 </div>
                                                                 <div>
                                                                     <p class="font-medium">Expected Output:</p>
-                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{ testCase.output }}</code>
+                                                                    <code class="block rounded bg-muted p-2 font-mono whitespace-pre-wrap">{{
+                                                                        testCase.output
+                                                                    }}</code>
                                                                 </div>
                                                                 <div v-if="testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.isRunning">
                                                                     <div class="flex items-center justify-between">
@@ -539,8 +600,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                         <span
                                                                             class="text-xs font-semibold"
                                                                             :class="{
-                                                                                'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
-                                                                                'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                                                'text-green-600 dark:text-green-500':
+                                                                                    testCaseResults[testCase.id]?.passed,
+                                                                                'text-red-600 dark:text-red-500':
+                                                                                    !testCaseResults[testCase.id]?.passed,
                                                                             }"
                                                                         >
                                                                             {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
@@ -549,10 +612,13 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     <code
                                                                         class="block rounded p-2 font-mono whitespace-pre-wrap"
                                                                         :class="{
-                                                                            'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
-                                                                            'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                                            'border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20':
+                                                                                testCaseResults[testCase.id]?.passed,
+                                                                            'border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20':
+                                                                                !testCaseResults[testCase.id]?.passed,
                                                                         }"
-                                                                    >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                                                        >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code
+                                                                    >
                                                                 </div>
                                                                 <Button
                                                                     size="sm"
@@ -561,7 +627,10 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                                     :disabled="!form.code_content || testCaseResults[testCase.id]?.isRunning"
                                                                     class="w-full gap-2"
                                                                 >
-                                                                    <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-4 w-4 animate-spin" />
+                                                                    <LoaderCircle
+                                                                        v-if="testCaseResults[testCase.id]?.isRunning"
+                                                                        class="h-4 w-4 animate-spin"
+                                                                    />
                                                                     <Play v-else class="h-4 w-4 fill-current stroke-none" />
                                                                     {{ testCaseResults[testCase.id]?.isRunning ? 'Running...' : 'Run This Test' }}
                                                                 </Button>
@@ -727,13 +796,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                 <!-- Test Cases Section (Mobile) -->
                 <div v-else-if="showTestCases" class="flex flex-1 flex-col overflow-hidden">
                     <div v-if="props.testCases && props.testCases.length > 0" class="border-b bg-muted/40 px-4 py-2">
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            @click="runAllTestCases"
-                            :disabled="!form.code_content || isRunning"
-                            class="w-full gap-2"
-                        >
+                        <Button size="sm" variant="outline" @click="runAllTestCases" :disabled="!form.code_content || isRunning" class="w-full gap-2">
                             <Play class="h-3 w-3 fill-current stroke-none" />
                             Run All Tests
                         </Button>
@@ -744,17 +807,17 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                 <AccordionItem v-for="(testCase, index) in props.testCases" :key="testCase.id" :value="`test-${testCase.id}`">
                                     <AccordionTrigger>
                                         <div class="flex items-center gap-2">
-                                            <LoaderCircle
-                                                v-if="testCaseResults[testCase.id]?.isRunning"
-                                                class="h-3 w-3 animate-spin text-blue-500"
-                                            />
+                                            <LoaderCircle v-if="testCaseResults[testCase.id]?.isRunning" class="h-3 w-3 animate-spin text-blue-500" />
                                             <div
                                                 v-else
                                                 class="h-2 w-2 rounded-full"
                                                 :class="{
                                                     'bg-green-500': testCaseResults[testCase.id]?.passed,
-                                                    'bg-red-500': testCaseResults[testCase.id] && !testCaseResults[testCase.id]?.passed && !testCaseResults[testCase.id]?.isRunning,
-                                                    'bg-yellow-500': !testCaseResults[testCase.id]
+                                                    'bg-red-500':
+                                                        testCaseResults[testCase.id] &&
+                                                        !testCaseResults[testCase.id]?.passed &&
+                                                        !testCaseResults[testCase.id]?.isRunning,
+                                                    'bg-yellow-500': !testCaseResults[testCase.id],
                                                 }"
                                             ></div>
                                             <span>{{ testCase.title || `Test Case ${index + 1}` }}</span>
@@ -777,7 +840,7 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                         class="text-xs font-semibold"
                                                         :class="{
                                                             'text-green-600 dark:text-green-500': testCaseResults[testCase.id]?.passed,
-                                                            'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed
+                                                            'text-red-600 dark:text-red-500': !testCaseResults[testCase.id]?.passed,
                                                         }"
                                                     >
                                                         {{ testCaseResults[testCase.id]?.passed ? '✓ PASSED' : '✗ FAILED' }}
@@ -786,10 +849,13 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                                                 <code
                                                     class="block rounded p-2 font-mono whitespace-pre-wrap"
                                                     :class="{
-                                                        'bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800': testCaseResults[testCase.id]?.passed,
-                                                        'bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800': !testCaseResults[testCase.id]?.passed
+                                                        'border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20':
+                                                            testCaseResults[testCase.id]?.passed,
+                                                        'border border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20':
+                                                            !testCaseResults[testCase.id]?.passed,
                                                     }"
-                                                >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code>
+                                                    >{{ testCaseResults[testCase.id]?.output || '(no output)' }}</code
+                                                >
                                             </div>
                                             <Button
                                                 size="sm"

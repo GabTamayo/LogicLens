@@ -49,4 +49,5 @@ Route::middleware(['auth', 'verified', 'role:'.RoleName::TEACHER->value])->group
 
     // Submission Routes (teacher actions)
     Route::delete('submissions/{submission}', [SubmissionController::class, 'destroy'])->name('submissions.destroy');
+    Route::get('submissions/{submission}/violations', [SubmissionController::class, 'violations'])->name('submissions.violations');
 });
