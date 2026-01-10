@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CodeExecutionController;
+use App\Http\Controllers\ExamViolationController;
 use App\Http\Controllers\SubmissionDraftController;
 use App\Http\Controllers\Teacher\SubmissionController;
 use Illuminate\Support\Facades\Route;
@@ -23,6 +24,9 @@ Route::middleware(['auth', 'verified', 'enrolled'])->prefix('student')->group(fu
 
     // Draft auto-save route (accessible by both students and teachers)
     Route::post('submission/{token}/draft', [SubmissionDraftController::class, 'saveDraft'])->name('submission.draft.save');
+
+    // Exam security violation logging
+    Route::post('submission/{token}/violation', [ExamViolationController::class, 'store'])->name('submission.violation.store');
 });
 
 require __DIR__.'/teacher.php';

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { MoreHorizontal, Code, Copy, Trash } from 'lucide-vue-next'
+import { ref } from 'vue';
+import { MoreHorizontal, Code, AlertCircle, Trash } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
+import ViolationsDialog from '@/components/submissions/ViolationsDialog.vue';
 import { toast } from 'vue-sonner';
 import type { SubmissionRow } from '@/components/submissions/columns'
 import { router } from '@inertiajs/vue3'
@@ -12,6 +14,8 @@ const { submission } = defineProps<{ submission: SubmissionRow }>()
 defineEmits<{
     (e: 'expand'): void
 }>()
+
+const showViolationsDialog = ref(false);
 
 function deleteSubmission(submission: SubmissionRow) {
     router.delete(`/submissions/${submission.id}`, {
@@ -41,6 +45,10 @@ function deleteSubmission(submission: SubmissionRow) {
                 <Code class="w-4 h-4 mr-2" />
                 View Code...
             </DropdownMenuItem>
+            <DropdownMenuItem @click="showViolationsDialog = true">
+                <AlertCircle class="w-4 h-4 mr-2" />
+                View Violations...
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <AlertDialog>
                 <AlertDialogTrigger as-child>
@@ -65,4 +73,11 @@ function deleteSubmission(submission: SubmissionRow) {
             </AlertDialog>
         </DropdownMenuContent>
     </DropdownMenu>
+
+    <!-- Violations Dialog -->
+    <ViolationsDialog
+        v-model="showViolationsDialog"
+        :submission-id="submission.id"
+        :student-name="submission.student_name"
+    />
 </template>

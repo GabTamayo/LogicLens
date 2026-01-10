@@ -30,6 +30,7 @@ class SubmissionRequest extends FormRequest
                 return;
             }
 
+            $this->validateActivityLinkIsOpen($validator, $activityLink);
             $this->validateUniqueSubmission($validator, $activityLink);
         });
     }
@@ -44,6 +45,16 @@ class SubmissionRequest extends FormRequest
             $validator->errors()->add(
                 'code_content',
                 'You have already submitted for this activity.'
+            );
+        }
+    }
+
+    private function validateActivityLinkIsOpen($validator, ActivityLink $activityLink): void
+    {
+        if (!$activityLink->is_open) {
+            $validator->errors()->add(
+                'code_content',
+                'This activity link is closed and no longer accepting submissions.'
             );
         }
     }

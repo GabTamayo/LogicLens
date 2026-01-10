@@ -119,8 +119,8 @@ const handleDetectSubmission = () => {
                 if (page.props.successMessage) {
                     toast.success(page.props.successMessage);
                 } else {
-                    toast.success('Detection complete', {
-                        description: 'Similarity detection has been completed successfully.',
+                    toast.info('Similarity detection is now in progress', {
+                        description: 'Results will appear in the Detection tab once completed.',
                     });
                 }
                 isDetecting.value = false;

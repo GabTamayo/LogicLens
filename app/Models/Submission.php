@@ -109,6 +109,11 @@ class Submission extends Model
             $startedAt = now();
             $endingAt = $startedAt->copy()->addMinutes($timeLimit);
 
+            // Cap ending_at at activity link's expires_at if it exists
+            if ($this->activityLink->expires_at && $endingAt->isAfter($this->activityLink->expires_at)) {
+                $endingAt = $this->activityLink->expires_at;
+            }
+
             $this->update([
                 'started_at' => $startedAt,
                 'ending_at' => $endingAt,

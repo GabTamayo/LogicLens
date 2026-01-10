@@ -11,13 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLanguage } from '@/composables/useLanguage';
 import { useScore } from '@/composables/useScore';
+import { useTimer } from '@/composables/useTimer';
 import StudentAppLayout from '@/layouts/StudentAppLayout.vue';
 import type { BreadcrumbItem, StudentCourseShowProps } from '@/types';
 import { Deferred, Head, InfiniteScroll, Link, router } from '@inertiajs/vue3';
 import { format, isThisMonth, isThisWeek, isToday, isYesterday, parseISO } from 'date-fns';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { Calendar, CalendarCheck, Eye, LoaderCircle, Play } from 'lucide-vue-next';
+import { Calendar, Clock, Eye, LoaderCircle, Play } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 dayjs.extend(relativeTime);
@@ -141,6 +142,25 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
+
+// Create a computed map of activity timers for efficient reactive updates
+const activityTimers = computed(() => {
+    const timers = new Map<number, ReturnType<typeof useTimer>>();
+
+    props.activities?.data?.forEach((activity) => {
+        if (activity.has_time_limit && activity.ending_at && activity.has_timer_started) {
+            const endingAtRef = computed(() => activity.ending_at);
+            timers.set(activity.id, useTimer(endingAtRef));
+        }
+    });
+
+    return timers;
+});
+
+// Helper function to get timer data for a specific activity
+function getActivityTimer(activityId: number) {
+    return activityTimers.value.get(activityId);
+}
 </script>
 
 <template>
@@ -248,6 +268,26 @@ onUnmounted(() => {
                                                                             <span class="flex items-center gap-1.5">
                                                                                 <Calendar class="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                                                                                 {{ dayjs(activity.created_at).format('MMM D, YYYY h:mm A') }}
+                                                                            </span>
+                                                                            <!-- Timer Display -->
+                                                                            <span
+                                                                                v-if="getActivityTimer(activity.id)?.formattedTimeRemaining.value"
+                                                                                class="flex w-fit items-center gap-1.5 rounded-md border px-2 py-0.5"
+                                                                                :class="{
+                                                                                    'border-red-500 bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400':
+                                                                                        getActivityTimer(activity.id)?.isTimeCritical.value,
+                                                                                    'border-yellow-500 bg-yellow-50 text-yellow-600 dark:bg-yellow-950/20 dark:text-yellow-400':
+                                                                                        getActivityTimer(activity.id)?.isTimeWarning.value &&
+                                                                                        !getActivityTimer(activity.id)?.isTimeCritical.value,
+                                                                                    'border-border bg-card text-foreground':
+                                                                                        !getActivityTimer(activity.id)?.isTimeWarning.value &&
+                                                                                        !getActivityTimer(activity.id)?.isTimeCritical.value,
+                                                                                }"
+                                                                            >
+                                                                                <Clock class="h-3.5 w-3.5" />
+                                                                                <span class="font-mono text-xs font-semibold">
+                                                                                    {{ getActivityTimer(activity.id)?.formattedTimeRemaining.value }}
+                                                                                </span>
                                                                             </span>
                                                                             <span v-if="activity.expires_at" class="flex items-center gap-1.5">
                                                                                 <Calendar class="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
@@ -369,13 +409,6 @@ onUnmounted(() => {
                                                                             </span>
 
                                                                             <div class="flex items-center gap-3">
-                                                                                <span
-                                                                                    v-if="!activity.is_open"
-                                                                                    class="sm:text-md flex items-center gap-1.5 text-xs font-semibold text-white/90"
-                                                                                >
-                                                                                    <CalendarCheck class="h-3.5 w-3.5" />
-                                                                                    Closed
-                                                                                </span>
                                                                                 <div class="hidden md:block">
                                                                                     <span class="flex items-center gap-1.5 text-xs text-white/90">
                                                                                         <Calendar class="h-3.5 w-3.5" />
