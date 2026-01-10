@@ -24,7 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { PistonService } from '@/services/piston';
 import { SubmissionPageProps } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, BookOpen, Check, CheckCircle2, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
+import { useTimestamp } from '@vueuse/core';
+import { ArrowLeft, BookOpen, Check, CheckCircle2, Clock, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
@@ -50,6 +51,63 @@ const isLandscape = computed(() => windowWidth.value > windowHeight.value);
 const showInstructions = ref(true);
 const showTestCases = ref(false);
 const showConsole = ref(false);
+
+// Timer countdown logic
+const now = useTimestamp({ interval: 1000 });
+const timeRemaining = computed(() => {
+    if (!props.hasTimeLimit || !props.endingAt) {
+        return null;
+    }
+
+    const endTime = new Date(props.endingAt).getTime();
+    const remaining = Math.max(0, Math.floor((endTime - now.value) / 1000));
+
+    return remaining;
+});
+
+const formattedTimeRemaining = computed(() => {
+    if (timeRemaining.value === null) {
+        return null;
+    }
+
+    const hours = Math.floor(timeRemaining.value / 3600);
+    const minutes = Math.floor((timeRemaining.value % 3600) / 60);
+    const seconds = timeRemaining.value % 60;
+
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    return `${minutes}:${String(seconds).padStart(2, '0')}`;
+});
+
+const isTimeWarning = computed(() => {
+    if (timeRemaining.value === null) {
+        return false;
+    }
+    return timeRemaining.value <= 300; // 5 minutes
+});
+
+const isTimeCritical = computed(() => {
+    if (timeRemaining.value === null) {
+        return false;
+    }
+    return timeRemaining.value <= 60; // 1 minute
+});
+
+const hasTimerExpired = computed(() => {
+    return timeRemaining.value === 0;
+});
+
+// Auto-submit when timer expires
+watch(hasTimerExpired, (expired) => {
+    if (expired && !submitted.value && !props.hasSubmitted) {
+        toast.warning('Time is up! Auto-submitting your work...');
+        setTimeout(() => {
+            submit();
+        }, 1000);
+    }
+});
 
 const updateViewport = () => {
     const wasPortrait = isPortrait.value;
@@ -278,7 +336,32 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                     </div>
                 </div>
 
-                <div class="inline-flex items-center gap-18">
+                <div class="inline-flex items-center gap-4">
+                    <!-- Timer Display (Desktop) -->
+                    <div v-if="props.hasTimeLimit && formattedTimeRemaining" class="flex items-center gap-2 rounded-lg border px-4 py-2"
+                        :class="{
+                            'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
+                            'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
+                            'border-border bg-muted/20': !isTimeWarning
+                        }"
+                    >
+                        <Clock class="h-5 w-5" :class="{
+                            'text-red-600 dark:text-red-400': isTimeCritical,
+                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                            'text-muted-foreground': !isTimeWarning
+                        }" />
+                        <div class="text-sm">
+                            <p class="font-mono text-lg font-bold leading-none" :class="{
+                                'text-red-600 dark:text-red-400': isTimeCritical,
+                                'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                                'text-foreground': !isTimeWarning
+                            }">
+                                {{ formattedTimeRemaining }}
+                            </p>
+                            <p class="text-xs text-muted-foreground">Time Remaining</p>
+                        </div>
+                    </div>
+
                     <div v-if="props.hasSubmitted && !submitted" class="bg-muted/20">
                         <Alert class="flex items-start gap-4">
                             <div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green-600">
@@ -316,8 +399,32 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                         <p class="truncate text-xs text-muted-foreground">{{ props.courseName }}</p>
                     </div>
                 </div>
-                <div v-if="props.hasSubmitted && !submitted" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-600">
-                    <Check class="h-3.5 w-3.5 text-white" />
+                <div class="flex items-center gap-2">
+                    <!-- Timer Display (Mobile) -->
+                    <div v-if="props.hasTimeLimit && formattedTimeRemaining" class="flex items-center gap-1 rounded border px-2 py-1"
+                        :class="{
+                            'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
+                            'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
+                            'border-border bg-muted/20': !isTimeWarning
+                        }"
+                    >
+                        <Clock class="h-3.5 w-3.5" :class="{
+                            'text-red-600 dark:text-red-400': isTimeCritical,
+                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                            'text-muted-foreground': !isTimeWarning
+                        }" />
+                        <span class="font-mono text-xs font-bold" :class="{
+                            'text-red-600 dark:text-red-400': isTimeCritical,
+                            'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
+                            'text-foreground': !isTimeWarning
+                        }">
+                            {{ formattedTimeRemaining }}
+                        </span>
+                    </div>
+
+                    <div v-if="props.hasSubmitted && !submitted" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-600">
+                        <Check class="h-3.5 w-3.5 text-white" />
+                    </div>
                 </div>
             </div>
         </div>

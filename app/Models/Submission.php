@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 class Submission extends Model
 {
@@ -25,12 +26,16 @@ class Submission extends Model
         'draft_code',
         'draft_stdin',
         'draft_saved_at',
+        'started_at',
+        'ending_at',
         'submitted_at',
         'score',
     ];
 
     protected $casts = [
         'draft_saved_at' => 'datetime',
+        'started_at' => 'datetime',
+        'ending_at' => 'datetime',
         'submitted_at' => 'datetime',
         'score' => 'decimal:2',
     ];
@@ -95,5 +100,44 @@ class Submission extends Model
     public function activityLanguage(): ?string
     {
         return $this->activityLink?->activity?->language;
+    }
+
+    public function startTimer(): void
+    {
+        if (! $this->started_at && $this->activityLink?->activity?->hasTimeLimit()) {
+            $timeLimit = $this->activityLink->activity->time_limit;
+            $startedAt = now();
+            $endingAt = $startedAt->copy()->addMinutes($timeLimit);
+
+            $this->update([
+                'started_at' => $startedAt,
+                'ending_at' => $endingAt,
+            ]);
+        }
+    }
+
+    public function hasTimerExpired(): bool
+    {
+        if (! $this->ending_at) {
+            return false;
+        }
+
+        return now()->isAfter($this->ending_at);
+    }
+
+    public function getTimeRemainingInSeconds(): ?int
+    {
+        if (! $this->ending_at) {
+            return null;
+        }
+
+        $remaining = now()->diffInSeconds($this->ending_at, false);
+
+        return max(0, (int) $remaining);
+    }
+
+    public function getExpiresAt(): ?Carbon
+    {
+        return $this->ending_at;
     }
 }

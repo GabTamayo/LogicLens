@@ -21,7 +21,21 @@ class SubmissionService
                 ['language' => $language]
             );
 
+        // Start timer if activity has time limit and timer not started
+        if (! $submission->started_at && $activityLink->activity->hasTimeLimit()) {
+            $submission->startTimer();
+            $submission->refresh();
+        }
+
         $hasSubmitted = $submission->submitted_at !== null;
+        $hasTimerExpired = $submission->hasTimerExpired();
+
+        // Auto-submit if timer has expired and not yet submitted
+        if ($hasTimerExpired && ! $hasSubmitted && $submission->draft_code) {
+            $this->autoSubmitExpiredSubmission($activityLink, $user, $submission->draft_code);
+            $submission->refresh();
+            $hasSubmitted = true;
+        }
 
         return [
             'bgImage' => asset('images/clonewave-bg.jpg'),
@@ -40,29 +54,49 @@ class SubmissionService
             'draftStdin' => $submission->draft_stdin,
             'draftSavedAt' => $submission->draft_saved_at?->toIso8601String(),
             'testCases' => $activityLink->activity->testCases()->select('id', 'title', 'input', 'output', 'score', 'order')->get(),
+            'hasTimeLimit' => $activityLink->activity->hasTimeLimit(),
+            'timeLimit' => $activityLink->activity->time_limit,
+            'endingAt' => $submission->ending_at?->toIso8601String(),
+            'timeRemainingSeconds' => $submission->getTimeRemainingInSeconds(),
+            'hasTimerExpired' => $hasTimerExpired,
         ];
     }
 
-    public function storeSubmission(ActivityLink $activityLink, User $user, array $validatedData)
+    public function storeSubmission(ActivityLink $activityLink, User $user, array $validatedData): bool
     {
+        $submission = $activityLink->submissions()
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        return $this->processSubmission($activityLink, $user, $validatedData['code_content']);
+    }
+
+    public function autoSubmitExpiredSubmission(ActivityLink $activityLink, User $user, string $code): bool
+    {
+        return $this->processSubmission($activityLink, $user, $code);
+    }
+
+    private function processSubmission(ActivityLink $activityLink, User $user, string $code): bool
+    {
+        $submission = $activityLink->submissions()
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
         $language = $activityLink->activity->language;
 
         // Run test cases in backend and calculate score
         $score = $this->calculateScoreByRunningTestCases(
             $activityLink,
-            $validatedData['code_content'],
+            $code,
             $language
         );
 
         // Update existing submission with submitted code and timestamp
-        return $activityLink->submissions()
-            ->where('user_id', $user->id)
-            ->firstOrFail()
-            ->update([
-                'code_content' => $validatedData['code_content'],
-                'score' => $score,
-                'submitted_at' => now(),
-            ]);
+        return $submission->update([
+            'code_content' => $code,
+            'score' => $score,
+            'submitted_at' => now(),
+        ]);
     }
 
     private function calculateScoreByRunningTestCases(ActivityLink $activityLink, string $code, string $language): float

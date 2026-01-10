@@ -65,6 +65,7 @@ export interface ActivityDetail {
     title: string;
     language_text: string;
     content: string;
+    time_limit: number | null;
     appUrl: string;
     courses: Array<{
         id: string;
@@ -173,6 +174,11 @@ export interface SubmissionPageProps {
         output: string;
         order: number;
     }>;
+    hasTimeLimit: boolean;
+    timeLimit: number | null;
+    endingAt: string | null;
+    timeRemainingSeconds: number | null;
+    hasTimerExpired: boolean;
 }
 
 export type Submission = {

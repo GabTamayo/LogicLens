@@ -16,14 +16,14 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Activities',
-        href: '/activities',
-        icon: SquarePen,
-    },
-    {
         title: 'Courses',
         href: '/courses',
         icon: BookOpenText,
+    },
+    {
+        title: 'Activities',
+        href: '/activities',
+        icon: SquarePen,
     },
 ];
 
