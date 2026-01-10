@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('activity-links:close-expired')->everyFiveMinutes();
+Schedule::command('submissions:auto-submit-expired')->everyMinute();

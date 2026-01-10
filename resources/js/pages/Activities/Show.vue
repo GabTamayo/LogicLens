@@ -104,6 +104,36 @@ const saveContent = () => {
     });
 };
 
+// Time Limit Management
+const isEditingTimeLimit = ref(false);
+const timeLimitForm = useForm({
+    time_limit: props.time_limit,
+});
+
+const toggleEditTimeLimit = () => {
+    if (isEditingTimeLimit.value) {
+        timeLimitForm.time_limit = props.time_limit;
+    }
+    isEditingTimeLimit.value = !isEditingTimeLimit.value;
+};
+
+const saveTimeLimit = () => {
+    timeLimitForm.patch(`/activities/${props.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isEditingTimeLimit.value = false;
+            toast.success('Time limit updated', {
+                description: 'The time limit has been saved successfully.',
+            });
+        },
+        onError: () => {
+            toast.error('Failed to update time limit', {
+                description: timeLimitForm.errors.time_limit || 'An error occurred while saving.',
+            });
+        },
+    });
+};
+
 // Test Cases Management
 interface TestCase {
     title: string;
@@ -437,6 +467,75 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
                         </div>
                     </CardContent>
                 </ScrollArea>
+            </Card>
+
+            <!-- Time Limit Section -->
+            <Card class="flex flex-col">
+                <CardHeader>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <CardTitle>Time Limit</CardTitle>
+                            <CardDescription class="text-xs md:text-sm">Set optional time limit for student submissions</CardDescription>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <template v-if="isEditingTimeLimit">
+                                <Button variant="outline" size="sm" @click="toggleEditTimeLimit" :disabled="timeLimitForm.processing">
+                                    <X class="mr-2 h-4 w-4" />
+                                    Cancel
+                                </Button>
+                                <Button size="sm" @click="saveTimeLimit" :disabled="timeLimitForm.processing">
+                                    <Save class="mr-2 h-4 w-4" />
+                                    {{ timeLimitForm.processing ? 'Saving...' : 'Save' }}
+                                </Button>
+                            </template>
+                            <Button v-else variant="outline" size="sm" @click="toggleEditTimeLimit">
+                                <Pencil class="mr-2 h-4 w-4" />
+                                Edit
+                            </Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div v-if="!isEditingTimeLimit" class="flex items-center gap-3">
+                        <Clock class="h-5 w-5 text-muted-foreground" />
+                        <div>
+                            <p v-if="props.time_limit" class="text-sm font-medium">
+                                {{ props.time_limit }} minute{{ props.time_limit !== 1 ? 's' : '' }}
+                            </p>
+                            <p v-else class="text-sm text-muted-foreground">No time limit set</p>
+                            <p class="text-xs text-muted-foreground">
+                                {{ props.time_limit ? 'Students must complete within this time' : 'Students can take as long as needed' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div v-else class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                Time Limit
+                                <span class="font-light text-muted-foreground">(Optional, in minutes)</span>
+                            </label>
+                            <NumberField class="w-1/2"
+                                v-model="timeLimitForm.time_limit"
+                                :min="1"
+                                :max="1440"
+                                :format-options="{
+                                    useGrouping: false,
+                                }"
+                            >
+                                <NumberFieldContent>
+                                    <NumberFieldDecrement />
+                                    <NumberFieldInput placeholder="No time limit" />
+                                    <NumberFieldIncrement />
+                                </NumberFieldContent>
+                            </NumberField>
+                            <p class="text-[0.8rem] text-muted-foreground">
+                                Set a time limit for this activity (1-1440 minutes). Leave empty for no time limit.
+                            </p>
+                            <InputError :message="timeLimitForm.errors.time_limit" />
+                        </div>
+                    </div>
+                </CardContent>
             </Card>
 
             <!-- Test Cases Section -->

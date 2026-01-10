@@ -9,16 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('submissions', function (Blueprint $table) {
-            if (! Schema::hasColumn('submissions', 'submitted_at')) {
-                $table->timestamp('submitted_at')->nullable()->after('draft_saved_at');
-            }
+            $table->timestamp('started_at')->nullable()->after('user_id')->comment('When the student started the activity timer');
+            $table->timestamp('ending_at')->nullable()->after('started_at')->comment('When the activity timer expires (set once when started)');
         });
     }
 
     public function down(): void
     {
         Schema::table('submissions', function (Blueprint $table) {
-            $table->dropColumn('submitted_at');
+            $table->dropColumn(['started_at', 'ending_at']);
         });
     }
 };

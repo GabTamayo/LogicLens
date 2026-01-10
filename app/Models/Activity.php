@@ -23,6 +23,7 @@ class Activity extends Model
         'title',
         'language',
         'content',
+        'time_limit',
     ];
 
     protected $casts = [
@@ -65,5 +66,15 @@ class Activity extends Model
     public function getLanguageTextAttribute(): ?string
     {
         return ProgrammingLanguage::response($this->language);
+    }
+
+    public function hasTimeLimit(): bool
+    {
+        return $this->time_limit !== null;
+    }
+
+    public function getTimeLimitInMinutes(): ?int
+    {
+        return $this->time_limit;
     }
 }

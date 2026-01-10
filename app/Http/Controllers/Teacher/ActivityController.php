@@ -40,6 +40,7 @@ class ActivityController extends Controller
             'title' => $validated['title'],
             'language' => $validated['language'],
             'content' => $validated['content'] ?? null,
+            'time_limit' => $validated['time_limit'] ?? null,
         ]);
 
         if (! empty($validated['test_cases'])) {
@@ -76,7 +77,15 @@ class ActivityController extends Controller
         $updateData = [];
 
         if (isset($validated['content'])) {
-            $activity->update(['content' => $validated['content']]);
+            $updateData['content'] = $validated['content'];
+        }
+
+        if (isset($validated['time_limit'])) {
+            $updateData['time_limit'] = $validated['time_limit'];
+        }
+
+        if (! empty($updateData)) {
+            $activity->update($updateData);
         }
 
         if (isset($validated['test_cases'])) {

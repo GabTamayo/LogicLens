@@ -24,6 +24,7 @@ class ActivityUpdateContentRequest extends FormRequest
     {
         return [
             'content' => ['nullable', 'string'],
+            'time_limit' => ['nullable', 'integer', 'min:1', 'max:1440'],
             'test_cases' => ['nullable', 'array'],
             'test_cases.*.title' => ['required', 'string', 'max:255'],
             'test_cases.*.input' => ['nullable', 'string'],
@@ -36,6 +37,9 @@ class ActivityUpdateContentRequest extends FormRequest
     {
         return [
             'content.string' => 'The activity content must be a valid text.',
+            'time_limit.integer' => 'The time limit must be a valid number.',
+            'time_limit.min' => 'The time limit must be at least 1 minute.',
+            'time_limit.max' => 'The time limit must not exceed 1440 minutes (24 hours).',
             'test_cases.array' => 'The test cases must be a valid array.',
             'test_cases.*.title.required' => 'Each test case must have a title.',
             'test_cases.*.title.string' => 'The test case title must be a valid text.',

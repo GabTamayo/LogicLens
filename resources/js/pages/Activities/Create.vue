@@ -27,6 +27,7 @@ const form = useForm({
     title: '',
     language: '',
     content: '',
+    time_limit: null as number | null,
     test_cases: [] as TestCase[],
 });
 
@@ -98,6 +99,36 @@ function submit(close: () => void) {
                             <InputError :message="form.errors.language" />
                         </FormItem>
                     </FormField>
+
+                    <FormField name="time_limit">
+                        <FormItem>
+                            <FormLabel>
+                                Time Limit
+                                <span class="font-light text-muted-foreground">(Optional, in minutes)</span>
+                            </FormLabel>
+                            <FormControl class="w-1/2">
+                                <NumberField
+                                    v-model="form.time_limit"
+                                    :min="1"
+                                    :max="1440"
+                                    :format-options="{
+                                        useGrouping: false,
+                                    }"
+                                >
+                                    <NumberFieldContent>
+                                        <NumberFieldDecrement />
+                                        <NumberFieldInput placeholder="No time limit" />
+                                        <NumberFieldIncrement />
+                                    </NumberFieldContent>
+                                </NumberField>
+                            </FormControl>
+                            <p class="text-[0.8rem] text-muted-foreground">
+                                Set a time limit for this activity (1-1440 minutes). Leave empty for no time limit.
+                            </p>
+                            <InputError :message="form.errors.time_limit" />
+                        </FormItem>
+                    </FormField>
+
                     <FormField name="content">
                         <FormItem>
                             <FormLabel>
