@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PistonService } from '@/services/piston';
 import { SubmissionPageProps } from '@/types';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { useTimestamp } from '@vueuse/core';
+import { useTimer } from '@/composables/useTimer';
 import { ArrowLeft, BookOpen, Check, CheckCircle2, Clock, Code, LoaderCircle, Play, Terminal } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
@@ -52,52 +52,10 @@ const showInstructions = ref(true);
 const showTestCases = ref(false);
 const showConsole = ref(false);
 
-// Timer countdown logic
-const now = useTimestamp({ interval: 1000 });
-const timeRemaining = computed(() => {
-    if (!props.hasTimeLimit || !props.endingAt) {
-        return null;
-    }
-
-    const endTime = new Date(props.endingAt).getTime();
-    const remaining = Math.max(0, Math.floor((endTime - now.value) / 1000));
-
-    return remaining;
-});
-
-const formattedTimeRemaining = computed(() => {
-    if (timeRemaining.value === null) {
-        return null;
-    }
-
-    const hours = Math.floor(timeRemaining.value / 3600);
-    const minutes = Math.floor((timeRemaining.value % 3600) / 60);
-    const seconds = timeRemaining.value % 60;
-
-    if (hours > 0) {
-        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    }
-
-    return `${minutes}:${String(seconds).padStart(2, '0')}`;
-});
-
-const isTimeWarning = computed(() => {
-    if (timeRemaining.value === null) {
-        return false;
-    }
-    return timeRemaining.value <= 300; // 5 minutes
-});
-
-const isTimeCritical = computed(() => {
-    if (timeRemaining.value === null) {
-        return false;
-    }
-    return timeRemaining.value <= 60; // 1 minute
-});
-
-const hasTimerExpired = computed(() => {
-    return timeRemaining.value === 0;
-});
+// Timer countdown logic using composable
+const endingAtRef = computed(() => props.endingAt);
+const hasSubmittedRef = computed(() => props.hasSubmitted || submitted.value);
+const { formattedTimeRemaining, isTimeWarning, isTimeCritical, hasTimerExpired } = useTimer(endingAtRef, hasSubmittedRef);
 
 // Auto-submit when timer expires
 watch(hasTimerExpired, (expired) => {
@@ -342,19 +300,19 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                         :class="{
                             'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
                             'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
-                            'border-border bg-muted/20': !isTimeWarning
+                            'border-border bg-card': !isTimeWarning && !isTimeCritical
                         }"
                     >
                         <Clock class="h-5 w-5" :class="{
                             'text-red-600 dark:text-red-400': isTimeCritical,
                             'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-muted-foreground': !isTimeWarning
+                            'text-muted-foreground': !isTimeWarning && !isTimeCritical
                         }" />
                         <div class="text-sm">
                             <p class="font-mono text-lg font-bold leading-none" :class="{
                                 'text-red-600 dark:text-red-400': isTimeCritical,
                                 'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                                'text-foreground': !isTimeWarning
+                                'text-foreground': !isTimeWarning && !isTimeCritical
                             }">
                                 {{ formattedTimeRemaining }}
                             </p>
@@ -405,18 +363,18 @@ const toggleSection = (section: 'instructions' | 'testcases' | 'console') => {
                         :class="{
                             'border-red-500 bg-red-50 dark:bg-red-950/20': isTimeCritical,
                             'border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20': isTimeWarning && !isTimeCritical,
-                            'border-border bg-muted/20': !isTimeWarning
+                            'border-border bg-card': !isTimeWarning && !isTimeCritical
                         }"
                     >
                         <Clock class="h-3.5 w-3.5" :class="{
                             'text-red-600 dark:text-red-400': isTimeCritical,
                             'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-muted-foreground': !isTimeWarning
+                            'text-muted-foreground': !isTimeWarning && !isTimeCritical
                         }" />
                         <span class="font-mono text-xs font-bold" :class="{
                             'text-red-600 dark:text-red-400': isTimeCritical,
                             'text-yellow-600 dark:text-yellow-400': isTimeWarning && !isTimeCritical,
-                            'text-foreground': !isTimeWarning
+                            'text-foreground': !isTimeWarning && !isTimeCritical
                         }">
                             {{ formattedTimeRemaining }}
                         </span>

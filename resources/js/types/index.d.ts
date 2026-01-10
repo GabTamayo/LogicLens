@@ -112,6 +112,10 @@ export interface CourseActivityLink {
     created_at: string;
     submissions_count: number;
     has_draft?: boolean;
+    has_time_limit?: boolean;
+    time_limit?: number | null;
+    ending_at?: string | null;
+    has_timer_started?: boolean;
 }
 
 export interface CourseShowProps {

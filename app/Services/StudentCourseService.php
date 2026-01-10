@@ -91,28 +91,37 @@ class StudentCourseService
         $userId = Auth::id();
 
         return $course->activityLinks()
-            ->with(['activity:id,title,language', 'activity.user:id,name'])
+            ->with(['activity:id,title,language,time_limit', 'activity.user:id,name'])
             ->where('is_open', true)
             ->whereDoesntHave('submissions', fn ($query) => $query->where('user_id', $userId)->whereNotNull('submitted_at'))
             ->with(['submissions' => fn ($query) => $query->where('user_id', $userId)
                 ->whereNull('submitted_at')
-                ->select('id', 'activity_link_id')
+                ->select('id', 'activity_link_id', 'started_at', 'ending_at', 'submitted_at')
                 ->limit(1),
             ])
             ->latest()
             ->paginate(5, ['*'], 'page', $page)
             ->withQueryString()
-            ->through(fn ($link) => [
-                'id' => $link->id,
-                'activity_id' => $link->activity_id,
-                'activity_title' => $link->activity->title ?? 'N/A',
-                'activity_language' => $link->activity->language ?? 'N/A',
-                'token' => $link->token,
-                'is_open' => $link->is_open,
-                'expires_at' => $link->expires_at,
-                'created_at' => $link->created_at,
-                'has_draft' => $link->submissions->isNotEmpty(),
-            ]);
+            ->through(function ($link) {
+                $submission = $link->submissions->first();
+                $hasTimeLimit = $link->activity && $link->activity->time_limit !== null;
+
+                return [
+                    'id' => $link->id,
+                    'activity_id' => $link->activity_id,
+                    'activity_title' => $link->activity->title ?? 'N/A',
+                    'activity_language' => $link->activity->language ?? 'N/A',
+                    'token' => $link->token,
+                    'is_open' => $link->is_open,
+                    'expires_at' => $link->expires_at,
+                    'created_at' => $link->created_at,
+                    'has_draft' => $link->submissions->isNotEmpty(),
+                    'has_time_limit' => $hasTimeLimit,
+                    'time_limit' => $link->activity?->time_limit,
+                    'ending_at' => $submission?->ending_at?->toIso8601String(),
+                    'has_timer_started' => $submission?->started_at !== null,
+                ];
+            });
     }
 
     public function queryStudents($course, array $params): array
