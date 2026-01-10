@@ -113,6 +113,7 @@ const saveDraft = () => {
             preserveScroll: true,
             preserveState: true,
             only: [],
+            showProgress: false,
             onSuccess: () => {
                 lastSaved.value = new Date().toLocaleTimeString();
             },

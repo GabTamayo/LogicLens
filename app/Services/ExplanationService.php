@@ -16,11 +16,11 @@ class ExplanationService
 
         try {
             $response = Prism::text()
-                ->using('ollama', 'qwen2.5-coder:7b')
+                ->using('groq', 'llama-3.3-70b-versatile')
                 ->withPrompt($prompt)
                 ->withMaxTokens(800)
                 ->withClientOptions([
-                    'timeout' => 120,
+                    'timeout' => 60,
                     'connect_timeout' => 10,
                 ])
                 ->generate();
@@ -48,13 +48,17 @@ class ExplanationService
 
         $lineMatchesFormatted = $this->formatLineMatches($detection->line_matches);
 
+        $seqPercent = round($detection->seq_score * 100, 2);
+        $structPercent = round($detection->struct_score * 100, 2);
+        $avgPercent = round($detection->avg_score * 100, 2);
+
         return <<<PROMPT
 You are a code similarity expert analyzing student programming submissions for plagiarism detection.
 
 ## Similarity Scores
-- Sequential Similarity: {$detection->seq_score}%
-- Structural Similarity: {$detection->struct_score}%
-- Average Similarity: {$detection->avg_score}%
+- Sequential Similarity: {$seqPercent}%
+- Structural Similarity: {$structPercent}%
+- Average Similarity: {$avgPercent}%
 
 ## Student A's Code (Matched Sections)
 ```{$detection->submissionA->language}
