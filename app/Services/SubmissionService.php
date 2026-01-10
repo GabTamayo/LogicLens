@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\ProgrammingLanguage;
 use App\Models\ActivityLink;
+use App\Models\Submission;
 use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 class SubmissionService
 {
@@ -78,6 +80,9 @@ class SubmissionService
 
     private function processSubmission(ActivityLink $activityLink, User $user, string $code): bool
     {
+        $this->validateActivityLinkIsOpen($activityLink);
+        $this->validateUniqueSubmission($activityLink, $user);
+
         $submission = $activityLink->submissions()
             ->where('user_id', $user->id)
             ->firstOrFail();
@@ -180,5 +185,27 @@ class SubmissionService
         $expected = trim($expectedOutput);
 
         return $actualOutput === $expected;
+    }
+
+    private function validateActivityLinkIsOpen(ActivityLink $activityLink): void
+    {
+        if (!$activityLink->is_open) {
+            throw ValidationException::withMessages([
+                'code_content' => 'This activity link is closed and no longer accepting submissions.',
+            ]);
+        }
+    }
+
+    private function validateUniqueSubmission(ActivityLink $activityLink, User $user): void
+    {
+        if (Submission::where('activity_link_id', $activityLink->id)
+            ->where('user_id', $user->id)
+            ->whereNotNull('submitted_at')
+            ->exists()
+        ) {
+            throw ValidationException::withMessages([
+                'code_content' => 'You have already submitted for this activity.',
+            ]);
+        }
     }
 }
