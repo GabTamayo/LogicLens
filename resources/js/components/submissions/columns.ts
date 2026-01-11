@@ -12,6 +12,7 @@ export interface SubmissionRow {
     submitted_at: string
     score: number | null
     total_score: number | null
+    violations_count: number
 }
 
 export const columns: ColumnDef<SubmissionRow>[] = [
@@ -42,6 +43,15 @@ export const columns: ColumnDef<SubmissionRow>[] = [
             }
 
             return h('div', { class: `text-center font-medium ${scoreDisplay.colorClass}` }, scoreDisplay.text)
+        },
+    },
+    {
+        accessorKey: 'violations_count',
+        label: 'Violations',
+        header: () => h('div', { class: 'text-center' }, 'Violations'),
+        cell: ({ row }) => {
+            const count = row.getValue('violations_count') as number
+            return h('div', { class: 'text-center font-medium text-destructive' }, count.toString())
         },
     },
     {
