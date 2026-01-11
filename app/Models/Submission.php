@@ -77,6 +77,11 @@ class Submission extends Model
         return $this->hasMany(Detection::class, 'submission_b_id');
     }
 
+    public function examViolations(): HasMany
+    {
+        return $this->hasMany(ExamViolation::class);
+    }
+
     public function scopeUndetected($query)
     {
         return $query->whereDoesntHave('detectionA')->whereDoesntHave('detectionB');

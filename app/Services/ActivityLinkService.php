@@ -15,6 +15,7 @@ class ActivityLinkService
             ->submitted()
             ->selectedAttributes()
             ->with('user:id,name,email')
+            ->withCount('examViolations')
             ->filterByStudent(
                 $request->input('student_name'),
             );
@@ -38,6 +39,7 @@ class ActivityLinkService
                 'score' => $submission->score,
                 'total_score' => $submission->total_score, // Computed from activity test cases
                 'submitted_at' => $submission->submitted_at,
+                'violations_count' => $submission->exam_violations_count,
             ];
         });
 

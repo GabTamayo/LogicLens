@@ -11,13 +11,14 @@ return new class extends Migration
         Schema::table('submissions', function (Blueprint $table) {
             $table->timestamp('started_at')->nullable()->after('user_id')->comment('When the student started the activity timer');
             $table->timestamp('ending_at')->nullable()->after('started_at')->comment('When the activity timer expires (set once when started)');
+            $table->timestamp('submitted_at')->nullable()->after('ending_at')->comment('When the submission was submitted');
         });
     }
 
     public function down(): void
     {
         Schema::table('submissions', function (Blueprint $table) {
-            $table->dropColumn(['started_at', 'ending_at']);
+            $table->dropColumn(['started_at', 'ending_at', 'submitted_at']);
         });
     }
 };
