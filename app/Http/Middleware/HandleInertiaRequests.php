@@ -70,7 +70,7 @@ class HandleInertiaRequests extends Middleware
             $quote = [
                 'message' => $quoteString,
                 'author' => null,
-                'image' => asset('images/clonewave-bg.jpg'),
+                'image' => asset('images/landing-bg2.png'),
             ];
 
             if (preg_match('/“(.+)”\s+—\s+(.+)/s', strip_tags($quoteString), $matches)) {

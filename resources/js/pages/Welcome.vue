@@ -6,52 +6,100 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { dashboard, login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Upload } from 'lucide-vue-next';
+import { onMounted, onUnmounted, ref } from 'vue';
+
+const isScrolled = ref(false);
+
+const handleScroll = () => {
+    isScrolled.value = window.scrollY > 50;
+};
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
     <Head title="Welcome" />
-    <div class="flex min-h-screen flex-col items-center bg-[#FDFDFC] lg:justify-center dark:bg-[#0a0a0a]">
-        <section
-            class="relative w-full overflow-hidden px-6 py-16 lg:px-8 lg:py-24"
-            style="background-image: url('/images/clonewave-bg.jpg'); background-size: cover; background-position: center"
+    <div class="flex min-h-screen flex-col items-center lg:justify-center dark:bg-[#0a0a0a]">
+        <!-- Sticky Header -->
+        <header
+            :class="[
+                'fixed top-0 right-0 left-0 z-50 transition-all duration-300',
+                isScrolled ? 'bg-white/95 shadow-md backdrop-blur-md dark:bg-[#0a0a0a]/95' : 'bg-transparent',
+            ]"
         >
-            <div class="absolute inset-0 bg-black/20 dark:bg-black/50"></div>
-
-            <header class="relative z-10 mx-auto mb-12 flex w-full max-w-7xl items-center justify-between px-4 text-sm sm:px-6">
+            <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 text-sm sm:px-6">
                 <div class="flex items-center gap-2">
-                    <svg viewBox="0 0 200 200" class="h-16 w-16 sm:h-20 sm:w-20">
+                    <svg viewBox="0 0 200 200" class="h-12 w-12 transition-all duration-300 sm:h-14 sm:w-14">
                         <line x1="120" y1="170" x2="80" y2="110" stroke="#3b82f6" stroke-width="12" stroke-linecap="round" />
                         <circle cx="75" cy="65" r="35" fill="none" stroke="#06b6d4" stroke-width="10" />
                         <circle cx="75" cy="65" r="28" fill="#06b6d4" opacity="0.15" />
                         <circle cx="85" cy="55" r="10" fill="#e0f2fe" opacity="0.7" />
                         <circle cx="66" cy="58" r="5" fill="#e0f2fe" opacity="0.5" />
                     </svg>
-                    <span class="text-xl font-bold tracking-tight text-white sm:text-2xl">LogicLens</span>
+                    <span
+                        :class="[
+                            'text-xl font-bold tracking-tight transition-colors duration-300 sm:text-2xl',
+                            isScrolled ? 'text-[#1b1b18] dark:text-white' : 'text-white',
+                        ]"
+                    >
+                        LogicLens
+                    </span>
                 </div>
                 <nav class="flex items-center gap-2 sm:gap-4">
                     <Link
                         v-if="$page.props.auth.user"
                         :href="$page.props.auth.user.is_student ? '/student/courses' : dashboard()"
-                        class="inline-block rounded-sm border border-[#ffffff40] px-3 py-1.5 text-xs whitespace-nowrap text-white hover:border-white sm:px-5 sm:text-sm"
+                        :class="[
+                            'inline-block rounded-sm border px-3 py-1.5 text-xs whitespace-nowrap transition-all duration-300 sm:px-5 sm:text-sm',
+                            isScrolled
+                                ? 'border-[#1b1b18]/20 text-[#1b1b18] hover:border-[#1b1b18] dark:border-white/20 dark:text-white dark:hover:border-white'
+                                : 'border-[#ffffff40] text-white hover:border-white',
+                        ]"
                     >
                         Dashboard
                     </Link>
                     <template v-else>
                         <Link
                             :href="login()"
-                            class="inline-block rounded-sm border border-transparent px-3 py-1.5 text-xs whitespace-nowrap text-white hover:border-white sm:px-5 sm:text-sm"
+                            :class="[
+                                'inline-block rounded-sm border border-transparent px-3 py-1.5 text-xs whitespace-nowrap transition-all duration-300 sm:px-5 sm:text-sm',
+                                isScrolled
+                                    ? 'text-[#1b1b18] hover:border-[#1b1b18]/20 dark:text-white dark:hover:border-white/20'
+                                    : 'text-white hover:border-white',
+                            ]"
                         >
                             Log in
                         </Link>
                         <Link
                             :href="register()"
-                            class="inline-block rounded-sm border border-[#ffffff40] px-3 py-1.5 text-xs whitespace-nowrap text-white hover:border-white sm:px-5 sm:text-sm"
+                            :class="[
+                                'inline-block rounded-sm border px-3 py-1.5 text-xs whitespace-nowrap transition-all duration-300 sm:px-5 sm:text-sm',
+                                isScrolled
+                                    ? 'border-[#1b1b18]/20 text-[#1b1b18] hover:border-[#1b1b18] dark:border-white/20 dark:text-white dark:hover:border-white'
+                                    : 'border-[#ffffff40] text-white hover:border-white',
+                            ]"
                         >
                             Register
                         </Link>
                     </template>
                 </nav>
-            </header>
+            </div>
+        </header>
+
+        <!-- Hero Section with Parallax Background -->
+        <section class="relative w-full overflow-hidden px-6 py-16 lg:px-8 lg:py-24">
+            <!-- Fixed Background Image -->
+            <div class="absolute inset-0 bg-cover bg-fixed bg-center" style="background-image: url('/images/landing-bg.png')"></div>
+            <div class="absolute inset-0 bg-black/60 dark:bg-black/50"></div>
+
+            <!-- Spacer for fixed header -->
+            <div class="h-25 sm:h-50"></div>
 
             <div class="relative z-10 mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div class="space-y-6 text-white">
@@ -247,19 +295,29 @@ import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Up
             </div>
         </section>
 
-        <section class="py-16 lg:py-24">
+        <section class="w-full bg-[#1a2329] py-20 lg:py-28">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
                     <div class="relative order-2 lg:order-1">
                         <div
-                            class="aspect-video overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10"
+                            class="aspect-video overflow-hidden rounded-none border-4 border-[#00ff41] bg-[#2a3942] shadow-[0_0_30px_rgba(0,255,65,0.4)]"
                         >
-                            <img src="/images/programming-bg.jpg" alt="System architecture" class="h-full w-full object-cover dark:brightness-75" />
+                            <img src="/images/landing-bg1.png" alt="System architecture" class="h-full w-full object-cover opacity-80" />
                         </div>
+                        <!-- Decorative corners -->
+                        <div class="absolute -top-6 -left-6 h-12 w-12 border-t-6 border-l-6 border-[#ff6b35]"></div>
+                        <div class="absolute -top-6 -right-6 h-12 w-12 border-t-6 border-r-6 border-[#ffd93d]"></div>
+                        <div class="absolute -bottom-6 -left-6 h-12 w-12 border-b-6 border-l-6 border-[#ffd93d]"></div>
+                        <div class="absolute -right-6 -bottom-6 h-12 w-12 border-r-6 border-b-6 border-[#ff6b35]"></div>
                     </div>
-                    <div class="order-1 space-y-4 lg:order-2">
-                        <h2 class="text-4xl font-bold tracking-tight text-[#1b1b18] dark:text-[#EDEDEC]">System Architecture</h2>
-                        <p class="text-lg leading-relaxed text-[#6b6b6b] dark:text-[#a1a1a1]">
+                    <div class="order-1 space-y-6 lg:order-2">
+                        <h2
+                            class="text-3xl font-bold tracking-tight text-[#00ff41] uppercase lg:text-4xl"
+                            style="font-family: 'Courier New', monospace"
+                        >
+                            System Architecture
+                        </h2>
+                        <p class="text-base font-medium text-[#00ff41]/80" style="font-family: 'Courier New', monospace">
                             The system integrates a Laravel-Inertia and Vue.js interface with a logic-based similarity detection service, powered by
                             FastAPI for efficient and scalable code analysis.
                         </p>
@@ -278,7 +336,7 @@ import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Up
                                 <div class="mx-4 grid grid-cols-2 gap-6 py-4">
                                     <a href="https://laravel.com" target="_blank" rel="noopener noreferrer">
                                         <Badge variant="secondary" class="flex w-full flex-col items-center gap-3 p-6">
-                                            <img class="h-12 w-12 object-contain" src="/images/laravel-logo.png" alt="Laravel" />
+                                            <img class="h-12 w-12 object-contain" src="/images/laravel-logo1.png" alt="Laravel" />
                                             <div class="text-center">
                                                 <h3 class="font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Laravel</h3>
                                                 <p class="text-xs text-[#6b6b6b] sm:text-sm dark:text-[#a1a1a1]">Backend Framework</p>
@@ -288,7 +346,7 @@ import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Up
 
                                     <a href="https://fastapi.tiangolo.com" target="_blank" rel="noopener noreferrer">
                                         <Badge variant="secondary" class="flex w-full flex-col items-center gap-3 p-6">
-                                            <img class="h-12 w-12 object-contain" src="/images/fastapi-logo.png" alt="FastAPI" />
+                                            <img class="h-12 w-12 object-contain" src="/images/fastapi-logo1.png" alt="FastAPI" />
                                             <div class="text-center">
                                                 <h3 class="font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">FastAPI</h3>
                                                 <p class="text-xs text-[#6b6b6b] sm:text-sm dark:text-[#a1a1a1]">Analysis Service</p>
@@ -298,7 +356,7 @@ import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Up
 
                                     <a href="https://vuejs.org" target="_blank" rel="noopener noreferrer">
                                         <Badge variant="secondary" class="flex w-full flex-col items-center gap-3 p-6">
-                                            <img class="h-12 w-12 object-contain" src="/images/vue-logo.png" alt="Vue.js" />
+                                            <img class="h-12 w-12 object-contain" src="/images/vue-logo1.png" alt="Vue.js" />
                                             <div class="text-center">
                                                 <h3 class="font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Vue.js</h3>
                                                 <p class="text-xs text-[#6b6b6b] sm:text-sm dark:text-[#a1a1a1]">Frontend Framework</p>
@@ -308,7 +366,7 @@ import { ArrowRight, BarChart3, ChevronRight, Code2, SearchCode, ShieldCheck, Up
 
                                     <a href="https://inertiajs.com" target="_blank" rel="noopener noreferrer">
                                         <Badge variant="secondary" class="flex w-full flex-col items-center gap-3 p-6">
-                                            <img class="h-12 w-12 object-contain" src="/images/inertia-logo.png" alt="Inertia.js" />
+                                            <img class="h-12 w-12 object-contain" src="/images/inertia-logo1.png" alt="Inertia.js" />
                                             <div class="text-center">
                                                 <h3 class="font-semibold text-[#1b1b18] dark:text-[#EDEDEC]">Inertia.js</h3>
                                                 <p class="text-xs text-[#6b6b6b] sm:text-sm dark:text-[#a1a1a1]">SPA Adapter</p>

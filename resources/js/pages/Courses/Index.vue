@@ -244,7 +244,7 @@ function copy(text: string) {
                                     <div class="mt-3 flex items-center justify-between gap-3">
                                         <CardDescription class="flex items-center gap-1.5 text-xs">
                                             <Calendar class="h-3.5 w-3.5" aria-hidden="true" />
-                                            <span>{{ dayjs(course.created_at).fromNow() }}</span>
+                                            <span>Created {{ dayjs(course.created_at).fromNow() }}</span>
                                         </CardDescription>
                                         <div class="flex items-center rounded-md border bg-muted px-2 py-1">
                                             <code class="font-mono text-xs font-semibold">{{ course.access_code }}</code>

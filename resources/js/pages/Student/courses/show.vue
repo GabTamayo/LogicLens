@@ -331,7 +331,22 @@ function getActivityTimer(activityId: number) {
                                                 </template>
                                             </InfiniteScroll>
                                         </div>
-                                        <div v-else class="py-8 text-center text-muted-foreground">No activities found</div>
+                                        <div v-else class="relative overflow-hidden rounded-lg py-60 text-center">
+                                            <div
+                                                class="absolute inset-0 opacity-10"
+                                                :style="{
+                                                    backgroundImage: 'url(/images/bg-relax.png)',
+                                                    backgroundSize: 'cover',
+                                                    backgroundPosition: 'center',
+                                                    backgroundRepeat: 'no-repeat',
+                                                }"
+                                            ></div>
+
+                                            <div class="relative z-10">
+                                                <p class="text-lg font-semibold text-muted-foreground">No activities found</p>
+                                                <p class="mt-2 text-sm text-muted-foreground">Take a break and relax! ☕</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </Deferred>
                             </template>
