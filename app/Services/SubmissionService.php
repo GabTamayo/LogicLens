@@ -40,7 +40,6 @@ class SubmissionService
         }
 
         return [
-            'bgImage' => asset('images/clonewave-bg.jpg'),
             'courseName' => $activityLink->course->name,
             'courseId' => $activityLink->course->id,
             'activityId' => $activityLink->activity->id,
