@@ -38,11 +38,6 @@ function removeStudent() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem>
-                    <BookUser class="w-4 h-4 mr-2" />
-                    View Details
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <AlertDialogTrigger as-child>
                     <DropdownMenuItem class="text-destructive focus:text-destructive" @select.prevent>
                         <CircleMinus class="w-4 h-4 mr-2" />

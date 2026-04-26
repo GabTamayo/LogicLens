@@ -98,36 +98,38 @@ const handleStudentsPageChange = (page: number) => {
                     </AspectRatio>
                 </CardHeader>
                 <CardContent>
-                    <CardAction class="absolute m-6">
-                        <ModalLink :href="`/courses/${course.id}/edit`" #default="{ loading }" :close-explicitly="true">
-                            <Button variant="secondary" size="lg" :disabled="loading">
-                                <Loader v-if="loading" class="h-4 w-4 animate-spin" />
-                                <Pencil v-else class="mr-1 size-4" />
-                                Edit course
-                            </Button>
-                        </ModalLink>
-                    </CardAction>
-                    <div class="flex flex-col gap-4">
-                        <div class="flex flex-col gap-3">
-                            <div class="flex flex-wrap items-center">
-                                <CardTitle class="text-2xl">{{ course.name }}</CardTitle>
-                            </div>
-                            <CardDescription class="flex flex-wrap items-center gap-2">
-                                <span>Created by {{ course.user?.name }}</span>
-                                <Separator orientation="vertical" class="h-4" />
-                                <span class="flex items-center gap-1.5">
-                                    <CalendarCheck class="h-3.5 w-3.5" />
-                                    {{ formattedDate }}
-                                </span>
-                                <Separator orientation="vertical" class="h-4" />
-                                <div class="flex items-center gap-1">
-                                    <Button variant="outline" size="icon-sm" @click.stop="copy(course.access_code)" aria-label="Copy access-code">
-                                        <Copy class="size-4" />
-                                    </Button>
-                                    <span>{{ course.access_code }}</span>
+                    <div class="flex items-start justify-between">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-3">
+                                <div class="flex flex-wrap items-center">
+                                    <CardTitle class="text-2xl">{{ course.name }}</CardTitle>
                                 </div>
-                            </CardDescription>
+                                <CardDescription class="flex flex-wrap items-center gap-2">
+                                    <span>Created by {{ course.user?.name }}</span>
+                                    <Separator orientation="vertical" class="h-4" />
+                                    <span class="flex items-center gap-1.5">
+                                        <CalendarCheck class="h-3.5 w-3.5" />
+                                        {{ formattedDate }}
+                                    </span>
+                                    <Separator orientation="vertical" class="h-4" />
+                                    <div class="flex items-center gap-1">
+                                        <Button variant="outline" size="icon-sm" @click.stop="copy(course.access_code)" aria-label="Copy access-code">
+                                            <Copy class="size-4" />
+                                        </Button>
+                                        <span>{{ course.access_code }}</span>
+                                    </div>
+                                </CardDescription>
+                            </div>
                         </div>
+                        <CardAction class="static m-0">
+                            <ModalLink :href="`/courses/${course.id}/edit`" #default="{ loading }" :close-explicitly="true">
+                                <Button variant="secondary" size="lg" :disabled="loading">
+                                    <Loader v-if="loading" class="h-4 w-4 animate-spin" />
+                                    <Pencil v-else class="mr-1 size-4" />
+                                    Edit course
+                                </Button>
+                            </ModalLink>
+                        </CardAction>
                     </div>
                 </CardContent>
             </Card>
