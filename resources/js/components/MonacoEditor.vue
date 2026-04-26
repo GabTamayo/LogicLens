@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
 import { VueMonacoEditor } from '@guolao/vue-monaco-editor';
+import { computed, ref } from 'vue';
 
 interface Props {
     modelValue: string;
@@ -42,8 +42,8 @@ const handleChange = (value: string) => {
 // Map Laravel language enum to Monaco language identifiers
 const getMonacoLanguage = computed(() => {
     const languageMap: Record<string, string> = {
-        'java': 'java',
-        'python': 'python',
+        java: 'java',
+        python: 'python',
     };
     return languageMap[props.language] || 'plaintext';
 });

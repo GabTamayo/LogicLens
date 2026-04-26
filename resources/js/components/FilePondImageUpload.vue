@@ -1,12 +1,12 @@
 <script setup lang="ts">
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
+import 'filepond/dist/filepond.min.css';
 import { ref } from 'vue';
 import vueFilePond from 'vue-filepond';
-import 'filepond/dist/filepond.min.css';
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
 
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginImageCrop from 'filepond-plugin-image-crop';
+import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginImageResize from 'filepond-plugin-image-resize';
 import FilePondPluginImageTransform from 'filepond-plugin-image-transform';
 
@@ -15,7 +15,7 @@ const FilePond = vueFilePond(
     FilePondPluginImagePreview,
     FilePondPluginImageCrop,
     FilePondPluginImageResize,
-    FilePondPluginImageTransform
+    FilePondPluginImageTransform,
 );
 
 interface Props {

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, AlertTriangle, CheckIcon, Clock, Keyboard, Monitor, MousePointer } from 'lucide-vue-next';
 import axios from 'axios';
+import { AlertCircle, AlertTriangle, CheckIcon, Clock, Keyboard, Monitor, MousePointer } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 
 interface Violation {
     id: number;
@@ -74,12 +74,14 @@ const fetchViolations = async () => {
 };
 
 const getViolationConfig = (type: string) => {
-    return violationTypeConfig[type] || {
-        icon: AlertCircle,
-        label: type,
-        color: 'text-gray-600 dark:text-gray-400',
-        bgColor: 'bg-gray-100 dark:bg-gray-950',
-    };
+    return (
+        violationTypeConfig[type] || {
+            icon: AlertCircle,
+            label: type,
+            color: 'text-gray-600 dark:text-gray-400',
+            bgColor: 'bg-gray-100 dark:bg-gray-950',
+        }
+    );
 };
 
 // Watch for dialog open to fetch violations
@@ -98,9 +100,7 @@ watch(modelValue, (newValue) => {
                     <AlertCircle class="h-5 w-5 text-orange-500" />
                     Exam Violations
                 </DialogTitle>
-                <DialogDescription>
-                    Security violations detected for {{ studentName }}'s submission
-                </DialogDescription>
+                <DialogDescription> Security violations detected for {{ studentName }}'s submission </DialogDescription>
             </DialogHeader>
 
             <div v-if="isLoading" class="flex items-center justify-center py-12">
@@ -139,10 +139,7 @@ watch(modelValue, (newValue) => {
                             class="rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
                         >
                             <div class="flex items-start gap-3">
-                                <div
-                                    class="mt-1 rounded-full p-2"
-                                    :class="getViolationConfig(violation.type).bgColor"
-                                >
+                                <div class="mt-1 rounded-full p-2" :class="getViolationConfig(violation.type).bgColor">
                                     <component
                                         :is="getViolationConfig(violation.type).icon"
                                         class="h-4 w-4"

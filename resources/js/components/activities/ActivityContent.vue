@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { CalendarClock, FileText, Pencil, Code } from 'lucide-vue-next';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
-import { Link } from '@inertiajs/vue3';
-import { useLanguage } from '@/composables/useLanguage';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDeadline } from '@/composables/useDeadline';
+import { useLanguage } from '@/composables/useLanguage';
+import { Link } from '@inertiajs/vue3';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { CalendarClock, Code, FileText, Pencil } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 dayjs.extend(relativeTime);
 
@@ -56,7 +56,7 @@ const deadlineStatus = computed(() => {
             <div class="mb-4 rounded-full bg-muted p-3">
                 <Code class="h-6 w-6 text-muted-foreground" />
             </div>
-            <p class="text-lg font-medium mb-1">Select an activity</p>
+            <p class="mb-1 text-lg font-medium">Select an activity</p>
             <p class="text-sm text-muted-foreground">Choose an activity to view details</p>
         </div>
     </div>
@@ -68,7 +68,7 @@ const deadlineStatus = computed(() => {
                 <div class="space-y-4">
                     <div class="flex items-start justify-between gap-4">
                         <div class="flex-1 space-y-1">
-                            <Button variant="link" class="p-0 h-auto text-start" as-child>
+                            <Button variant="link" class="h-auto p-0 text-start" as-child>
                                 <Link :href="`/activities/${activity.activity_id}`" prefetch="mount">
                                     <h2 class="text-2xl font-bold tracking-tight">
                                         {{ activity.activity_title }}
@@ -81,16 +81,14 @@ const deadlineStatus = computed(() => {
                     <!-- Metadata -->
                     <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                         <div class="flex items-center gap-2">
-                            <Badge variant="outline" :class="[
-                                'flex items-center gap-1.5',
-                                getLanguageConfig(activity.activity_language).colors,
-                            ]">
-                                <img v-if="getLanguageConfig(activity.activity_language).logo"
+                            <Badge variant="outline" :class="['flex items-center gap-1.5', getLanguageConfig(activity.activity_language).colors]">
+                                <img
+                                    v-if="getLanguageConfig(activity.activity_language).logo"
                                     :src="getLanguageConfig(activity.activity_language).logo"
-                                    :alt="activity.activity_language" class="h-3.5 w-3.5 object-contain" />
-                                <span class="text-xs font-medium">{{
-                                    activity.activity_language
-                                }}</span>
+                                    :alt="activity.activity_language"
+                                    class="h-3.5 w-3.5 object-contain"
+                                />
+                                <span class="text-xs font-medium">{{ activity.activity_language }}</span>
                             </Badge>
                         </div>
 
@@ -110,12 +108,9 @@ const deadlineStatus = computed(() => {
                     <Card>
                         <CardHeader class="pb-3">
                             <CardDescription>Total Submissions</CardDescription>
-                            <CardTitle class="text-3xl">{{
-                                activity.submissions_count
-                            }}</CardTitle>
+                            <CardTitle class="text-3xl">{{ activity.submissions_count }}</CardTitle>
                             <CardAction>
-                                <Link :href="`/activities/${activity.activity_id}/links/${activity.id}`"
-                                    prefetch="mount">
+                                <Link :href="`/activities/${activity.activity_id}/links/${activity.id}`" prefetch="mount">
                                     <Button class="w-fit" size="sm">
                                         <span class="block md:hidden lg:hidden xl:block">View Submissions</span>
                                     </Button>
@@ -127,8 +122,7 @@ const deadlineStatus = computed(() => {
                     <Card>
                         <CardHeader class="pb-3">
                             <CardDescription>Deadline</CardDescription>
-                            <CardTitle v-if="deadlineStatus" class="flex items-center gap-2 text-lg"
-                                :class="deadlineStatus.class">
+                            <CardTitle v-if="deadlineStatus" class="flex items-center gap-2 text-lg" :class="deadlineStatus.class">
                                 <component :is="deadlineStatus.icon" class="h-5 w-5" />
                                 {{ formattedExpiry }}
                             </CardTitle>
@@ -141,7 +135,7 @@ const deadlineStatus = computed(() => {
 
                 <!-- Activity Content -->
                 <Card>
-                    <CardHeader class="flex justify-between items-center">
+                    <CardHeader class="flex items-center justify-between">
                         <div>
                             <CardTitle>Activity Content</CardTitle>
                             <CardDescription>Instructions and details for this activity</CardDescription>
@@ -149,8 +143,7 @@ const deadlineStatus = computed(() => {
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger as-child>
-                                    <Button v-if="activity.activity_content" variant="outline" size="icon-sm"
-                                        class="rounded-full">
+                                    <Button v-if="activity.activity_content" variant="outline" size="icon-sm" class="rounded-full">
                                         <Link :href="`/activities/${activity.activity_id}`" prefetch="mount">
                                             <Pencil class="size-4" />
                                         </Link>
@@ -163,16 +156,17 @@ const deadlineStatus = computed(() => {
                         </TooltipProvider>
                     </CardHeader>
                     <CardContent>
-                        <div v-if="activity.activity_content" class="prose prose-sm dark:prose-invert max-w-none"
-                            v-html="activity.activity_content"></div>
+                        <div
+                            v-if="activity.activity_content"
+                            class="prose prose-sm max-w-none dark:prose-invert"
+                            v-html="activity.activity_content"
+                        ></div>
                         <div v-else class="flex flex-col items-center justify-center py-12 text-center">
                             <div class="mb-4 rounded-full bg-muted p-3">
                                 <FileText class="h-6 w-6 text-muted-foreground" />
                             </div>
-                            <h3 class="mb-1 font-semibold text-lg">No content added yet</h3>
-                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">
-                                Add instructions, requirements, or details for this activity
-                            </p>
+                            <h3 class="mb-1 text-lg font-semibold">No content added yet</h3>
+                            <p class="mb-4 max-w-sm text-sm text-muted-foreground">Add instructions, requirements, or details for this activity</p>
                             <Link :href="`/activities/${activity.activity_id}`" prefetch="mount">
                                 <Button variant="outline" size="sm">
                                     <Pencil class="mr-2 h-4 w-4" />

@@ -1,5 +1,5 @@
-import { formatDistanceToNow, parseISO, differenceInDays } from 'date-fns';
-import { Clock, AlertCircle } from 'lucide-vue-next';
+import { differenceInDays, formatDistanceToNow, parseISO } from 'date-fns';
+import { AlertCircle, Clock } from 'lucide-vue-next';
 import type { Component } from 'vue';
 
 export interface DeadlineStatus {
@@ -49,19 +49,19 @@ export function useDeadline() {
             return {
                 type: 'expired',
                 class: 'text-red-600 dark:text-red-400',
-                icon: AlertCircle
+                icon: AlertCircle,
             };
         } else if (hoursUntilDeadline < 24) {
             return {
                 type: 'urgent',
                 class: 'text-orange-600 dark:text-orange-400',
-                icon: AlertCircle
+                icon: AlertCircle,
             };
         } else {
             return {
                 type: 'active',
                 class: 'text-muted-foreground',
-                icon: Clock
+                icon: Clock,
             };
         }
     }

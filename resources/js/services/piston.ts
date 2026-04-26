@@ -45,19 +45,15 @@ const API_BASE_URL = '/api/code';
 
 // Map Laravel language enum to Piston language identifiers
 const LANGUAGE_MAP: Record<string, { language: string; version: string }> = {
-    'java': { language: 'java', version: '15.0.2' },
-    'python': { language: 'python', version: '3.12' },
+    java: { language: 'java', version: '15.0.2' },
+    python: { language: 'python', version: '3.12' },
 };
 
 export class PistonService {
     /**
      * Execute code using Piston API
      */
-    static async executeCode(
-        language: string,
-        code: string,
-        stdin: string = ''
-    ): Promise<PistonExecuteResponse> {
+    static async executeCode(language: string, code: string, stdin: string = ''): Promise<PistonExecuteResponse> {
         const languageConfig = LANGUAGE_MAP[language];
 
         if (!languageConfig) {

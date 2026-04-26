@@ -250,7 +250,7 @@ const hasContent = computed(() => {
                                         <div class="mb-4 gap-3">
                                             <div class="min-w-0 flex-1">
                                                 <CardTitle
-                                                    class="truncate line-clamp-2 text-lg font-semibold transition-colors group-hover:text-primary dark:text-white"
+                                                    class="line-clamp-2 truncate text-lg font-semibold transition-colors group-hover:text-primary dark:text-white"
                                                 >
                                                     {{ course.name }}
                                                 </CardTitle>

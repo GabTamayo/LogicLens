@@ -1,18 +1,18 @@
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
-import DropdownAction from './data-table.dropdown.vue'
-import { useScore } from '@/composables/useScore'
+import { useScore } from '@/composables/useScore';
+import type { ColumnDef } from '@tanstack/vue-table';
+import { h } from 'vue';
+import DropdownAction from './data-table.dropdown.vue';
 
 export interface SubmissionRow {
-    id: string
-    student_name: string
-    student_email: string
-    code_content: string
-    language: string
-    submitted_at: string
-    score: number | null
-    total_score: number | null
-    violations_count: number
+    id: string;
+    student_name: string;
+    student_email: string;
+    code_content: string;
+    language: string;
+    submitted_at: string;
+    score: number | null;
+    total_score: number | null;
+    violations_count: number;
 }
 
 export const columns: ColumnDef<SubmissionRow>[] = [
@@ -33,16 +33,16 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         label: 'Score',
         header: () => h('div', { class: 'text-center' }, 'Score'),
         cell: ({ row }) => {
-            const score = row.getValue('score') as number | null
-            const totalScore = row.original.total_score
-            const { getScoreDisplay } = useScore()
-            const scoreDisplay = getScoreDisplay(score, totalScore)
+            const score = row.getValue('score') as number | null;
+            const totalScore = row.original.total_score;
+            const { getScoreDisplay } = useScore();
+            const scoreDisplay = getScoreDisplay(score, totalScore);
 
             if (score === null || totalScore === null) {
-                return h('div', { class: 'text-center text-xs text-muted-foreground' }, scoreDisplay.text)
+                return h('div', { class: 'text-center text-xs text-muted-foreground' }, scoreDisplay.text);
             }
 
-            return h('div', { class: `text-center font-medium ${scoreDisplay.colorClass}` }, scoreDisplay.text)
+            return h('div', { class: `text-center font-medium ${scoreDisplay.colorClass}` }, scoreDisplay.text);
         },
     },
     {
@@ -50,8 +50,8 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         label: 'Violations',
         header: () => h('div', { class: 'text-center' }, 'Violations'),
         cell: ({ row }) => {
-            const count = row.getValue('violations_count') as number
-            return h('div', { class: 'text-center font-medium text-destructive' }, count.toString())
+            const count = row.getValue('violations_count') as number;
+            return h('div', { class: 'text-center font-medium text-destructive' }, count.toString());
         },
     },
     {
@@ -59,24 +59,28 @@ export const columns: ColumnDef<SubmissionRow>[] = [
         label: 'Submitted At',
         header: () => h('div', { class: 'text-right' }, 'Submitted At'),
         cell: ({ row }) => {
-            const date = new Date(row.getValue('submitted_at'))
+            const date = new Date(row.getValue('submitted_at'));
             const formatted = date.toLocaleString('en-PH', {
                 dateStyle: 'medium',
                 timeStyle: 'short',
-            })
-            return h('div', { class: 'text-right text-xs text-muted-foreground' }, formatted)
+            });
+            return h('div', { class: 'text-right text-xs text-muted-foreground' }, formatted);
         },
     },
     {
         id: 'actions',
         enableHiding: false,
         cell: ({ row }) => {
-            const submission = row.original
+            const submission = row.original;
 
-            return h('div', { class: 'relative' }, h(DropdownAction, {
-                submission,
-                onExpand: row.toggleExpanded,
-            }))
+            return h(
+                'div',
+                { class: 'relative' },
+                h(DropdownAction, {
+                    submission,
+                    onExpand: row.toggleExpanded,
+                }),
+            );
         },
-    }
-]
+    },
+];

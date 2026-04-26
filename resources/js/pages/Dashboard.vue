@@ -1,18 +1,18 @@
 <script setup lang="ts">
+import DashboardBarchart from '@/components/DashboardBarchart.vue';
+import DashboardCards from '@/components/DashboardCards.vue';
+import DashboardSidebar from '@/components/DashboardSidebar.vue';
+import Button from '@/components/ui/button/Button.vue';
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Toaster } from '@/components/ui/sonner';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DashboardPageProps } from '@/types';
 import { Deferred, Head } from '@inertiajs/vue3';
-import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from '@/components/ui/drawer'
-import Button from '@/components/ui/button/Button.vue';
-import DashboardCards from '@/components/DashboardCards.vue';
-import DashboardSidebar from '@/components/DashboardSidebar.vue';
-import DashboardBarchart from '@/components/DashboardBarchart.vue';
-import { onUnmounted, ref, watch } from 'vue';
 import { ChevronUp } from 'lucide-vue-next';
-import { Toaster } from '@/components/ui/sonner';
+import { onUnmounted, ref, watch } from 'vue';
 import 'vue-sonner/style.css';
-import { Skeleton } from '@/components/ui/skeleton';
 
 const props = defineProps<DashboardPageProps>();
 const breadcrumbs: BreadcrumbItem[] = [
@@ -47,7 +47,7 @@ const fetchAverageScore = async (filter: string) => {
     try {
         const response = await fetch(`/dashboard/average-score?filter=${encodeURIComponent(filter)}`, {
             headers: {
-                'Accept': 'application/json',
+                Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
         });
@@ -69,14 +69,12 @@ const handleFilterChanged = (filter: string) => {
 </script>
 
 <template>
-
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="p-4 lg:p-6 flex flex-1 flex-col">
-            <div class="@container/main flex flex-1 gap-4 lg:gap-6 min-w-0">
-
-                <div class="flex flex-1 flex-col gap-2 min-w-0">
+        <div class="flex flex-1 flex-col p-4 lg:p-6">
+            <div class="@container/main flex min-w-0 flex-1 gap-4 lg:gap-6">
+                <div class="flex min-w-0 flex-1 flex-col gap-2">
                     <div class="xl:hidden">
                         <Drawer v-model:open="isDrawerOpen">
                             <DrawerTrigger as-child>
@@ -86,16 +84,16 @@ const handleFilterChanged = (filter: string) => {
                                 </Button>
                             </DrawerTrigger>
                             <DrawerContent class="h-[96vh] max-h-[96vh]">
-                                <div class="w-full h-full flex flex-col">
+                                <div class="flex h-full w-full flex-col">
                                     <DrawerHeader class="flex-shrink-0">
                                         <DrawerTitle>Activity Details</DrawerTitle>
-                                        <DrawerDescription>View your active links, upcoming activities, and flagged
-                                            detections.</DrawerDescription>
+                                        <DrawerDescription>View your active links, upcoming activities, and flagged detections.</DrawerDescription>
                                     </DrawerHeader>
                                     <div class="flex-1 overflow-y-auto px-4 pb-4">
                                         <div class="space-y-6 pt-4">
                                             <Deferred
-                                                :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']">
+                                                :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']"
+                                            >
                                                 <template #fallback>
                                                     <div class="space-y-4">
                                                         <Skeleton class="h-44 w-full rounded-xl border" />
@@ -103,12 +101,14 @@ const handleFilterChanged = (filter: string) => {
                                                         <Skeleton class="h-56 w-full rounded-xl border" />
                                                     </div>
                                                 </template>
-                                                <DashboardSidebar :active-links-data="activeLinksData"
+                                                <DashboardSidebar
+                                                    :active-links-data="activeLinksData"
                                                     :upcoming-this-week="upcomingThisWeek"
                                                     :total-upcoming-this-week="totalUpcomingThisWeek"
                                                     :flagged-detections="flaggedDetections"
                                                     :total-flagged-detections="totalFlaggedDetections"
-                                                    :close-drawer="() => isDrawerOpen = false" />
+                                                    :close-drawer="() => (isDrawerOpen = false)"
+                                                />
                                             </Deferred>
                                         </div>
                                     </div>
@@ -118,18 +118,19 @@ const handleFilterChanged = (filter: string) => {
                     </div>
 
                     <div class="w-full">
-                        <Deferred
-                            :data="['totalActivityLinks', 'totalLinksWithoutDetections', 'totalAverageScore']">
+                        <Deferred :data="['totalActivityLinks', 'totalLinksWithoutDetections', 'totalAverageScore']">
                             <template #fallback>
-                                <div class="grid gap-4 grid-cols-1 lg:grid-cols-3">
+                                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                                     <Skeleton class="h-48 w-full rounded-xl" />
                                     <Skeleton class="h-48 w-full rounded-xl" />
                                     <Skeleton class="h-48 w-full rounded-xl" />
                                 </div>
                             </template>
-                            <DashboardCards :total-activity-links="totalActivityLinks"
+                            <DashboardCards
+                                :total-activity-links="totalActivityLinks"
                                 :total-links-without-detections="totalLinksWithoutDetections"
-                                :total-average-score="dynamicAverageScore" />
+                                :total-average-score="dynamicAverageScore"
+                            />
                         </Deferred>
                     </div>
                     <div>
@@ -137,15 +138,13 @@ const handleFilterChanged = (filter: string) => {
                             <template #fallback>
                                 <Skeleton class="h-[580px] w-full rounded-xl" />
                             </template>
-                            <DashboardBarchart @filter-changed="handleFilterChanged"
-                                :average-score-per-activity="averageScorePerActivity" />
+                            <DashboardBarchart @filter-changed="handleFilterChanged" :average-score-per-activity="averageScorePerActivity" />
                         </Deferred>
                     </div>
                 </div>
 
-                <aside class="hidden xl:flex flex-col w-80 xl:w-96 min-w-80 shrink-0 gap-4">
-                    <Deferred
-                        :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']">
+                <aside class="hidden w-80 min-w-80 shrink-0 flex-col gap-4 xl:flex xl:w-96">
+                    <Deferred :data="['activeLinksData', 'totalUpcomingThisWeek', 'flaggedDetections', 'totalFlaggedDetections']">
                         <template #fallback>
                             <div class="space-y-4">
                                 <Skeleton class="h-52 w-full rounded-xl" />
@@ -153,12 +152,15 @@ const handleFilterChanged = (filter: string) => {
                                 <Skeleton class="h-66 w-full rounded-xl" />
                             </div>
                         </template>
-                        <DashboardSidebar :active-links-data="activeLinksData" :upcoming-this-week="upcomingThisWeek"
-                            :total-upcoming-this-week="totalUpcomingThisWeek" :flagged-detections="flaggedDetections"
-                            :total-flagged-detections="totalFlaggedDetections" />
+                        <DashboardSidebar
+                            :active-links-data="activeLinksData"
+                            :upcoming-this-week="upcomingThisWeek"
+                            :total-upcoming-this-week="totalUpcomingThisWeek"
+                            :flagged-detections="flaggedDetections"
+                            :total-flagged-detections="totalFlaggedDetections"
+                        />
                     </Deferred>
                 </aside>
-
             </div>
         </div>
     </AppLayout>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { Modal } from '@inertiaui/modal-vue';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import { useForm } from '@inertiajs/vue3';
-import { toast } from 'vue-sonner';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import type { EnrollCourseProps } from '@/types';
+import { useForm } from '@inertiajs/vue3';
+import { Modal } from '@inertiaui/modal-vue';
+import { toast } from 'vue-sonner';
 import 'vue-sonner/style.css';
 
 defineProps<EnrollCourseProps>();
@@ -22,9 +22,9 @@ function submit(close: () => void) {
             close();
         },
         onError: () => {
-            const errorMessage = form.errors.access_code
+            const errorMessage = form.errors.access_code;
             toast.error('Failed to enroll. Please try again.', {
-                description: errorMessage
+                description: errorMessage,
             });
         },
     });
@@ -32,25 +32,28 @@ function submit(close: () => void) {
 </script>
 
 <template>
-    <Modal max-width="md" position="center" v-slot="{ close }"
-        panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
+    <Modal max-width="md" position="center" v-slot="{ close }" panel-classes="bg-white rounded dark:bg-[hsl(240.02_9.66%_1.01%)]">
         <Form class="space-y-6" @submit="submit(close)">
             <FormField name="access_code">
                 <FormItem>
                     <div class="mb-4">
                         <div class="flex items-center">
                             <div>
-                                <h1 class="font-bold text-lg cursor-default">Enroll in a Course</h1>
+                                <h1 class="cursor-default text-lg font-bold">Enroll in a Course</h1>
                             </div>
                         </div>
-                        <FormDescription>
-                            Enter the access code provided by your Professor
-                        </FormDescription>
+                        <FormDescription> Enter the access code provided by your Professor </FormDescription>
                     </div>
                     <FormLabel>Access Code</FormLabel>
                     <FormControl>
-                        <Input id="access_code" v-model="form.access_code" type="text"
-                            placeholder="Enter course access code" :disabled="form.processing" class="font-mono" />
+                        <Input
+                            id="access_code"
+                            v-model="form.access_code"
+                            type="text"
+                            placeholder="Enter course access code"
+                            :disabled="form.processing"
+                            class="font-mono"
+                        />
                     </FormControl>
                 </FormItem>
             </FormField>

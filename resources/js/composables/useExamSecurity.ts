@@ -1,6 +1,6 @@
+import axios from 'axios';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { toast } from 'vue-sonner';
-import axios from 'axios';
 
 interface ExamSecurityOptions {
     token: string;
@@ -97,7 +97,9 @@ export function useExamSecurity(options: ExamSecurityOptions) {
                 event.shiftKey ? 'Shift' : '',
                 event.metaKey ? 'Cmd' : '',
                 event.key,
-            ].filter(Boolean).join('+');
+            ]
+                .filter(Boolean)
+                .join('+');
 
             logViolation('keyboard_shortcut', `Blocked shortcut: ${keys}`);
 

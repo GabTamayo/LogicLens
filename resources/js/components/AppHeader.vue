@@ -13,8 +13,8 @@ import { toUrl, urlIsActive } from '@/lib/utils';
 import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
 import { ModalLink } from '@inertiaui/modal-vue';
-import { Book, Plus, Menu, Loader2 } from 'lucide-vue-next';
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue';
+import { Book, Loader2, Menu, Plus } from 'lucide-vue-next';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -42,9 +42,7 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const rightNavItems: NavItem[] = [
-
-];
+const rightNavItems: NavItem[] = [];
 
 // Control sidebar open/close state
 const isSidebarOpen = ref(false);
@@ -95,17 +93,26 @@ onUnmounted(() => {
                             </SheetHeader>
                             <div class="flex h-full flex-1 flex-col justify-between space-y-4 py-6">
                                 <nav class="-mx-3 space-y-1">
-                                    <Link v-for="item in mainNavItems" :key="item.title" :href="item.href"
+                                    <Link
+                                        v-for="item in mainNavItems"
+                                        :key="item.title"
+                                        :href="item.href"
                                         class="flex items-center gap-x-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-accent"
-                                        :class="activeItemStyles(item.href)">
+                                        :class="activeItemStyles(item.href)"
+                                    >
                                         <component v-if="item.icon" :is="item.icon" class="h-5 w-5" />
                                         {{ item.title }}
                                     </Link>
                                 </nav>
                                 <div class="flex flex-col space-y-4">
-                                    <a v-for="item in rightNavItems" :key="item.title" :href="toUrl(item.href)"
-                                        target="_blank" rel="noopener noreferrer"
-                                        class="flex items-center space-x-2 text-sm font-medium">
+                                    <a
+                                        v-for="item in rightNavItems"
+                                        :key="item.title"
+                                        :href="toUrl(item.href)"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="flex items-center space-x-2 text-sm font-medium"
+                                    >
                                         <component v-if="item.icon" :is="item.icon" class="h-5 w-5" />
                                         <span>{{ item.title }}</span>
                                     </a>
@@ -123,17 +130,18 @@ onUnmounted(() => {
                 <div class="hidden h-full lg:flex lg:flex-1">
                     <NavigationMenu class="ml-10 flex h-full items-stretch">
                         <NavigationMenuList class="flex h-full items-stretch space-x-2">
-                            <NavigationMenuItem v-for="(item, index) in mainNavItems" :key="index"
-                                class="relative flex h-full items-center">
+                            <NavigationMenuItem v-for="(item, index) in mainNavItems" :key="index" class="relative flex h-full items-center">
                                 <Link
                                     :class="[navigationMenuTriggerStyle(), activeItemStyles(item.href), 'h-9 cursor-pointer px-3']"
-                                    :href="item.href">
+                                    :href="item.href"
+                                >
                                     <component v-if="item.icon" :is="item.icon" class="mr-2 h-4 w-4" />
                                     {{ item.title }}
                                 </Link>
-                                <div v-if="isCurrentRoute(item.href)"
-                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white">
-                                </div>
+                                <div
+                                    v-if="isCurrentRoute(item.href)"
+                                    class="absolute bottom-0 left-0 h-0.5 w-full translate-y-px bg-black dark:bg-white"
+                                ></div>
                             </NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
@@ -146,12 +154,10 @@ onUnmounted(() => {
                                 <TooltipProvider :delay-duration="0">
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <Button variant="ghost" size="icon" as-child
-                                                class="group h-9 w-9 cursor-pointer">
+                                            <Button variant="ghost" size="icon" as-child class="group h-9 w-9 cursor-pointer">
                                                 <a :href="toUrl(item.href)" target="_blank" rel="noopener noreferrer">
                                                     <span class="sr-only">{{ item.title }}</span>
-                                                    <component :is="item.icon"
-                                                        class="size-5 opacity-80 group-hover:opacity-100" />
+                                                    <component :is="item.icon" class="size-5 opacity-80 group-hover:opacity-100" />
                                                 </a>
                                             </Button>
                                         </TooltipTrigger>
@@ -168,8 +174,7 @@ onUnmounted(() => {
                         <Tooltip>
                             <TooltipTrigger as-child>
                                 <ModalLink href="/student/enroll" #default="{ loading }">
-                                    <Button :disabled="loading" class="rounded-full p-1" size="icon-sm"
-                                        aria-label="Enroll Course">
+                                    <Button :disabled="loading" class="rounded-full p-1" size="icon-sm" aria-label="Enroll Course">
                                         <Loader2 v-if="loading" class="size-5 animate-spin" />
                                         <Plus v-else class="size-5" />
                                     </Button>
@@ -183,13 +188,14 @@ onUnmounted(() => {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger :as-child="true">
-                            <Button variant="ghost" size="icon"
-                                class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                class="relative size-10 w-auto rounded-full p-1 focus-within:ring-2 focus-within:ring-primary"
+                            >
                                 <Avatar class="size-8 overflow-hidden rounded-full">
-                                    <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar"
-                                        :alt="auth.user.name" />
-                                    <AvatarFallback
-                                        class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
+                                    <AvatarImage v-if="auth.user.avatar" :src="auth.user.avatar" :alt="auth.user.name" />
+                                    <AvatarFallback class="rounded-lg bg-neutral-200 font-semibold text-black dark:bg-neutral-700 dark:text-white">
                                         {{ getInitials(auth.user?.name) }}
                                     </AvatarFallback>
                                 </Avatar>

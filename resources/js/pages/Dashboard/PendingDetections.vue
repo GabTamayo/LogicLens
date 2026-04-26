@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import { Deferred, Modal } from '@inertiaui/modal-vue';
-import { AlertTriangle, CircleCheck, Loader, Calendar } from 'lucide-vue-next';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Item, ItemContent, ItemDescription, ItemTitle, ItemGroup, ItemSeparator } from '@/components/ui/item';
 import { Badge } from '@/components/ui/badge';
+import { Item, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from '@/components/ui/item';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import Separator from '@/components/ui/separator/Separator.vue';
-import { Link } from '@inertiajs/vue3';
-import { format, parseISO, isToday, isYesterday, isThisWeek, isThisMonth, differenceInDays } from 'date-fns';
 import { type PendingDetection } from '@/types';
+import { Link } from '@inertiajs/vue3';
+import { Deferred, Modal } from '@inertiaui/modal-vue';
+import { differenceInDays, format, isThisMonth, isThisWeek, isToday, isYesterday, parseISO } from 'date-fns';
+import { AlertTriangle, Calendar, CircleCheck, Loader } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 interface Props {
     pendingDetections: PendingDetection[];
@@ -74,17 +74,13 @@ const groupedByDate = computed(() => {
 </script>
 
 <template>
-    <Modal v-slot="{ close }" position="top" max-width="3xl"
-        panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(240.02_9.66%_1.01%)]">
-        <div class="tracking-tight space-y-6">
-
+    <Modal v-slot="{ close }" position="top" max-width="3xl" panel-classes="bg-white rounded-lg p-6 dark:bg-[hsl(240.02_9.66%_1.01%)]">
+        <div class="space-y-6 tracking-tight">
             <div class="inline-flex items-baseline space-x-2">
                 <AlertTriangle class="size-4 text-amber-600 dark:text-amber-400" />
                 <div>
-                    <h1 class="text-sm sm:text-lg font-bold">Pending Detections</h1>
-                    <span class="text-xs sm:text-sm text-muted-foreground">
-                        Activity links awaiting similarity detection
-                    </span>
+                    <h1 class="text-sm font-bold sm:text-lg">Pending Detections</h1>
+                    <span class="text-xs text-muted-foreground sm:text-sm"> Activity links awaiting similarity detection </span>
                 </div>
             </div>
 
@@ -98,7 +94,7 @@ const groupedByDate = computed(() => {
                     </div>
                 </template>
 
-                <div class="grid grid-cols-2 gap-4 rounded-lg p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50">
+                <div class="grid grid-cols-2 gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
                     <div class="text-center">
                         <div class="text-2xl font-bold text-amber-600 dark:text-amber-400">
                             {{ pendingDetections.length }}
@@ -113,7 +109,7 @@ const groupedByDate = computed(() => {
                     </div>
                 </div>
 
-                <div class="flex-1 min-h-0 space-y-4">
+                <div class="min-h-0 flex-1 space-y-4">
                     <div v-if="pendingDetections.length > 0">
                         <ScrollArea class="h-[450px] rounded-md">
                             <div class="space-y-6">
@@ -121,7 +117,7 @@ const groupedByDate = computed(() => {
                                     <div class="space-y-3">
                                         <div class="flex items-center gap-2 px-2">
                                             <Calendar class="size-4 text-muted-foreground" />
-                                            <h3 class="font-semibold text-sm text-foreground">
+                                            <h3 class="text-sm font-semibold text-foreground">
                                                 {{ group.dateLabel }}
                                             </h3>
                                             <Badge variant="secondary" class="ml-auto text-xs">
@@ -144,13 +140,15 @@ const groupedByDate = computed(() => {
                                                                         - {{ link.language }}
                                                                     </span>
                                                                 </ItemDescription>
-                                                                <ItemDescription v-if="link.created_at" class="text-xs text-muted-foreground mt-1">
+                                                                <ItemDescription v-if="link.created_at" class="mt-1 text-xs text-muted-foreground">
                                                                     {{ formatRelativeDate(link.created_at) }}
                                                                 </ItemDescription>
                                                             </ItemContent>
                                                             <ItemContent>
-                                                                <Badge variant="outline"
-                                                                    class="text-xs text-amber-600 dark:text-amber-400 border-amber-600 dark:border-amber-400">
+                                                                <Badge
+                                                                    variant="outline"
+                                                                    class="border-amber-600 text-xs text-amber-600 dark:border-amber-400 dark:text-amber-400"
+                                                                >
                                                                     Pending
                                                                 </Badge>
                                                             </ItemContent>
@@ -168,15 +166,13 @@ const groupedByDate = computed(() => {
                         </ScrollArea>
                     </div>
 
-                    <div v-else
-                        class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
-                        <CircleCheck class="size-12 mb-4 opacity-75 text-green-600 dark:text-green-400" />
+                    <div v-else class="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
+                        <CircleCheck class="mb-4 size-12 text-green-600 opacity-75 dark:text-green-400" />
                         <p class="text-sm font-medium">No pending detections</p>
-                        <p class="text-xs mt-1">All closed activity links have been processed</p>
+                        <p class="mt-1 text-xs">All closed activity links have been processed</p>
                     </div>
                 </div>
             </Deferred>
-
         </div>
     </Modal>
 </template>

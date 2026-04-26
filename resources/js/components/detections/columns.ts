@@ -1,33 +1,33 @@
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
-import DropdownAction from './data-table.dropdown.vue'
-import { Badge } from '@/components/ui/badge'
-import { Flag } from 'lucide-vue-next'
-import { useSimilarity } from '@/composables/useSimilarity'
+import { Badge } from '@/components/ui/badge';
+import { useSimilarity } from '@/composables/useSimilarity';
+import type { ColumnDef } from '@tanstack/vue-table';
+import { Flag } from 'lucide-vue-next';
+import { h } from 'vue';
+import DropdownAction from './data-table.dropdown.vue';
 
 export interface DetectionRow {
-    id: string
-    flagged?: boolean
+    id: string;
+    flagged?: boolean;
     submission_a: {
-        id: number
-        student_name: string
-        student_email: string
-    }
+        id: number;
+        student_name: string;
+        student_email: string;
+    };
     submission_b: {
-        id: number
-        student_name: string
-        student_email: string
-    }
-    avg_score: number
-    created_at: string
+        id: number;
+        student_name: string;
+        student_email: string;
+    };
+    avg_score: number;
+    created_at: string;
 }
 
-const { getSimilarityBadge } = useSimilarity()
+const { getSimilarityBadge } = useSimilarity();
 
 const getSimilarityBadgeVNode = (score: number) => {
-    const badge = getSimilarityBadge(score)
-    return h(Badge, { variant: badge.variant }, () => badge.label)
-}
+    const badge = getSimilarityBadge(score);
+    return h(Badge, { variant: badge.variant }, () => badge.label);
+};
 
 export const columns: ColumnDef<DetectionRow>[] = [
     {
@@ -35,8 +35,8 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Flag',
         header: () => h('div', { class: 'text-center' }, ''),
         cell: ({ row }) => {
-            const flagged = !!row.original.flagged
-            return h('div', { class: 'flex justify-center' }, flagged ? h(Flag, { class: 'w-4 h-4 text-destructive', title: 'Flagged' }) : undefined)
+            const flagged = !!row.original.flagged;
+            return h('div', { class: 'flex justify-center' }, flagged ? h(Flag, { class: 'w-4 h-4 text-destructive', title: 'Flagged' }) : undefined);
         },
         enableHiding: false,
         size: 36,
@@ -46,10 +46,8 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Student A',
         header: () => h('div', { class: '' }, 'Student A'),
         cell: ({ row }) => {
-            const studentA = row.original.submission_a
-            return h('div', { class: 'flex flex-col' }, [
-                h('span', { class: 'font-medium' }, studentA.student_name),
-            ])
+            const studentA = row.original.submission_a;
+            return h('div', { class: 'flex flex-col' }, [h('span', { class: 'font-medium' }, studentA.student_name)]);
         },
     },
     {
@@ -57,10 +55,8 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Student B',
         header: () => h('div', { class: '' }, 'Student B'),
         cell: ({ row }) => {
-            const studentB = row.original.submission_b
-            return h('div', { class: 'flex flex-col' }, [
-                h('span', { class: 'font-medium' }, studentB.student_name),
-            ])
+            const studentB = row.original.submission_b;
+            return h('div', { class: 'flex flex-col' }, [h('span', { class: 'font-medium' }, studentB.student_name)]);
         },
     },
     {
@@ -68,8 +64,8 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Similarity Score',
         header: () => h('div', { class: 'text-center' }, 'Similarity Score'),
         cell: ({ row }) => {
-            const score = row.getValue('avg_score') as number
-            return h('div', { class: 'text-center font-mono font-semibold' }, `${(score * 100).toFixed(2)}%`)
+            const score = row.getValue('avg_score') as number;
+            return h('div', { class: 'text-center font-mono font-semibold' }, `${(score * 100).toFixed(2)}%`);
         },
     },
     {
@@ -77,19 +73,23 @@ export const columns: ColumnDef<DetectionRow>[] = [
         label: 'Level',
         header: () => h('div', { class: 'text-center' }, 'Level'),
         cell: ({ row }) => {
-            const score = row.original.avg_score
-            return h('div', { class: 'flex justify-center' }, getSimilarityBadgeVNode(score))
+            const score = row.original.avg_score;
+            return h('div', { class: 'flex justify-center' }, getSimilarityBadgeVNode(score));
         },
     },
     {
         id: 'actions',
         enableHiding: false,
         cell: ({ row }) => {
-            const detection = row.original
+            const detection = row.original;
 
-            return h('div', { class: 'relative' }, h(DropdownAction, {
-                detection,
-            }))
+            return h(
+                'div',
+                { class: 'relative' },
+                h(DropdownAction, {
+                    detection,
+                }),
+            );
         },
-    }
-]
+    },
+];

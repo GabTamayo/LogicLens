@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import {
+    AlertDialog,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog/';
 import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, } from '@/components/ui/alert-dialog/';
+import { useForm } from '@inertiajs/vue3';
 import { Loader2, Trash2 } from 'lucide-vue-next';
-import { toast } from 'vue-sonner'
+import { defineProps } from 'vue';
+import { toast } from 'vue-sonner';
 
 const props = defineProps<{
     endpoint: string;
@@ -34,8 +43,8 @@ const handleDelete = () => {
 <template>
     <AlertDialog as-child>
         <AlertDialogTrigger as-child>
-            <Button variant="destructive" class="cursor-pointer flex items-center gap-2">
-                <Trash2 class="w-4 h-4" />
+            <Button variant="destructive" class="flex cursor-pointer items-center gap-2">
+                <Trash2 class="h-4 w-4" />
                 <span class="hidden sm:inline">{{ buttonText ?? 'Delete' }}</span>
             </Button>
         </AlertDialogTrigger>

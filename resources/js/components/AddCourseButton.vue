@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ModalLink } from '@inertiaui/modal-vue'
-import { Button } from '@/components/ui/button'
-import { Loader, Plus } from 'lucide-vue-next'
-
+import { Button } from '@/components/ui/button';
+import { ModalLink } from '@inertiaui/modal-vue';
+import { Loader, Plus } from 'lucide-vue-next';
 </script>
 
 <template>

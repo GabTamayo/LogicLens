@@ -9,7 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/vue3';
-import { LoaderCircle, GraduationCap, Users } from 'lucide-vue-next';
+import { GraduationCap, LoaderCircle, Users } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const selectedRole = ref('student');
@@ -40,12 +40,12 @@ const selectedRole = ref('student');
 
                 <div class="grid gap-2">
                     <Label>Register as</Label>
-                    <ToggleGroup v-model="selectedRole" type="single" class="grid grid-cols-2 w-full">
-                        <ToggleGroupItem value="student" aria-label="Register as Student" class="flex-col gap-2 h-auto py-3">
+                    <ToggleGroup v-model="selectedRole" type="single" class="grid w-full grid-cols-2">
+                        <ToggleGroupItem value="student" aria-label="Register as Student" class="h-auto flex-col gap-2 py-3">
                             <GraduationCap class="h-5 w-5" />
                             <span>Student</span>
                         </ToggleGroupItem>
-                        <ToggleGroupItem value="teacher" aria-label="Register as Teacher" class="flex-col gap-2 h-auto py-3">
+                        <ToggleGroupItem value="teacher" aria-label="Register as Teacher" class="h-auto flex-col gap-2 py-3">
                             <Users class="h-5 w-5" />
                             <span>Teacher</span>
                         </ToggleGroupItem>

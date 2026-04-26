@@ -1,11 +1,11 @@
 // @/components/student-course/students/columns.ts
-import { h } from 'vue'
-import type { ColumnDef } from '@tanstack/vue-table'
+import type { ColumnDef } from '@tanstack/vue-table';
+import { h } from 'vue';
 
 export interface StudentRow {
-    id: number
-    name: string
-    email: string
+    id: number;
+    name: string;
+    email: string;
 }
 
 export const columns: ColumnDef<StudentRow>[] = [
@@ -21,4 +21,4 @@ export const columns: ColumnDef<StudentRow>[] = [
         header: () => h('div', { class: '' }, 'Email'),
         cell: ({ row }) => h('div', { class: 'text-sm text-muted-foreground' }, row.getValue('email')),
     },
-]
+];

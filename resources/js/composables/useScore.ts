@@ -15,9 +15,12 @@ export function useScore() {
         }
 
         const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0;
-        const colorClass = percentage >= 70 ? 'text-green-600 dark:text-green-500' :
-                           percentage >= 50 ? 'text-yellow-600 dark:text-yellow-500' :
-                           'text-red-600 dark:text-red-500';
+        const colorClass =
+            percentage >= 70
+                ? 'text-green-600 dark:text-green-500'
+                : percentage >= 50
+                  ? 'text-yellow-600 dark:text-yellow-500'
+                  : 'text-red-600 dark:text-red-500';
 
         return {
             text: `${score}/${totalScore}`,
@@ -36,9 +39,11 @@ export function useScore() {
         }
 
         const percentage = totalScore > 0 ? (score / totalScore) * 100 : 0;
-        return percentage >= 70 ? 'bg-green-600 dark:bg-green-700' :
-               percentage >= 50 ? 'bg-yellow-600 dark:bg-yellow-700' :
-               'bg-red-700 dark:bg-red-800';
+        return percentage >= 70
+            ? 'bg-green-600 dark:bg-green-700'
+            : percentage >= 50
+              ? 'bg-yellow-600 dark:bg-yellow-700'
+              : 'bg-red-700 dark:bg-red-800';
     };
 
     return {

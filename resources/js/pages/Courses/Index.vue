@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AddCourseButton from '@/components/AddCourseButton.vue';
 import PaginationComponent from '@/components/Pagination.vue';
-import Button from '@/components/ui/button/Button.vue';
 import AspectRatio from '@/components/ui/aspect-ratio/AspectRatio.vue';
+import Button from '@/components/ui/button/Button.vue';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
@@ -228,7 +228,7 @@ function copy(text: string) {
                         >
                             <Card class="group relative h-full overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg">
                                 <CardHeader>
-                                    <AspectRatio :ratio="16 / 9" class="rounded-lg overflow-hidden bg-muted">
+                                    <AspectRatio :ratio="16 / 9" class="overflow-hidden rounded-lg bg-muted">
                                         <img
                                             :src="`/images/cover-photos/${course.cover_photo}`"
                                             :alt="`Cover for ${course.name}`"

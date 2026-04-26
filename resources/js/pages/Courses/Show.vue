@@ -90,11 +90,7 @@ const handleStudentsPageChange = (page: number) => {
             <Card>
                 <CardHeader>
                     <AspectRatio :ratio="6 / 1.5" class="rounded-lg bg-muted">
-                        <img
-                            :src="`/images/cover-photos/${course.cover_photo}`"
-                            alt="Course cover"
-                            class="h-full w-full rounded-lg object-cover"
-                        />
+                        <img :src="`/images/cover-photos/${course.cover_photo}`" alt="Course cover" class="h-full w-full rounded-lg object-cover" />
                     </AspectRatio>
                 </CardHeader>
                 <CardContent>

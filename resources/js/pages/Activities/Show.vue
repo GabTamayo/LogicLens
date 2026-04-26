@@ -511,11 +511,12 @@ const { getLanguageColor, getLanguageLogo } = useLanguage();
 
                     <div v-else class="space-y-4">
                         <div class="space-y-2">
-                            <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                            <label class="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                 Time Limit
                                 <span class="font-light text-muted-foreground">(Optional, in minutes)</span>
                             </label>
-                            <NumberField class="w-1/2"
+                            <NumberField
+                                class="w-1/2"
                                 v-model="timeLimitForm.time_limit"
                                 :min="1"
                                 :max="1440"

@@ -33,21 +33,15 @@ const DEFAULT_CONFIG: LanguageConfig = {
 
 export function useLanguage() {
     const getLanguageColor = (language: string): string => {
-        return LANGUAGE_CONFIGS[language]?.colors
-            ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()]?.colors
-            ?? DEFAULT_CONFIG.colors;
+        return LANGUAGE_CONFIGS[language]?.colors ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()]?.colors ?? DEFAULT_CONFIG.colors;
     };
 
     const getLanguageLogo = (language: string): string | null => {
-        return LANGUAGE_CONFIGS[language]?.logo
-            ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()]?.logo
-            ?? DEFAULT_CONFIG.logo;
+        return LANGUAGE_CONFIGS[language]?.logo ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()]?.logo ?? DEFAULT_CONFIG.logo;
     };
 
     const getLanguageConfig = (language: string): LanguageConfig => {
-        return LANGUAGE_CONFIGS[language]
-            ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()]
-            ?? DEFAULT_CONFIG;
+        return LANGUAGE_CONFIGS[language] ?? LANGUAGE_CONFIGS_LOWERCASE[language?.toLowerCase()] ?? DEFAULT_CONFIG;
     };
 
     return {
