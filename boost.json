@@ -1,10 +1,12 @@
 {
     "agents": [
-        "claude_code"
+        "gemini"
     ],
     "editors": [
-        "vscode"
+        "gemini"
     ],
-    "guidelines": [],
-    "herd_mcp": true
+    "guidelines": [
+        "echolabsdev/prism"
+    ],
+    "sail": true
 }

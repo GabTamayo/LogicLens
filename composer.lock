@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "31e49b74dcf7f2424fa28840378636eb",
+    "content-hash": "bac9cd15349d0e695cd104413b047df5",
     "packages": [
         {
             "name": "bensampo/laravel-enum",
@@ -8789,16 +8789,16 @@
         },
         {
             "name": "laravel/boost",
-            "version": "dev-main",
+            "version": "v1.8.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/boost.git",
-                "reference": "ad0b50bbd2b984119b571b8d08a2ed1d5d45b1c1"
+                "reference": "cdcb12114315491f72a2cecb5130d8b9dffa0103"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/boost/zipball/ad0b50bbd2b984119b571b8d08a2ed1d5d45b1c1",
-                "reference": "ad0b50bbd2b984119b571b8d08a2ed1d5d45b1c1",
+                "url": "https://api.github.com/repos/laravel/boost/zipball/cdcb12114315491f72a2cecb5130d8b9dffa0103",
+                "reference": "cdcb12114315491f72a2cecb5130d8b9dffa0103",
                 "shasum": ""
             },
             "require": {
@@ -8820,7 +8820,6 @@
                 "phpstan/phpstan": "^2.1.27",
                 "rector/rector": "^2.1"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -8852,7 +8851,7 @@
                 "issues": "https://github.com/laravel/boost/issues",
                 "source": "https://github.com/laravel/boost"
             },
-            "time": "2026-01-02T21:51:20+00:00"
+            "time": "2026-03-27T17:24:01+00:00"
         },
         {
             "name": "laravel/mcp",
@@ -11832,14 +11831,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "laravel/boost": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
