@@ -112,7 +112,7 @@ watch(() => props.modelValue, (newValue) => {
 watch(isImageDialogOpen, (isOpen) => {
     try {
         document.body.classList.toggle('no-tooltips', Boolean(isOpen));
-    } catch (e) {
+    } catch {
         // ignore (SSR or no document)
     }
 });

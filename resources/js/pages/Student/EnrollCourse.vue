@@ -2,16 +2,13 @@
 import { Modal } from '@inertiaui/modal-vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form";
-import InputError from '@/components/InputError.vue';
 import { useForm } from '@inertiajs/vue3';
-import { BookOpen } from 'lucide-vue-next';
 import { toast } from 'vue-sonner';
 import type { EnrollCourseProps } from '@/types';
 import 'vue-sonner/style.css';
 
-const props = defineProps<EnrollCourseProps>();
+defineProps<EnrollCourseProps>();
 
 const form = useForm({
     access_code: '',

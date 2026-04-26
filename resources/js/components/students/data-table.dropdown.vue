@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { MoreHorizontal, BookUser, CircleMinus } from 'lucide-vue-next'
+import { MoreHorizontal, CircleMinus } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { StudentRow } from '@/components/students/columns'
 import type { CourseShowProps } from '@/types'
 import { toast } from 'vue-sonner'

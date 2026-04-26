@@ -238,7 +238,7 @@ const updateDetectionFilter = (column: string, value: string) => {
                                     />
                                     {{ link.is_open ? 'Open' : 'Closed' }}
                                 </Badge>
-                                <Switch v-model="link.is_open" @update:modelValue="updateStatus($event)" />
+                                <Switch :model-value="link.is_open" @update:modelValue="updateStatus($event)" />
                             </div>
                             <CardDescription class="flex flex-wrap items-center gap-2 pb-1.5">
                                 <span>{{ props.activityTitle }}</span>

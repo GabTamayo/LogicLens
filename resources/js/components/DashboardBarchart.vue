@@ -3,7 +3,7 @@ import { VisAxis, VisGroupedBar, VisXYContainer } from "@unovis/vue"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue, } from '@/components/ui/select'
 import { ChartContainer, ChartCrosshair, ChartTooltip, ChartTooltipContent, componentToString, ChartConfig } from "@/components/ui/chart"
-import { Loader, FileQuestion } from "lucide-vue-next"
+import { Loader } from "lucide-vue-next"
 import SelectSeparator from "./ui/select/SelectSeparator.vue"
 import { computed, ref, watch } from 'vue'
 import type { AverageScorePerActivity, AverageScorePerActivityLink } from '@/types'

@@ -3,7 +3,7 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
-import { createApp, h } from 'vue';
+import { createApp } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 import { renderApp } from '@inertiaui/modal-vue';
 import { configureEcho } from '@laravel/echo-vue';

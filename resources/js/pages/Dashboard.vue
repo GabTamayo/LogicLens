@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type DashboardPageProps } from '@/types';
 import { Deferred, Head } from '@inertiajs/vue3';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger, } from '@/components/ui/drawer'
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger, } from '@/components/ui/drawer'
 import Button from '@/components/ui/button/Button.vue';
 import DashboardCards from '@/components/DashboardCards.vue';
 import DashboardSidebar from '@/components/DashboardSidebar.vue';

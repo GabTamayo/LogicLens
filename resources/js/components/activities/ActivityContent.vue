@@ -4,7 +4,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Circle, Eye, CalendarClock, FileText, Pencil, Code } from 'lucide-vue-next';
+import { CalendarClock, FileText, Pencil, Code } from 'lucide-vue-next';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, } from '@/components/ui/tooltip'
 import { Link } from '@inertiajs/vue3';
 import { useLanguage } from '@/composables/useLanguage';

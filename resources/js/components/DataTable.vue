@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="TData, TValue">
 import type { ColumnDef, VisibilityState, ExpandedState } from '@tanstack/vue-table'
-import { h, ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { EllipsisVertical, FileScan, LoaderCircle } from 'lucide-vue-next'

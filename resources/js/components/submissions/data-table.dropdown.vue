@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { MoreHorizontal, Code, AlertCircle, Trash } from 'lucide-vue-next'
 import { Button } from '@/components/ui/button'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog'
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from '@/components/ui/alert-dialog'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 import ViolationsDialog from '@/components/submissions/ViolationsDialog.vue';
 import { toast } from 'vue-sonner';
@@ -76,7 +76,7 @@ function deleteSubmission(submission: SubmissionRow) {
 
     <!-- Violations Dialog -->
     <ViolationsDialog
-        v-model="showViolationsDialog"
+        v-model:open="showViolationsDialog"
         :submission-id="submission.id"
         :student-name="submission.student_name"
     />

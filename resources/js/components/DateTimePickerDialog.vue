@@ -39,7 +39,11 @@ const updateCalendarValue = (value: DateValue) => {
 function handleTimeChange(type: 'hour' | 'minute', value: number) {
     const currentDate = selectedDateTime.value || new Date()
     const newDate = new Date(currentDate)
-    type === 'hour' ? newDate.setHours(value) : newDate.setMinutes(value)
+    if (type === 'hour') {
+        newDate.setHours(value)
+    } else {
+        newDate.setMinutes(value)
+    }
     selectedDateTime.value = newDate
     emit('update:modelValue', newDate)
 }

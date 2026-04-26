@@ -134,7 +134,7 @@ watch(modelValue, (newValue) => {
                 <ScrollArea class="h-[400px] rounded-lg border">
                     <div class="space-y-3 p-4">
                         <div
-                            v-for="(violation, index) in violations"
+                            v-for="violation in violations"
                             :key="violation.id"
                             class="rounded-lg border bg-card p-4 transition-colors hover:bg-muted/50"
                         >

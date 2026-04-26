@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AlertTriangle, CheckCircle2, LoaderCircle, TrendingUp, } from "lucide-vue-next"
+import { AlertTriangle, LoaderCircle, } from "lucide-vue-next"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ModalLink } from "@inertiaui/modal-vue";

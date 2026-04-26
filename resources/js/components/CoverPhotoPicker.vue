@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Item, ItemGroup, ItemHeader } from '@/components/ui/item';
 
-const props = defineProps<{
+defineProps<{
     coverPhotos: Array<{ name: string; path: string }>;
     modelValue: string;
 }>();
