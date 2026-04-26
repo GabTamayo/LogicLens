@@ -188,7 +188,7 @@ class SubmissionService
 
     private function validateActivityLinkIsOpen(ActivityLink $activityLink): void
     {
-        if (!$activityLink->is_open) {
+        if (! $activityLink->is_open) {
             throw ValidationException::withMessages([
                 'code_content' => 'This activity link is closed and no longer accepting submissions.',
             ]);

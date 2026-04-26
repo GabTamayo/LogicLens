@@ -15,7 +15,9 @@ class DetectionJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 300;
+
     public $tries = 2;
+
     public $backoff = 30;
 
     /**
@@ -38,7 +40,7 @@ class DetectionJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error("Detection job permanently failed for {$this->activityLinkId}: " . $exception->getMessage());
+        Log::error("Detection job permanently failed for {$this->activityLinkId}: ".$exception->getMessage());
         // Optional: send notification to user here
     }
 }

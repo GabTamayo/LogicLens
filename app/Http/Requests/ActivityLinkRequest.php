@@ -25,7 +25,7 @@ class ActivityLinkRequest extends FormRequest
         $activityId = $this->route('activity')?->id;
 
         return [
-            'course_id'  => [
+            'course_id' => [
                 'required',
                 'uuid',
                 'exists:courses,id',

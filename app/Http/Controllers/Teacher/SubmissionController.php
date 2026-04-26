@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Teacher;
 
-use App\Http\Requests\SubmissionRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SubmissionRequest;
 use App\Models\ActivityLink;
 use App\Models\ExamViolation;
 use App\Models\Submission;

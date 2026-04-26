@@ -23,7 +23,7 @@ class ActivityLinkUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'is_open'    => ['required', 'boolean'],
+            'is_open' => ['required', 'boolean'],
             'expires_at' => ['nullable', 'date', 'after_or_equal:now'],
         ];
     }
@@ -45,7 +45,7 @@ class ActivityLinkUpdateRequest extends FormRequest
                     $this->input('is_open') === true &&
                     $link->expires_at &&
                     $link->expires_at->isPast() &&
-                    (!$this->has('expires_at') || $this->input('expires_at') === $link->expires_at->format('Y-m-d'))
+                    (! $this->has('expires_at') || $this->input('expires_at') === $link->expires_at->format('Y-m-d'))
                 ) {
                     $validator->errors()->add(
                         'expires_at',

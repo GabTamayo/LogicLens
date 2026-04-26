@@ -11,6 +11,7 @@ class TestCase extends Model
 {
     /** @use HasFactory<\Database\Factories\TestCaseFactory> */
     use HasFactory;
+
     use HasUuid;
 
     protected $keyType = 'string';

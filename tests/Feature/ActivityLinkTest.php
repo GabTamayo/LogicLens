@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Models\Activity;
 use App\Models\ActivityLink;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -20,7 +20,6 @@ test('an activity link can be created for an activity', function () {
     $response = $this->post(route('activities.links.store', $activity), [
         'name' => 'Test Token',
     ]);
-
 
     $response->assertStatus(302);
 

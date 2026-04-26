@@ -51,7 +51,7 @@ class SubmissionRequest extends FormRequest
 
     private function validateActivityLinkIsOpen($validator, ActivityLink $activityLink): void
     {
-        if (!$activityLink->is_open) {
+        if (! $activityLink->is_open) {
             $validator->errors()->add(
                 'code_content',
                 'This activity link is closed and no longer accepting submissions.'

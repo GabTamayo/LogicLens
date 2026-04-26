@@ -13,13 +13,14 @@ use BenSampo\Enum\Enum;
 final class ProgrammingLanguage extends Enum
 {
     const JAVA = 'java';
+
     const PYTHON = 'python';
 
     public static function response(?string $value): ?string
     {
         $readableValues = [
             self::JAVA => 'Java',
-            self::PYTHON => 'Python'
+            self::PYTHON => 'Python',
         ];
 
         return $readableValues[$value] ?? null;
@@ -46,9 +47,9 @@ final class ProgrammingLanguage extends Enum
     public static function fileExtensions(string $language): array
     {
         return match ($language) {
-            self::JAVA   => ['java'],
+            self::JAVA => ['java'],
             self::PYTHON => ['py'],
-            default      => ['txt'],
+            default => ['txt'],
         };
     }
 

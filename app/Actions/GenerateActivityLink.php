@@ -14,9 +14,9 @@ class GenerateActivityLink
         } while (ActivityLink::where('token', $token)->exists());
 
         return $activity->activityLinks()->create([
-            'course_id'  => $courseId,
-            'token'      => $token,
-            'is_open'    => true,
+            'course_id' => $courseId,
+            'token' => $token,
+            'is_open' => true,
             'expires_at' => $expiresAt,
         ]);
     }

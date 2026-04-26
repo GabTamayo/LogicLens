@@ -108,7 +108,7 @@ PROMPT;
         }
 
         if (empty($extractedSections)) {
-            return substr(implode("\n", array_slice($lines, 0, 20)), 0, 500) . '...';
+            return substr(implode("\n", array_slice($lines, 0, 20)), 0, 500).'...';
         }
 
         return implode("\n\n---\n\n", $extractedSections);

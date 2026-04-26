@@ -115,6 +115,6 @@ return [
     'socialite' => [
         'drivers' => [
             'similarity_detector',
-        ]
-    ]
+        ],
+    ],
 ];

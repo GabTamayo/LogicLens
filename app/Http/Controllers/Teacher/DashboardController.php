@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Teacher;
 
-use App\Models\ActivityLink;
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLink;
 use App\Services\DashboardService;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -14,32 +14,32 @@ class DashboardController extends Controller
     {
         $userId = Auth::id();
 
-        $baseQuery = ActivityLink::whereHas('activity', fn($q) => $q->where('user_id', $userId));
+        $baseQuery = ActivityLink::whereHas('activity', fn ($q) => $q->where('user_id', $userId));
 
         return Inertia::render('Dashboard', [
-            'totalActivityLinks' => Inertia::defer(fn() => (clone $baseQuery)->count()),
-            'activeLinksData' => Inertia::defer(fn() => $dashboardService->getActiveLinksData(clone $baseQuery)),
-            'totalLinksWithoutDetections' => Inertia::defer(fn() => (clone $baseQuery)->where('is_open', false)->doesntHave('detections')->count(),),
-            'totalUpcomingThisWeek' => Inertia::defer(fn() => $dashboardService->getUpcomingLinksThisWeekCount(clone $baseQuery)),
-            'totalFlaggedDetections' => Inertia::defer(fn() => $dashboardService->getFlaggedDetectionsCount($userId)),
-            'totalAverageScore' => Inertia::defer(fn() => $dashboardService->getAverageScore($userId)),
-            'averageScorePerActivity' => Inertia::defer(fn() => $dashboardService->getAverageScorePerActivity($userId)),
-            'upcomingThisWeek' => Inertia::scroll(fn() => $dashboardService->getUpcomingLinksThisWeek(clone $baseQuery)),
-            'flaggedDetections' => Inertia::scroll(fn() => $dashboardService->getFlaggedDetections($userId)),
+            'totalActivityLinks' => Inertia::defer(fn () => (clone $baseQuery)->count()),
+            'activeLinksData' => Inertia::defer(fn () => $dashboardService->getActiveLinksData(clone $baseQuery)),
+            'totalLinksWithoutDetections' => Inertia::defer(fn () => (clone $baseQuery)->where('is_open', false)->doesntHave('detections')->count()),
+            'totalUpcomingThisWeek' => Inertia::defer(fn () => $dashboardService->getUpcomingLinksThisWeekCount(clone $baseQuery)),
+            'totalFlaggedDetections' => Inertia::defer(fn () => $dashboardService->getFlaggedDetectionsCount($userId)),
+            'totalAverageScore' => Inertia::defer(fn () => $dashboardService->getAverageScore($userId)),
+            'averageScorePerActivity' => Inertia::defer(fn () => $dashboardService->getAverageScorePerActivity($userId)),
+            'upcomingThisWeek' => Inertia::scroll(fn () => $dashboardService->getUpcomingLinksThisWeek(clone $baseQuery)),
+            'flaggedDetections' => Inertia::scroll(fn () => $dashboardService->getFlaggedDetections($userId)),
         ]);
     }
 
     public function activeLinks(DashboardService $dashboardService)
     {
         return Inertia::modal('Dashboard/ActiveLinks', [
-            'activeLinks' => Inertia::defer(fn() => $dashboardService->getActiveLinks(Auth::id())),
+            'activeLinks' => Inertia::defer(fn () => $dashboardService->getActiveLinks(Auth::id())),
         ]);
     }
 
     public function pendingDetections(DashboardService $dashboardService)
     {
         return Inertia::modal('Dashboard/PendingDetections', [
-            'pendingDetections' => Inertia::defer(fn() => $dashboardService->getPendingDetections(Auth::id())),
+            'pendingDetections' => Inertia::defer(fn () => $dashboardService->getPendingDetections(Auth::id())),
         ]);
     }
 
