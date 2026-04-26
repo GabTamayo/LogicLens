@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      # Optional: PostgreSQL if you really want to match prod
+      # postgres:
+      #   image: postgres:15
+      #   env:
+      #     POSTGRES_DB: testing
+      #     POSTGRES_PASSWORD: password
+      #   ports:
+      #     - 5432:5432
+      #   options: >-
+      #     --health-cmd pg_isready
+      #     --health-interval 10s
+      #     --health-timeout 5s
+      #     --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: mbstring, dom, curl, libxml, zlib, sqlite, pdo_sqlite, bcmath, intl, gd
+        coverage: none
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: |
+        echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+
+    - name: Install Composer dependencies
+      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Install NPM dependencies
+      run: npm ci
+
+    - name: Prepare Laravel Application
+      run: |
+        cp .env.example .env
+        php artisan key:generate
+
+    - name: Compile Assets
+      run: npm run build
+
+    - name: Generate Wayfinder Routes
+      run: php artisan wayfinder:generate
+
+    - name: Run Tests
+      env:
+        DB_CONNECTION: sqlite
+        DB_DATABASE: ":memory:"
+      run: php artisan test --compact
+
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+        extensions: mbstring, dom, curl, libxml, zlib, sqlite, pdo_sqlite
+        coverage: none
+
+    - name: Install Composer dependencies
+      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: PHP Linting (Pint)
+      run: vendor/bin/pint --test
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - name: Install NPM dependencies
+      run: npm ci
+
+    - name: JS/Vue Linting (ESLint)
+      run: npm run lint
+
+    - name: Format Check (Prettier)
+      run: npm run format:check
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [laravel-tests, linting]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_PORT || 22 }}
+          script: |
+            cd ${{ secrets.REMOTE_PATH }}
+            git pull origin main
+            
+            # Install PHP dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction
+            
+            # Install Node dependencies and build assets
+            npm ci
+            npm run build
+            
+            # Generate Wayfinder routes
+            php artisan wayfinder:generate
+            
+            # Run migrations and cache
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            
+            # Restart Queue/Reverb if needed
+            php artisan queue:restart
